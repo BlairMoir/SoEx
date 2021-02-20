@@ -9,4 +9,17 @@ Here I intend to demonstrate techniques such as workflows and [strategy](https:/
 * Build IFx to enforce convention on service communication as per method guidelines
 * Implement Ambient Context
 * Create a real System Design for a problem that requires the demonstration of the described techniques.
+* Define or reference a taxonomy for all terms used e.g. "Business Event"
 * ...
+
+# Examples to demonstrate in a service oriented context
+* Workflow Manager
+* Strategy Pattern 
+* Adapter Pattern
+* Ambient Context
+* Business Events
+
+# Non goals
+Currently this project will not:
+* Demonstrate in a language other than C#
+* Autogenerate clients for other languages
