@@ -15,7 +15,7 @@ dotnet add package Dapr.AspNetCore
 
 Update startup.cs
 
-```
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     ...
@@ -23,30 +23,33 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
+Modify GreeterService.cs 
+
 Add using statements
-```
+```csharp
 using Dapr.AppCallback.Autogen.Grpc.v1;
 using Dapr.Client.Autogen.Grpc.v1;
 using Google.Protobuf.WellKnownTypes;
 ```
 
-Modify GreeterService.cs changing the base class as below
-```
+Changing the base class as below
+
+```csharp
 public class GreeterService :  AppCallback.AppCallbackBase
 ```
 
 remove override from  Say Hello Method
-```
+```csharp
 public Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
-        {
-            return Task.FromResult(new HelloReply
-            {
-                Message = "Hello " + request.Name
-            });
-        }
+{
+    return Task.FromResult(new HelloReply
+    {
+        Message = "Hello " + request.Name
+    });
+}
 ```
 implement oninvoke
-```
+```csharp
 public override async Task<InvokeResponse> OnInvoke(InvokeRequest request, ServerCallContext context)
 {
     var response = new InvokeResponse();
@@ -64,8 +67,8 @@ public override async Task<InvokeResponse> OnInvoke(InvokeRequest request, Serve
 }
 ```
 
-Implement ListtopicSubscriptions to keep dapr happy
-```
+Implement ListTopicSubscriptions to keep dapr happy
+```csharp
 public override Task<ListTopicSubscriptionsResponse> ListTopicSubscriptions(Empty request, ServerCallContext context)
 {            
     return Task.FromResult(new ListTopicSubscriptionsResponse());
@@ -76,7 +79,7 @@ public override Task<ListTopicSubscriptionsResponse> ListTopicSubscriptions(Empt
 
 As we are using grpc access from a browser won't work, we will cheat and add a client call to this project
 Create a file LocalDaprClient
-```
+```csharp
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -111,7 +114,7 @@ namespace DaprDemo.D002.HelloGrpc
 ```
 
 in startup.cs add
-```
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     ...
@@ -125,3 +128,9 @@ dapr run --app-id DaprDemo-D002-HelloGrpc --app-port 5000 --app-protocol grpc --
 ```
 
 Observe output in the logs
+
+```
+== APP == info: DaprDemo.D002.HelloGrpc.LocalDaprClient[0]
+
+== APP ==       Grpc Response: Hello [Your name here]
+```
