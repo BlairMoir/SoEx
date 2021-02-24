@@ -15,7 +15,7 @@ dotnet add package Dapr.AspNetCore
 
 Update startup.cs
 
-```
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddControllers().AddDapr();                       
