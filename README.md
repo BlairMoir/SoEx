@@ -1,4 +1,4 @@
-# Company
+# Service Oriented Examples (SoEx)
 Example Vertical Swathe of a Method Informed System
 
 Leveraging [dapr](https://dapr.io/) where possible, this a template for building microservice architectures, using the [IDesign Method](http://www.idesign.net/).
