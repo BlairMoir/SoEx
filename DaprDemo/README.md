@@ -18,5 +18,5 @@ The purpose of these demos is to demonstarte using dapr capabilities from c#. Ea
 
  | Name | Description|
  |-|-|
- |[HelloWebApi](DaprDemo.D001.HelloWebApi)| Dapr service invocation of an HTTP service |
- |[HelloGrpc](DaprDemo.D002.HelloGrpc) | Dapr service invocation of a Grpc service|
+ |[HelloWebApi](DaprDemo.D001.HelloWebApi)| Dapr invocation of an HTTP service |
+ |[HelloGrpc](DaprDemo.D002.HelloGrpc) | Dapr invocation of a Grpc service|
