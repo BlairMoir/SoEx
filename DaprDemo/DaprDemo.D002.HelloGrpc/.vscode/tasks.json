@@ -1,0 +1,56 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/DaprDemo.D002.HelloGrpc.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/DaprDemo.D002.HelloGrpc.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "${workspaceFolder}/DaprDemo.D002.HelloGrpc.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "appId": "DaprDemo-D002-HelloGrpc",
+            "appPort": 5000,
+            "appProtocol": "grpc",
+            "label": "daprd-debug",
+            "type": "daprd",
+            "dependsOn": "build",
+            "httpPort": 5020
+        },
+        {
+            "appId": "DaprDemo-D002-HelloGrpc",
+            "label": "daprd-down",
+            "type": "daprd-down"
+        }
+    ]
+}
