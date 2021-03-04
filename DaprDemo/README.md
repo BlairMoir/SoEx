@@ -8,7 +8,7 @@ The purpose of these demos is to demonstarte using dapr capabilities from c#. Ea
 ## Initial Demos
 * [Install dapr](https://docs.dapr.io/getting-started/)
     * This requires docker as well
-* [Dotnet core 3.1 or dotnet 5](https://dotnet.microsoft.com/download)
+* [dotnet 5](https://dotnet.microsoft.com/download)
 
 ## Later Demos
 * [Visual Studio Code](https://code.visualstudio.com/)
