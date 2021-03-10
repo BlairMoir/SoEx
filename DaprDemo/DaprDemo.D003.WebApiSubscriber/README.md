@@ -62,6 +62,6 @@ publish event
 Invoke-RestMethod -Method Post -ContentType 'application/json' -Body '{"Summary": "test"}' -Uri 'http://localhost:3500/v1.0/publish/pubsub/exampletopic'
 
 
-curl -X POST http://localhost:3500/v1.0/publish/pubsub/exampletopic -H "Content-Type: application/json" -d '{"Summary": "test"}}'
+curl -X POST http://localhost:3500/v1.0/publish/pubsub/exampletopic -H "Content-Type: application/json" -d '{"Summary": "test"}'
 
 ```
