@@ -1,0 +1,55 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/DaprDemo.D005.ReadSecrets.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/DaprDemo.D005.ReadSecrets.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "${workspaceFolder}/DaprDemo.D005.ReadSecrets.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "appId": "DaprDemo-D005-ReadSecrets",
+            "appPort": 5000,
+            "label": "daprd-debug",
+            "type": "daprd",
+            "componentsPath": "./components",
+            "dependsOn": "build"
+        },
+        {
+            "appId": "DaprDemo-D005-ReadSecrets",
+            "label": "daprd-down",
+            "type": "daprd-down"
+        }
+    ]
+}
