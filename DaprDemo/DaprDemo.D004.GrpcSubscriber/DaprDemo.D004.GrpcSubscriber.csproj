@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapr.AspNetCore" Version="1.0.0" />
+    <PackageReference Include="Dapr.AspNetCore" Version="1.1.2" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
   </ItemGroup>
 
