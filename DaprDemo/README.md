@@ -24,3 +24,4 @@ The purpose of these demos is to demonstarte using dapr capabilities from c#. Ea
  |[GrpcSubscriber](DaprDemo.D004.GrpcSubscriber) | Grpc Topic Subscriber|
  |[ReadSecrets](DaprDemo.D005.ReadSecrets) | Read from Dapr secret component using IConfigurationProvider |
  |[UseState](DaprDemo.D006.UseState) | Read from Dapr state store component using Controller Attribute |
+ |[InputBinding](DaprDemo.D007.InputBinding) | Listen to Dapr input binding (Azure storage queue) |
