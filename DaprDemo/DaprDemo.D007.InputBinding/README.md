@@ -64,7 +64,49 @@ public override Task<BindingEventResponse> OnBindingEvent(BindingEventRequest re
 
 create azure storeage queue
 create components folder
-create storagebinding
-setup secrets
+create storagebinding - storageBinding.yaml
+```yaml
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: my-storage-binding
+spec:
+  type: bindings.azure.storagequeues
+  version: v1
+  metadata:
+  - name: storageAccount
+    value: "[your storage account name]"
+  - name: storageAccessKey
+    secretKeyRef:
+      name: access-key
+      key: access-key
+  - name: queue
+    value: "dapr"
+  - name: ttlInSeconds
+    value: "60"
+auth:
+  secretStore: my-secret-store
+```
+setup secrets - secretStore.yaml
+```yaml
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name:  my-secret-store  
+spec:
+  type: secretstores.local.file
+  version: v1
+  metadata:
+  - name: secretsFile
+    value: ./components/mysecrets-secrets.json
+  - name: nestedSeparator
+    value: ":"
+```
+mysecrets-secrets.json
+```json
+{
+    "access-key" : "[your access key]" 
+}
+```
 
 Send message to storage queue. hacky code commited in example to ensure we see some portion of our message correctly using either UTF8 or base64
