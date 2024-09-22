@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -16,6 +16,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Proxy", "Proxy\SoEx.Proxy.csproj", "{B115B4D8-6DCD-47D8-B1DD-09B5E5F46F2D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Test", "Test\SoEx.Test.csproj", "{ECF9B624-A539-40E1-979C-8CD4919F1466}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Hosting.InProc", "Hosting\InProc\SoEx.Hosting.InProc.csproj", "{057C4CB0-58AE-4336-9792-2CFC2BE8F7DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Hosting.Dapr", "Hosting\Dapr\SoEx.Hosting.Dapr.csproj", "{F2878640-1B2C-4E90-8205-6F5A14E3B311}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +58,14 @@ Global
 		{ECF9B624-A539-40E1-979C-8CD4919F1466}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECF9B624-A539-40E1-979C-8CD4919F1466}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECF9B624-A539-40E1-979C-8CD4919F1466}.Release|Any CPU.Build.0 = Release|Any CPU
+		{057C4CB0-58AE-4336-9792-2CFC2BE8F7DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{057C4CB0-58AE-4336-9792-2CFC2BE8F7DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{057C4CB0-58AE-4336-9792-2CFC2BE8F7DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{057C4CB0-58AE-4336-9792-2CFC2BE8F7DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2878640-1B2C-4E90-8205-6F5A14E3B311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2878640-1B2C-4E90-8205-6F5A14E3B311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2878640-1B2C-4E90-8205-6F5A14E3B311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2878640-1B2C-4E90-8205-6F5A14E3B311}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
