@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Context.Abstractions",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Context", "Context\Common\SoEx.Context.csproj", "{CF0A84C7-5A2F-4BCC-B89B-5D28D362D2BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Interceptors.DynamicProxy", "Interceptors\DynamicProxy\SoEx.Interceptors.DynamicProxy.csproj", "{5377E0F2-9DA1-4915-AAC7-23E107577E04}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,10 @@ Global
 		{CF0A84C7-5A2F-4BCC-B89B-5D28D362D2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF0A84C7-5A2F-4BCC-B89B-5D28D362D2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF0A84C7-5A2F-4BCC-B89B-5D28D362D2BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5377E0F2-9DA1-4915-AAC7-23E107577E04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5377E0F2-9DA1-4915-AAC7-23E107577E04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5377E0F2-9DA1-4915-AAC7-23E107577E04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5377E0F2-9DA1-4915-AAC7-23E107577E04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

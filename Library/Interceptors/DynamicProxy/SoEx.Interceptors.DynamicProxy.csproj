@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>SoEx.Interceptors.DynamicProxy</PackageId>
+    <Version>0.0.0-alpha-1.0</Version>
+    <Authors>Blair Moir</Authors>
+    <Copyright>Copyright (c) Blair Moir 2024</Copyright>
+    <PackageProjectUrl>https://github.com/BlairMoir/SoEx/tree/primary/Library</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/BlairMoir/SoEx</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Castle.Core.AsyncInterceptor" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="SoEx.Container" Version="0.0.0-alpha-1.0" />
+    <PackageReference Include="SoEx.Context.Abstractions" Version="0.0.0-alpha-1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
+</Project>
