@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Interceptors.DynamicProxy", "Interceptors\DynamicProxy\SoEx.Interceptors.DynamicProxy.csproj", "{5377E0F2-9DA1-4915-AAC7-23E107577E04}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Interceptors.Grpc", "Interceptors\Grpc\SoEx.Interceptors.Grpc.csproj", "{28623AB7-75B0-4C39-8481-29C15A9F6E8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Proxy", "Proxy\SoEx.Proxy.csproj", "{B115B4D8-6DCD-47D8-B1DD-09B5E5F46F2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +44,10 @@ Global
 		{28623AB7-75B0-4C39-8481-29C15A9F6E8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28623AB7-75B0-4C39-8481-29C15A9F6E8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28623AB7-75B0-4C39-8481-29C15A9F6E8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B115B4D8-6DCD-47D8-B1DD-09B5E5F46F2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B115B4D8-6DCD-47D8-B1DD-09B5E5F46F2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B115B4D8-6DCD-47D8-B1DD-09B5E5F46F2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B115B4D8-6DCD-47D8-B1DD-09B5E5F46F2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
