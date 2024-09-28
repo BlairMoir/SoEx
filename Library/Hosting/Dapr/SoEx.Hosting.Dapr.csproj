@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>SoEx.Hosting.Dapr</PackageId>
-    <Version>0.0.0-alpha-1.0</Version>
+    <Version>0.0.0-alpha-1.1</Version>
     <Authors>Blair Moir</Authors>
     <PackageProjectUrl>https://github.com/BlairMoir/SoEx/tree/primary/Library</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BlairMoir/SoEx</RepositoryUrl>
@@ -19,10 +19,10 @@
     <PackageReference Include="protobuf-net.Grpc" Version="1.1.1" />
     <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.1.1" />
     <PackageReference Include="protobuf-net.Grpc.AspNetCore.Reflection" Version="1.1.1" />
-    <PackageReference Include="SoEx.Container" Version="0.0.0-alpha-1.0" />
-    <PackageReference Include="SoEx.Context.Abstractions" Version="0.0.0-alpha-1.0" />
-    <PackageReference Include="SoEx.Interceptors.Grpc" Version="0.0.0-alpha-1.0" />
-    <PackageReference Include="SoEx.Context" Version="0.0.0-alpha-1.0" />
+    <PackageReference Include="SoEx.Container" Version="0.0.0-alpha-1.1" />
+    <PackageReference Include="SoEx.Context.Abstractions" Version="0.0.0-alpha-1.1" />
+    <PackageReference Include="SoEx.Interceptors.Grpc" Version="0.0.0-alpha-1.1" />
+    <PackageReference Include="SoEx.Context" Version="0.0.0-alpha-1.1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
