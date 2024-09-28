@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Component\Manager\Membership\Service\Example002.Manager.Membership.Service.csproj" />
+    <ProjectReference Include="..\..\..\Component\Access\Customer\Interface\Example002.Access.Customer.Interface.csproj" />
+    <ProjectReference Include="..\..\..\iFx\Hosting\Dapr\Example002.iFx.Hosting.Dapr.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

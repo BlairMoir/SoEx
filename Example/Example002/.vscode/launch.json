@@ -1,0 +1,46 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "[InProc] C#: Company.InProcHost Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Host/InProc/Example002.Host.InProc.csproj"
+        },
+        {
+            "name": "[Dapr] C#: TestClient Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Host/Dapr/TestClient/Example002.Host.TestClient.csproj"
+        },
+        {
+            "name": "[Dapr] C#: Customer Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Host/Dapr/Customer/Example002.Host.Customer.csproj",
+            "preLaunchTask": "dapr-debug-customer",
+            "postDebugTask": "daprd-down-customer"
+        },
+        {
+            "name": "[Dapr] C#: Membership Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Host/Dapr/Membership/Example002.Host.Membership.csproj",
+            "preLaunchTask": "dapr-debug-membership",
+            "postDebugTask": "daprd-down-membership"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "[Dapr] Debug All Hosts",
+            "configurations": [
+                "[Dapr] C#: Membership Debug",
+                "[Dapr] C#: Customer Debug",
+                "[Dapr] C#: TestClient Debug"
+            ]
+        }
+    ]
+}
