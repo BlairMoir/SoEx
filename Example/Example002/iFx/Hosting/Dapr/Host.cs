@@ -31,17 +31,17 @@ public static class Host
         var hostAssemblyName = Assembly.GetCallingAssembly().GetName().Name;
 
         var builder = WebApplication.CreateBuilder(args);
-        builder.DaprIfx(FindClientInterfaces(companyNamespace));
+        builder.DaprIfx(AppIdConvention, FindClientInterfaces(companyNamespace));
         builder.Services.ConfigureLogging();
         builder.Services.ConfigureTelemetry();
         builder.Services.AddSingleton<IContextFlowPolicy, ContextFlowPolicy>();
         builder.WebHost.ConfigureKestrel(options =>
+        {
+            options.ListenLocalhost(port, listenOptions =>
             {
-                options.ListenLocalhost(port, listenOptions =>
-                {
-                    listenOptions.Protocols = HttpProtocols.Http2;
-                });
+                listenOptions.Protocols = HttpProtocols.Http2;
             });
+        });
         var app = builder.Build();
         app.DaprService(FindServiceTypes(companyNamespace));
         return app;
@@ -111,4 +111,6 @@ public static class Host
         }
         return clientTypes.ToArray();
     }
+
+    private static Func<Type, string> AppIdConvention => type => type.Namespace!.Replace(".", "-").Replace("Interface", "Service"); 
 }
