@@ -1,3 +1,6 @@
+> [!WARNING]  
+> Dapr has changed alot in the three years since I made these demos. This approach has been deprecated. 
+
 # Hello Grpc
 
 
