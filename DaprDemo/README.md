@@ -1,3 +1,6 @@
+> [!WARNING]  
+> Dapr has changed alot in the three years since I made these demos. They might use deprecated features or not function
+
 # DaprDemos
 
 The purpose of these demos is to demonstarte using dapr capabilities from c#. Each example should contain only the minium required to demonstrate the concept.
