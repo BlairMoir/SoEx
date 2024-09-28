@@ -19,24 +19,24 @@ namespace SoEx.Dapr
     {
         private static readonly List<Type> s_standardInterceptors = [typeof(ScopeInterceptor), typeof(Grpc.InvocationInterceptor), typeof(ErrorInterceptor)];
 
-        public static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Type[] clientInterfaces)
+        public static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Func<Type,string> appIdConvention, Type[] clientInterfaces)
         {
-            return DaprIfx(hostBuilder, clientInterfaces, [.. s_standardInterceptors]);
+            return DaprIfx(hostBuilder, appIdConvention, clientInterfaces, [.. s_standardInterceptors]);
         }
-        public static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Type[] clientInterfaces, Func<List<Type>, Type[]> interceptorFactory)
+        public static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Func<Type,string> appIdConvention, Type[] clientInterfaces, Func<List<Type>, Type[]> interceptorFactory)
         {
 
-            return DaprIfx(hostBuilder, clientInterfaces, interceptorFactory.Invoke(s_standardInterceptors));
+            return DaprIfx(hostBuilder, appIdConvention, clientInterfaces, interceptorFactory.Invoke(s_standardInterceptors));
         }
 
-        private static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Type[] clientInterfaces, Type[] interceptors)
+        private static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Func<Type,string> appIdConvention, Type[] clientInterfaces, Type[] interceptors)
         {
             var factoryProvider = new AutofacServiceProviderFactory(builder =>
             {
                 builder.RegisterType<ScopeInterceptor>();
                 builder.RegisterType<AmbientContext>().AsImplementedInterfaces().InstancePerLifetimeScope();
                 builder.RegisterBuildCallback(scope => ContainerFactory.ForRoot(() => scope));
-                RegisterGrpcClients(builder, clientInterfaces);
+                RegisterGrpcClients(builder, appIdConvention, clientInterfaces);
             });
             hostBuilder.Host.UseServiceProviderFactory(factoryProvider);
             hostBuilder.Services.AddCodeFirstGrpc(
@@ -71,12 +71,12 @@ namespace SoEx.Dapr
             method.Invoke(null, [app]);
         }
 
-        private static void RegisterGrpcClients(ContainerBuilder builder, Type[] serviceInterfaces)
+        private static void RegisterGrpcClients(ContainerBuilder builder,Func<Type,string> appIdConvention, Type[] serviceInterfaces)
         {
             foreach (Type serviceInterfaceType in serviceInterfaces)
             {
                 Debug.Assert(serviceInterfaceType.Namespace is not null);
-                string appId = serviceInterfaceType.Namespace.Replace(".", "-").Replace("Interface", "Service");
+                string appId = appIdConvention.Invoke(serviceInterfaceType);                
                 builder.Register((c) => ServiceClientFactory(c, serviceInterfaceType, appId))
                 .As(serviceInterfaceType);
             }
