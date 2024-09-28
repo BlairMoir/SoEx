@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"appId": "Example001-Manager-Membership-Service",
+			"appPort": 5000,
+			"grpcPort": 50000,
+			"label": "dapr-debug-membership",
+			"type": "dapr"
+		},
+		{
+			"appId": "Example001-Manager-Membership-Service",
+			"label": "daprd-down-membership",
+			"type": "daprd-down"
+		},
+		{
+			"appId": "Example001-Access-Customer-Service",
+			"appPort": 5001,
+			"grpcPort": 50001,
+			"label": "dapr-debug-customer",
+			"type": "dapr"
+		},
+		{
+			"appId": "Example001-Access-Customer-Service",
+			"label": "daprd-down-customer",
+			"type": "daprd-down"
+		}
+	]
+}

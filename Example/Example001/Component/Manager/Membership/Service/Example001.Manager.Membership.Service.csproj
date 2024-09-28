@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Interface\Example001.Manager.Membership.Interface.csproj" />
+    <ProjectReference Include="..\..\..\..\iFx\Proxy\Example001.iFx.Proxy.csproj" />
+    <ProjectReference Include="..\..\..\Access\Customer\Interface\Example001.Access.Customer.Interface.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
