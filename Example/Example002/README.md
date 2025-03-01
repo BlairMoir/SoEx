@@ -1,3 +1,5 @@
 # SoEx Example002
 
-More details in the [Example001 wiki page](https://github.com/BlairMoir/SoEx/wiki/Example002)
+InProc and Dapr
+
+Demonstrate finding services using IService marker interface
