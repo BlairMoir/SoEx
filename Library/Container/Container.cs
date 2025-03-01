@@ -35,6 +35,13 @@ namespace SoEx
             s_asyncLocalLifetimeScope.Value = localLifetimeScope;
             return localLifetimeScope;
         }
+        
+        public static ILifetimeScope BeginLocalLifetimeScopeFromRoot()
+        {
+            ILifetimeScope localLifetimeScope = s_rootScope.BeginLifetimeScope();
+            s_asyncLocalLifetimeScope.Value = localLifetimeScope;
+            return localLifetimeScope;
+        }
     }
 
     public static class ContainerFactory

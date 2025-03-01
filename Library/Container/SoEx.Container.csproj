@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>SoEx.Container</PackageId>
-    <Version>0.0.0-alpha-1.1</Version>
+    <Version>0.0.0-alpha-1.3</Version>
     <Authors>Blair Moir</Authors>
     <Copyright>Copyright (c) Blair Moir 2024</Copyright>
     <PackageProjectUrl>https://github.com/BlairMoir/SoEx/tree/primary/Library</PackageProjectUrl>
