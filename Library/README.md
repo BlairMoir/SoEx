@@ -19,3 +19,9 @@ SoEx is a collection of NuGet packages that allows you to host your POCO service
 ![NuGet Version](https://img.shields.io/nuget/vpre/SoEx.Proxy?label=SoEx.Proxy)
 
 ![NuGet Version](https://img.shields.io/nuget/vpre/SoEx.Test?label=SoEx.Test)
+
+![NuGet Version](https://img.shields.io/nuget/vpre/SoEx.PubSub?label=SoEx.PubSub)
+
+![NuGet Version](https://img.shields.io/nuget/vpre/SoEx.PubSub.InProc?label=SoEx.PubSub.InProc)
+
+![NuGet Version](https://img.shields.io/nuget/vpre/SoEx.PubSub.Dapr?label=SoEx.PubSub.Dapr)
