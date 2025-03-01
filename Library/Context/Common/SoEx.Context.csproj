@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>SoEx.Context</PackageId>
-    <Version>0.0.0-alpha-1.1</Version>
+    <Version>0.0.0-alpha-1.2</Version>
     <Authors>Blair Moir</Authors>
     <Copyright>Copyright (c) Blair Moir 2024</Copyright>
     <PackageProjectUrl>https://github.com/BlairMoir/SoEx/tree/primary/Library</PackageProjectUrl>

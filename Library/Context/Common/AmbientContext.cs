@@ -4,7 +4,7 @@ namespace SoEx.Context
 {
     public class AmbientContext : IAmbientContext
     {
-        private readonly ConcurrentDictionary<string, object> _contexts = [];
+        protected readonly ConcurrentDictionary<string, object> _contexts = [];
 
         public void SetIfNotExists<T>(Func<T> contextFactory) where T : class
         {
