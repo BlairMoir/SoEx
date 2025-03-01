@@ -11,6 +11,22 @@ namespace SoEx.InProc
     {
         private static readonly List<Type> s_standardInterceptors = [typeof(DiagnosticActivityInterceptor), typeof(ScopeInterceptor), typeof(InvocationInterceptor), typeof(ErrorInterceptor)];
 
+        public static IHostApplicationBuilder InProcIfx(this IHostApplicationBuilder hostBuilder, params Type[] serviceTypes)
+        {
+            return InProcIfx(hostBuilder, [.. s_standardInterceptors], serviceTypes);
+        }
+
+        public static IHostApplicationBuilder InProcIfx(this IHostApplicationBuilder hostBuilder, Func<List<Type>, Type[]> interceptorFactory, params Type[] serviceTypes)
+        {
+            return InProcIfx(hostBuilder, [.. interceptorFactory.Invoke(s_standardInterceptors)], serviceTypes);
+        }
+
+        private static IHostApplicationBuilder InProcIfx(this IHostApplicationBuilder hostBuilder, Type[] interceptors, params Type[] serviceTypes)
+        {
+            hostBuilder.ConfigureContainer(ServiceProviderFactory(interceptors, serviceTypes));
+            return hostBuilder;
+        }
+
         public static IHostBuilder InProcIfx(this IHostBuilder hostBuilder, params Type[] serviceTypes)
         {
             return InProcIfx(hostBuilder, [.. s_standardInterceptors], serviceTypes);
@@ -22,16 +38,17 @@ namespace SoEx.InProc
         }
 
         private static IHostBuilder InProcIfx(this IHostBuilder hostBuilder, Type[] interceptors, params Type[] serviceTypes)
-        {
-            var factoryProvider = new AutofacServiceProviderFactory(builder =>
-            {
-                builder.RegisterTypes(interceptors);
-                builder.RegisterType<AmbientContext>().AsImplementedInterfaces().InstancePerLifetimeScope();
-                builder.RegisterBuildCallback(scope => ContainerFactory.ForRoot(() => scope));
-                RegisterServiceTypes(builder, interceptors, serviceTypes);
-            });
-            return hostBuilder.UseServiceProviderFactory(factoryProvider);
+        {            
+            return hostBuilder.UseServiceProviderFactory(ServiceProviderFactory(interceptors, serviceTypes));
         }
+
+        private static AutofacServiceProviderFactory ServiceProviderFactory(Type[] interceptors, Type[] serviceTypes) => new AutofacServiceProviderFactory(builder =>
+        {
+            builder.RegisterTypes(interceptors);
+            builder.RegisterType<AmbientContext>().AsImplementedInterfaces().InstancePerLifetimeScope();
+            builder.RegisterBuildCallback(scope => ContainerFactory.ForRoot(() => scope));
+            RegisterServiceTypes(builder, interceptors, serviceTypes);
+        });
 
         private static void RegisterServiceTypes(ContainerBuilder builder, Type[] interceptors, Type[] types)
         {
