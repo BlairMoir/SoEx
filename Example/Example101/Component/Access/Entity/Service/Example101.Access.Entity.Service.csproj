@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Interface\Example101.Access.Entity.Interface.csproj" />
+    <ProjectReference Include="..\..\..\..\iFx\Service\Example101.iFx.Service.csproj" />
+    <ProjectReference Include="..\..\..\..\Common\Contract\Example101.Common.Contract.csproj" />
+    <ProjectReference Include="..\..\..\Utility\Cache\Interface\Example101.Utility.Cache.Interface.csproj" />
+    <ProjectReference Include="..\..\..\..\iFx\Proxy\Example101.iFx.Proxy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
