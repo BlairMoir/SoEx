@@ -29,10 +29,11 @@ namespace SoEx.Test
             return builder.Build();
         }
 
-        internal static IDisposable CreateTestScope(Type[] types, Type[] policies)
+        internal static IDisposable CreateTestScope(Type[] types, Type[] policies, Action<ContainerBuilder> dependencies)
         {
             return Container.BeginLocalLifetimeScope(configuration =>
             {
+                dependencies.Invoke(configuration);
                 configuration.RegisterTypes(types).As(t => t.GetInterfaces())
                 .EnableInterfaceInterceptors()
                 .InterceptedBy(typeof(DynamicProxy.ScopeInterceptor));
