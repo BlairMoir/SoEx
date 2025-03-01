@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>SoEx.Hosting.Dapr</PackageId>
-    <Version>0.0.0-alpha-1.1</Version>
+    <Version>0.0.0-alpha-1.2</Version>
     <Authors>Blair Moir</Authors>
     <PackageProjectUrl>https://github.com/BlairMoir/SoEx/tree/primary/Library</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BlairMoir/SoEx</RepositoryUrl>
@@ -13,6 +13,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Autofac.Extras.DynamicProxy" Version="7.1.0" />
     <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -22,7 +23,8 @@
     <PackageReference Include="SoEx.Container" Version="0.0.0-alpha-1.1" />
     <PackageReference Include="SoEx.Context.Abstractions" Version="0.0.0-alpha-1.1" />
     <PackageReference Include="SoEx.Interceptors.Grpc" Version="0.0.0-alpha-1.1" />
-    <PackageReference Include="SoEx.Context" Version="0.0.0-alpha-1.1" />
+    <PackageReference Include="SoEx.Interceptors.DynamicProxy" Version="0.0.0-alpha-1.1" />
+    <PackageReference Include="SoEx.Context" Version="0.0.0-alpha-1.2" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\"/>

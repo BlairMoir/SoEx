@@ -2,6 +2,7 @@
 using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Autofac.Extras.DynamicProxy;
 using Dapr.Client;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
@@ -19,17 +20,23 @@ namespace SoEx.Dapr
     {
         private static readonly List<Type> s_standardInterceptors = [typeof(ScopeInterceptor), typeof(Grpc.InvocationInterceptor), typeof(ErrorInterceptor)];
 
-        public static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Func<Type,string> appIdConvention, Type[] clientInterfaces)
+        public static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Func<Type,string> appIdConvention, Type[] clientInterfaces, EventListener[]? eventListeners = null)
         {
-            return DaprIfx(hostBuilder, appIdConvention, clientInterfaces, [.. s_standardInterceptors]);
+            return DaprIfx(hostBuilder, appIdConvention, clientInterfaces, [.. s_standardInterceptors], eventListeners);
         }
-        public static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Func<Type,string> appIdConvention, Type[] clientInterfaces, Func<List<Type>, Type[]> interceptorFactory)
+        public static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Func<Type,string> appIdConvention, Type[] clientInterfaces, Func<List<Type>, Type[]> interceptorFactory, EventListener[]? eventListeners = null)
         {
 
-            return DaprIfx(hostBuilder, appIdConvention, clientInterfaces, interceptorFactory.Invoke(s_standardInterceptors));
+            return DaprIfx(hostBuilder, appIdConvention, clientInterfaces, interceptorFactory.Invoke(s_standardInterceptors), eventListeners);
         }
 
-        private static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Func<Type,string> appIdConvention, Type[] clientInterfaces, Type[] interceptors)
+        public static IHostApplicationBuilder DaprSubscriptions(this WebApplicationBuilder hostBuilder, Type[] subscriptions)
+        {
+            AppCallBackService.AddSubscriptions(subscriptions);
+            return hostBuilder;
+        }   
+
+        private static IHostApplicationBuilder DaprIfx(this WebApplicationBuilder hostBuilder, Func<Type,string> appIdConvention, Type[] clientInterfaces, Type[] interceptors, EventListener[]? eventListeners)
         {
             var factoryProvider = new AutofacServiceProviderFactory(builder =>
             {
@@ -37,6 +44,7 @@ namespace SoEx.Dapr
                 builder.RegisterType<AmbientContext>().AsImplementedInterfaces().InstancePerLifetimeScope();
                 builder.RegisterBuildCallback(scope => ContainerFactory.ForRoot(() => scope));
                 RegisterGrpcClients(builder, appIdConvention, clientInterfaces);
+                RegisterEventListeners(builder, eventListeners);
             });
             hostBuilder.Host.UseServiceProviderFactory(factoryProvider);
             hostBuilder.Services.AddCodeFirstGrpc(
@@ -51,6 +59,20 @@ namespace SoEx.Dapr
             return hostBuilder;
         }
 
+        private static void RegisterEventListeners(ContainerBuilder builder, EventListener[]? eventListeners)
+        {
+            if(eventListeners is not null)
+            {
+                Type[] dynamicProxyInterceptors = [typeof(DynamicProxy.ScopeInterceptor),typeof(DynamicProxy.InvocationInterceptor),typeof(DynamicProxy.ErrorInterceptor)];
+                builder.RegisterTypes(dynamicProxyInterceptors);
+                foreach(var listener in eventListeners)
+                {
+                    builder.RegisterType(listener.EventService).As(listener.EventInterface)
+                    .EnableInterfaceInterceptors()
+                    .InterceptedBy(dynamicProxyInterceptors);
+                }  
+            }
+        }
         public static WebApplication DaprService(this WebApplication app, Type[] serviceTypes)
         {
             foreach (Type service in serviceTypes)
