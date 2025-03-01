@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -20,6 +20,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Hosting.InProc", "Hosting\InProc\SoEx.Hosting.InProc.csproj", "{057C4CB0-58AE-4336-9792-2CFC2BE8F7DF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Hosting.Dapr", "Hosting\Dapr\SoEx.Hosting.Dapr.csproj", "{F2878640-1B2C-4E90-8205-6F5A14E3B311}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PubSub", "PubSub", "{3D117EAB-AC4E-47A6-BC7B-18E219906814}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.PubSub", "PubSub\Common\SoEx.PubSub.csproj", "{154782D3-1C51-4771-A731-533873FAA27C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.PubSub.InProc", "PubSub\InProc\SoEx.PubSub.InProc.csproj", "{E4D1B653-9745-45E5-BB87-11C79F6B83D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.PubSub.Dapr", "PubSub\Dapr\SoEx.PubSub.Dapr.csproj", "{C931FF1B-79B8-4BB3-9132-CC4C3DDCAF49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,7 +74,22 @@ Global
 		{F2878640-1B2C-4E90-8205-6F5A14E3B311}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2878640-1B2C-4E90-8205-6F5A14E3B311}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2878640-1B2C-4E90-8205-6F5A14E3B311}.Release|Any CPU.Build.0 = Release|Any CPU
+		{154782D3-1C51-4771-A731-533873FAA27C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{154782D3-1C51-4771-A731-533873FAA27C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{154782D3-1C51-4771-A731-533873FAA27C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{154782D3-1C51-4771-A731-533873FAA27C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4D1B653-9745-45E5-BB87-11C79F6B83D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4D1B653-9745-45E5-BB87-11C79F6B83D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4D1B653-9745-45E5-BB87-11C79F6B83D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4D1B653-9745-45E5-BB87-11C79F6B83D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C931FF1B-79B8-4BB3-9132-CC4C3DDCAF49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C931FF1B-79B8-4BB3-9132-CC4C3DDCAF49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C931FF1B-79B8-4BB3-9132-CC4C3DDCAF49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C931FF1B-79B8-4BB3-9132-CC4C3DDCAF49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{154782D3-1C51-4771-A731-533873FAA27C} = {3D117EAB-AC4E-47A6-BC7B-18E219906814}
+		{E4D1B653-9745-45E5-BB87-11C79F6B83D1} = {3D117EAB-AC4E-47A6-BC7B-18E219906814}
+		{C931FF1B-79B8-4BB3-9132-CC4C3DDCAF49} = {3D117EAB-AC4E-47A6-BC7B-18E219906814}
 	EndGlobalSection
 EndGlobal
