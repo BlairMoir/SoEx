@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-rc.1.24431.7" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-rc.1.24431.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Policy\Example003.Common.Policy.csproj" />
+    <ProjectReference Include="..\..\iFx\Hosting\InProc\Example003.iFx.Hosting.InProc.csproj" />
+    <ProjectReference Include="..\..\iFx\Proxy\Example003.iFx.Proxy.csproj" />
+    <ProjectReference Include="..\..\Component\Manager\Membership\Service\Example003.Manager.Membership.Service.csproj" />
+    <ProjectReference Include="..\..\Component\Manager\Membership\Interface\Example003.Manager.Membership.Interface.csproj" />
+    <ProjectReference Include="..\..\Component\Access\Customer\Service\Example003.Access.Customer.Service.csproj" />
+  </ItemGroup>
+
+</Project>
