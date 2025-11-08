@@ -28,7 +28,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     defaults:
-      working-directory: ./Doc
+      run:
+        working-directory: ./Doc
     steps:
       - name: Checkout
         uses: actions/checkout@v4
