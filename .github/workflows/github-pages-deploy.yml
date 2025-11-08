@@ -43,6 +43,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache-dependency-path: './Doc/package-lock.json'
           cache: npm # or pnpm / yarn
       - name: Setup Pages
         uses: actions/configure-pages@v4
