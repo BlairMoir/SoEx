@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Channel\SoEx.Channel.csproj" />
+    <ProjectReference Include="..\Endpoint\SoEx.Endpoint.csproj" />
+    <ProjectReference Include="..\Topology\SoEx.Topology.csproj" />
+    <ProjectReference Include="..\Abstractions\SoEx.Abstractions.csproj" />
+    <ProjectReference Include="..\Diagnostics\SoEx.Diagnostics.csproj" />
+    <ProjectReference Include="..\Container\SoEx.Container.csproj" />
+    <ProjectReference Include="..\Context\Common\SoEx.Context.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="8.4.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Autofac.Extras.DynamicProxy" Version="7.1.0" />
+    <PackageReference Include="Castle.Core.AsyncInterceptor" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>SoEx.Hosting</PackageId>
+    <PackageOutputPath>../../nupkgs</PackageOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+</Project>

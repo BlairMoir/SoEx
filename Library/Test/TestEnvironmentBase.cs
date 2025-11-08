@@ -1,59 +1,89 @@
-using Autofac;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Autofac;
+using Microsoft.Extensions.Logging;
+using SoEx.Abstractions;
+using SoEx.Context;
+using SoEx.Hosting;
+using SoEx.Topology;
+using SoEx.Transport.InProc;
+using SoEx.Transport.SBQueue;
+using SoEx.Transport.ThreadChannel;
 
 namespace SoEx.Test
 {
     public abstract class TestEnvironmentBase
     {
-        Type[] _servicesUnderTest = [];
-        Type[] _policies = [];
-        Action<ContainerBuilder> _autofacDependencies  = c => {};
-        Action<IServiceCollection> _microsoftDependencies  = sc => {};
+        SoEx.Topology.System _topology = new Topology.System() { Clients = [], SubSystems = [] };
 
-        public void SetupServices(params Type[] types)
+        Type[]? _policies;
+
+        public void DefaultConfiguration(SoEx.Topology.System topology)
         {
-            _servicesUnderTest = types;
+            _topology = topology;
         }
 
-        public void SetupContextPolicy(params Type[] policies)
+        public void DefaultPolicies(Type[] policies)
         {
             _policies = policies;
         }
 
-        public void DependencyContainerBuilder( Action<ContainerBuilder> cb)
+        public async Task TestService<S>(Func<S, Task> callerFunc, SoEx.Topology.System? system = null) where S : notnull
         {
-            _autofacDependencies = cb;
-        }
-
-        public void DependencyServiceCollection( Action<IServiceCollection> sc)
-        {
-            _microsoftDependencies = sc;
-        }
-
-        public Task TestService<T>(Func<T, Task> callerMock, params object[] mocks) where T : class
-        {
-            return MockServiceEnvironment<T>(GetServiceType<T>(), callerMock, mocks);
-        }
-
-        private Type GetServiceType<T>()
-        {
-            return _servicesUnderTest.Single(t => t.GetInterfaces().Contains(typeof(T)));
-        }
-
-        private void ServiceDependencies(ContainerBuilder containerBuilder)
-        {
-            _microsoftDependencies.Invoke(new ServiceCollectionBridge(containerBuilder));
-            _autofacDependencies.Invoke(containerBuilder);
-        }
-
-        private async Task MockServiceEnvironment<T>(Type targetType, Func<T, Task> callerMock, params object[] mocks) where T : class
-        {
-            using (IDisposable environmentScope = TestContainer.CreateTestScope(_servicesUnderTest, _policies, ServiceDependencies))
-            using (IDisposable testScope = TestContainer.CreateTestScope(mocks))
+            var container = BuildContainer(system);
+            using (var requestScope = container.BeginLifetimeScopeAsyncLocal())
             {
-                T poco = Container.Resolve<T>();
-                await callerMock.Invoke(poco);
+                var proxy = requestScope.Resolve<S>();
+                await callerFunc.Invoke(proxy);
             }
+        }
+
+        public async Task TestComponent<I>(Func<I, Task> callerFunc, SoEx.Topology.System? system = null) where I : class
+        {
+            var orginalTopo = system ?? _topology;
+            var subsystemName = orginalTopo.SubSystems.First().Name;
+            var newTopo = new SoEx.Topology.System()
+            {
+                SubSystems = orginalTopo.SubSystems,
+                Clients = [new Client<I>() { Service = new InProcBinding<I>(subsystemName), SubSystem = subsystemName }],
+                Defaults = orginalTopo.Defaults
+            };
+            var container = BuildContainer(newTopo);
+            using (var requestScope = container.BeginLifetimeScopeAsyncLocal())
+            {
+                var proxy = requestScope.Resolve<I>();
+                await callerFunc.Invoke(proxy);
+            }
+        }
+
+        private ILifetimeScope BuildContainer(SoEx.Topology.System? system)
+        {
+            ContainerBuilder builder = new ContainerBuilder();
+            builder.RegisterSoEx(system ?? _topology);
+            builder.RegisterType<LoggerFactory>()
+                            .As<ILoggerFactory>()
+                            .SingleInstance();
+            builder.RegisterGeneric(typeof(Logger<>))
+                .As(typeof(ILogger<>))
+                .SingleInstance();
+            builder.RegisterGeneric(typeof(InProcChannel<>)).As(typeof(InProcChannel<>));
+            builder.RegisterGeneric(typeof(UnsafeThreadChannelChannel<>)).As(typeof(UnsafeThreadChannelChannel<>));
+            builder.RegisterGeneric(typeof(UnsafeThreadEventChannel<>)).As(typeof(UnsafeThreadEventChannel<>)).SingleInstance();
+            builder.RegisterGeneric(typeof(SBQueueChannel<>)).As(typeof(SBQueueChannel<>));
+            builder.RegisterType<InProcListeners>().SingleInstance().AsSelf();
+
+
+            if (_policies is not null)
+            {
+                builder.RegisterTypes(_policies).As<IContextFlowPolicy>();
+            }
+
+            var scope = builder.Build();
+            var endpointRegister = scope.Resolve<RegisteredEndpoints>();
+            foreach (var endpoint in endpointRegister.Endpoints)
+            {
+                endpoint.Listen();
+            }
+
+            return scope;
         }
     }
 }

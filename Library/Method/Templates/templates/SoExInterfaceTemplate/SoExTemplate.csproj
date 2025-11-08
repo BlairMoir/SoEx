@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+<!--#if( enforceDesign ) -->
+  <ItemGroup>
+    <PackageReference Include="System.ServiceModel.Primitives" Version="8.0.0" />
+      <PackageReference Include="SoEx.Method.Analyzer" Version="1.0.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime;build;native;analyzers;buildtransitive</IncludeAssets>
+      </PackageReference>
+  </ItemGroup>
+    <PropertyGroup>
+        <ProjectName>$(MSBuildProjectName)</ProjectName>
+    </PropertyGroup>
+    <ItemGroup>
+        <CompilerVisibleProperty Include="ProjectName" />
+    </ItemGroup>
+    <ItemGroup>
+        <AdditionalFiles Include="$(SolutionDir)\modelanalyzer.json" />
+    </ItemGroup>
+    <PropertyGroup>
+        <WarningsAsErrors>PCV001</WarningsAsErrors>
+        <NoWarn>CS8618</NoWarn>
+    </PropertyGroup>
+<!--#endif -->
+</Project>

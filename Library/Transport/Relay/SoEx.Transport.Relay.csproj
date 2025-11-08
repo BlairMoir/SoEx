@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\Endpoint\SoEx.Endpoint.csproj" />
+    <ProjectReference Include="..\..\Topology\SoEx.Topology.csproj" />
+    <ProjectReference Include="..\..\Abstractions\SoEx.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Diagnostics\SoEx.Diagnostics.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Relay" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+  </ItemGroup>
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>SoEx.Transport.Relay</PackageId>
+    <PackageOutputPath>../../../nupkgs</PackageOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+</Project>

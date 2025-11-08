@@ -1,10 +1,17 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using SoEx.Abstractions;
 
 namespace SoEx.Context
 {
     public class AmbientContext : IAmbientContext
     {
+        readonly IMessageSerializer _messageSerializer;
         protected readonly ConcurrentDictionary<string, object> _contexts = [];
+
+        public AmbientContext(IMessageSerializer messageSerializer)
+        {
+            _messageSerializer = messageSerializer;
+        }
 
         public void SetIfNotExists<T>(Func<T> contextFactory) where T : class
         {
@@ -38,5 +45,29 @@ namespace SoEx.Context
                 _contexts.TryAdd(contextName, context);
             }
         }
+
+        public byte[] Serialize()
+        {
+            return _messageSerializer.Serialize(_contexts);
+        }
+
+        public void Deserialize(byte[]? serlializedContexts)
+        {
+            if (serlializedContexts is null)
+                return;
+
+
+            ConcurrentDictionary<string, object>? replacmentContexts = _messageSerializer.Deserialize<ConcurrentDictionary<string, object>>(serlializedContexts);
+
+            if (replacmentContexts is null)
+                return;
+
+
+            foreach (var replacement in replacmentContexts)
+            {
+                _contexts.AddOrUpdate(replacement.Key, replacement.Value, (k, v) => replacement.Value);
+            }
+        }
     }
 }
+

@@ -1,0 +1,51 @@
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Security;
+using Autofac;
+using Microsoft.Extensions.Logging;
+using SoEx.Abstractions;
+using SoEx.Exceptions;
+using SoEx.Topology;
+
+namespace SoEx.Endpoint
+{
+    public class EndpointPipeline : IEndpointPipeline
+    {
+        readonly IHostAndClientLookup _subsystemlifeTimeScope;
+        readonly ILogger<EndpointPipeline> _logger;
+
+        public EndpointPipeline(ILogger<EndpointPipeline> logger, IHostAndClientLookup subsystemlifeTimeScope)
+        {
+            _subsystemlifeTimeScope = subsystemlifeTimeScope;
+            _logger = logger;
+        }
+
+        public async Task<byte[]> ServicePipeLine<I>(byte[] payload, IPipeline? pipeline, Activity? parentActivity) where I : class
+        {
+            try
+            {
+                Type dispatcherType = pipeline?.Dispatcher ?? typeof(IDispatcher);
+                Type serializerType = pipeline?.MessageSerializer ?? typeof(IMessageSerializer);
+                var subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
+                using (Autofac.ILifetimeScope requestScope = subSystemHost.BeginRequestLifetimeScope())
+                {
+                    var dispatcher = (IDispatcher)requestScope.Resolve(dispatcherType);
+                    var serializer = (IMessageSerializer)requestScope.Resolve(serializerType);
+
+                    InvocationRequest? request = serializer.Deserialize<InvocationRequest>(payload);
+                    using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(EndpointPipeline)}", ActivityKind.Server, request?.ActivityId))
+                    {
+                        Debug.Assert(request is not null);
+                        var response = await dispatcher.Dispatch<I>(request);
+                        return serializer.Serialize(response);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing service pipeline");
+                throw new ServiceException("Error executing service pipeline", ex);
+            }
+        }
+    }
+}

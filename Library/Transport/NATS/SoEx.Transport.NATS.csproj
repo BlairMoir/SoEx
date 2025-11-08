@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\Abstractions\SoEx.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Diagnostics\SoEx.Diagnostics.csproj" />
+    <ProjectReference Include="..\..\Endpoint\SoEx.Endpoint.csproj" />
+    <ProjectReference Include="..\..\Topology\SoEx.Topology.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NATS.Net" Version="2.6.11" />
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageOutputPath>../../../nupkgs</PackageOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+</Project>

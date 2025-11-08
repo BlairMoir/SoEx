@@ -1,0 +1,18 @@
+
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Blair Moir",
+    "classifications": ["SoEx"],
+    "name": "SoEx Solution Template",
+    "description": "Solution structure for SoEx Examples",
+    "groupIdentity": "SoEx.Template.Solution",
+    "identity": "SoEx.Template.MethodSolution",
+    "shortName": "method.solution",
+    "defaultName": "Example001",
+    "tags": {
+      "language": "C#",
+      "type": "solution"
+    },
+    "sourceName": "SoExTemplate"    
+  }
+  

@@ -1,0 +1,37 @@
+
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Blair Moir",
+  "classifications": ["SoEx"],
+  "name": "SoEx Event Template",
+  "description": "Event structure for SoEx Examples",
+  "groupIdentity": "SoEx.Template.Event",
+  "identity": "SoEx.Template.MethodEvent",
+  "shortName": "method.event",
+  "defaultName": "ComponentA",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "SoExTemplate",
+  "symbols": {
+    "componentType": {
+        "isRequired": false,
+        "description": "Component Type",
+        "datatype": "string",
+        "type": "parameter",
+        "FileRename": "ComponentType",
+        "replaces": "ComponentType",
+        "defaultValue": "Event"
+    },
+    "componentName": {
+      "isRequired": true,
+        "description": "Component Name",
+        "datatype": "string",
+        "type": "parameter",
+        "FileRename": "ComponentName",
+        "replaces": "ComponentName"
+    }    
+  }
+}
+  
