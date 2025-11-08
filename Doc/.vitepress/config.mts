@@ -5,6 +5,7 @@ export default defineConfig({
   base: "/SoEx/",
   title: "SoEx",
   description: "A VitePress Site",
+  ignoreDeadLinks: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
