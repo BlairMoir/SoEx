@@ -1,5 +1,6 @@
-using SoExTemplate.Common.Contract;
 using SoEx.Context;
+using SoExTemplate.Common.Contract;
+
 namespace SoExTemplate.Common.Policy;
 
 public class ContextFlowPolicy : IContextFlowPolicy

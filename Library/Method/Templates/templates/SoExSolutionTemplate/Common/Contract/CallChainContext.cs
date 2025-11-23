@@ -2,21 +2,12 @@ using Newtonsoft.Json;
 
 namespace SoExTemplate.Common.Contract
 {
-    public class CallChainContext
+    public readonly struct CallChainContext
     {
-        private readonly Guid _callChainId;
-
         public CallChainContext()
         {
-            _callChainId = Guid.NewGuid();
         }
 
-        [JsonConstructor]
-        public CallChainContext(Guid CallChainId)
-        {
-            _callChainId = CallChainId;
-        }
-
-        public Guid CallChainId => _callChainId;
+        public Guid CallChainId { get; init; } = Guid.NewGuid();
     }
 }

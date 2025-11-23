@@ -1,7 +1,6 @@
 using Autofac;
 using SoEx;
 
-
 namespace SoExTemplate.Host.InProc
 {
     class Program

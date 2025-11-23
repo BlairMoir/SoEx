@@ -2,26 +2,15 @@ using Newtonsoft.Json;
 
 namespace SoExTemplate.Common.Contract
 {
-    public class CountContext
+    public readonly struct CountContext
     {
-        private int _hopCount = 1;
-
-        public CountContext()
-        {
-
-        }
+        public CountContext() { }
 
         public CountContext(CountContext parent)
         {
-            _hopCount = parent.HopCount + 1;
+            HopCount = parent.HopCount + 1;
         }
 
-        [JsonConstructor]
-        public CountContext(int HopCount)
-        {
-            _hopCount = HopCount;
-        }
-
-        public int HopCount => _hopCount;
+        public int HopCount { get; init; } = 1;
     }
 }

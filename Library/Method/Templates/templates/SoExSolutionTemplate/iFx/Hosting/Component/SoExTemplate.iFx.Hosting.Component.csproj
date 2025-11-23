@@ -9,10 +9,10 @@
   <ItemGroup>
     <PackageReference Include="SoEx.Hosting" Version="0.0.0-alpha-2.1" />
     <PackageReference Include="SoEx.Method.Conventions" Version="0.0.0-alpha-2.1" />
+    <PackageReference Include="SoEx.Transport.NamedPipe" Version="0.0.0-alpha-2.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Client\SoExTemplate.iFx.Client.csproj" />
     <ProjectReference Include="..\..\Convention\SoExTemplate.iFx.Convention.csproj" />
     <ProjectReference Include="..\..\Observability\SoExTemplate.iFx.Observability.csproj" />
   </ItemGroup>
