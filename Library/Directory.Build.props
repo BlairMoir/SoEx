@@ -3,7 +3,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <DebugType>embedded</DebugType>
     <LangVersion>13.0</LangVersion>
-    <Version>0.0.0-alpha-2.0</Version>
+    <Version>0.0.0-alpha-2.1</Version>
     <Authors>Blair Moir</Authors>
     <Copyright>Copyright (c) Blair Moir 2024</Copyright>
     <PackageProjectUrl>https://github.com/BlairMoir/SoEx/tree/primary/Library</PackageProjectUrl>
