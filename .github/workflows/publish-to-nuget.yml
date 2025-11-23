@@ -1,9 +1,9 @@
 name: publish-to-nuget
 on:
   workflow_dispatch:
-  push:
-    branches:
-    - alpha-2.0
+#  push:
+#    branches:
+#    - alpha-2.0
 jobs:
   build-and-publish:
     permissions:
