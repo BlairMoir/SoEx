@@ -13,7 +13,7 @@ namespace SoEx.Context
             _messageSerializer = messageSerializer;
         }
 
-        public void SetIfNotExists<T>(Func<T> contextFactory) where T : class
+        public void SetIfNotExists<T>(Func<T> contextFactory) where T : notnull
         {
             string contextName = typeof(T).Name;
             if (_contexts.ContainsKey(contextName))
@@ -23,17 +23,17 @@ namespace SoEx.Context
             _contexts.TryAdd(contextName, contextFactory.Invoke());
         }
 
-        public T Get<T>() where T : class
+        public T Get<T>() where T : notnull
         {
             return (T)_contexts[typeof(T).Name];
         }
 
-        public bool Contains<T>() where T : class
+        public bool Contains<T>() where T : notnull
         {
             return _contexts.ContainsKey(typeof(T).Name);
         }
 
-        public void SetOrReplace<T>(T context) where T : class
+        public void SetOrReplace<T>(T context) where T : notnull
         {
             string contextName = typeof(T).Name;
             if (_contexts.ContainsKey(contextName))
