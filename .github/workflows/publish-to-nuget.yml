@@ -11,6 +11,7 @@ jobs:
       id-token: write  # enable GitHub OIDC token issuance for this job
 
     runs-on: windows-latest
+    environment: nuget
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
