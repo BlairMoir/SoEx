@@ -7,6 +7,9 @@
     <PackageId>SoEx.Transport.SQS</PackageId>
     <PackageOutputPath>../../../nupkgs</PackageOutputPath>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Abstractions\SoEx.Abstractions.csproj" />
