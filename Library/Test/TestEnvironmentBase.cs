@@ -6,6 +6,7 @@ using SoEx.Hosting;
 using SoEx.Topology;
 using SoEx.Transport.InProc;
 using SoEx.Transport.SBQueue;
+using SoEx.Transport.SQS;
 using SoEx.Transport.ThreadChannel;
 
 namespace SoEx.Test
@@ -68,6 +69,7 @@ namespace SoEx.Test
             builder.RegisterGeneric(typeof(UnsafeThreadChannelChannel<>)).As(typeof(UnsafeThreadChannelChannel<>));
             builder.RegisterGeneric(typeof(UnsafeThreadEventChannel<>)).As(typeof(UnsafeThreadEventChannel<>)).SingleInstance();
             builder.RegisterGeneric(typeof(SBQueueChannel<>)).As(typeof(SBQueueChannel<>));
+            builder.RegisterGeneric(typeof(SQSChannel<>)).As(typeof(SQSChannel<>));
             builder.RegisterType<InProcListeners>().SingleInstance().AsSelf();
 
 

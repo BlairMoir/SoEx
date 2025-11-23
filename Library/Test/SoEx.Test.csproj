@@ -5,6 +5,7 @@
     <ProjectReference Include="..\Hosting\SoEx.Hosting.csproj" />
     <ProjectReference Include="..\Transport\InProc\SoEx.Transport.InProc.csproj" />
     <ProjectReference Include="..\Transport\SBQueue\SoEx.Transport.SBQueue.csproj" />
+    <ProjectReference Include="..\Transport\SQS\SoEx.Transport.SQS.csproj" />
     <ProjectReference Include="..\Transport\ThreadChannel\SoEx.Transport.ThreadChannel.csproj" />
   </ItemGroup>
 
