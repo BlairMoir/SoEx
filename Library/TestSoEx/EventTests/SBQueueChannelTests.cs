@@ -6,11 +6,18 @@ using OpenTelemetry.Trace;
 using SoEx.Exceptions;
 using SoEx.Transport.SBQueue;
 using SoEx.Test;
+using SoEx.Transport.SQS;
 using Testcontainers.ServiceBus;
 
 namespace SoEx.TestSoEx.EventTests;
 
-public class EventTestEnvironment : TestEnvironmentBase { }
+public class EventTestEnvironment : TestEnvironmentBase
+{
+    public EventTestEnvironment() : base()
+    {
+        GenericRegistrations([typeof(SQSChannel<>),typeof(SBQueueChannel<>)]);
+    }
+}
 
 public class SBQueueChannelTests
 {

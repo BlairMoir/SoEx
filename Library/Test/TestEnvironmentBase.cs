@@ -5,8 +5,6 @@ using SoEx.Context;
 using SoEx.Hosting;
 using SoEx.Topology;
 using SoEx.Transport.InProc;
-using SoEx.Transport.SBQueue;
-using SoEx.Transport.SQS;
 using SoEx.Transport.ThreadChannel;
 
 namespace SoEx.Test
@@ -16,6 +14,7 @@ namespace SoEx.Test
         SoEx.Topology.System _topology = new Topology.System() { Clients = [], SubSystems = [] };
 
         Type[]? _policies;
+        Type[]? _generics;
 
         public void DefaultConfiguration(SoEx.Topology.System topology)
         {
@@ -25,6 +24,11 @@ namespace SoEx.Test
         public void DefaultPolicies(Type[] policies)
         {
             _policies = policies;
+        }
+
+        public void GenericRegistrations(Type[] generics)
+        {
+            _generics = generics;
         }
 
         public async Task TestService<S>(Func<S, Task> callerFunc, SoEx.Topology.System? system = null) where S : notnull
@@ -68,14 +72,19 @@ namespace SoEx.Test
             builder.RegisterGeneric(typeof(InProcChannel<>)).As(typeof(InProcChannel<>));
             builder.RegisterGeneric(typeof(UnsafeThreadChannelChannel<>)).As(typeof(UnsafeThreadChannelChannel<>));
             builder.RegisterGeneric(typeof(UnsafeThreadEventChannel<>)).As(typeof(UnsafeThreadEventChannel<>)).SingleInstance();
-            builder.RegisterGeneric(typeof(SBQueueChannel<>)).As(typeof(SBQueueChannel<>));
-            builder.RegisterGeneric(typeof(SQSChannel<>)).As(typeof(SQSChannel<>));
             builder.RegisterType<InProcListeners>().SingleInstance().AsSelf();
-
 
             if (_policies is not null)
             {
                 builder.RegisterTypes(_policies).As<IContextFlowPolicy>();
+            }
+
+            if (_generics is not null)
+            {
+                foreach (var type in _generics)
+                {
+                    builder.RegisterGeneric(type).As(type);
+                }
             }
 
             var scope = builder.Build();
