@@ -188,6 +188,9 @@ namespace SoEx.Hosting
             {
                 var hostChannel = endpoint.Transport.HostChannel;
                 Type hostEndpointType = hostChannel?.MakeGenericType(endpoint.Contract) ?? throw new ArgumentException("Endpoint not defined for transport");
+
+                ValidateEndpointContract(endpoint);
+
                 // IEndpoint<I>
                 subsystemScopeBuilder.RegisterType(hostEndpointType).SingleInstance().As([hostEndpointType, typeof(IEndpoint)]);
                 subsystemScopeBuilder.RegisterBuildCallback(c =>
@@ -197,6 +200,17 @@ namespace SoEx.Hosting
                     endpointInstance.Bind(endpoint, host.Implementation.Name);
                     endpointRegister.AddEndpoint(endpointInstance);
                 });
+            }
+        }
+
+        private static void ValidateEndpointContract(Binding endpoint)
+        {
+            var groupedByName = endpoint.Contract.GetMethods().GroupBy( g=> g.Name).ToArray();
+            if (groupedByName.Any(a => a.Count() != 1))
+            {
+                var duplicates =  groupedByName.Where(a => a.Count() > 1);
+                string duplicateNames = string.Join(",", duplicates.Select(s => s.Key).ToArray());
+                throw new ArgumentException($"Topology - Endpoint contract is not valid. Contains duplicate operation name: {duplicateNames}");
             }
         }
 
