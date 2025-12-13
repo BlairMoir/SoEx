@@ -6,6 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Using Include="$(SolutionName).Common.Identifier" />
+    <Using Include="$(SolutionName).Common.Value" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(SolutionDir)\Common\Identifier\$(SolutionName).Common.Identifier.csproj" />
+    <ProjectReference Include="$(SolutionDir)\Common\Value\$(SolutionName).Common.Value.csproj" />
+  </ItemGroup>
+
 <!--#if( enforceDesign ) -->
   <ItemGroup>
     <PackageReference Include="System.ServiceModel.Primitives" Version="8.0.0" />
