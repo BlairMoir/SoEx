@@ -31,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoExTemplate.iFx.Hosting.Su
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoExTemplate.iFx.Hosting.Component", "iFx\Hosting\Component\SoExTemplate.iFx.Hosting.Component.csproj", "{F9D8C989-369B-4168-BDBC-827801AD9180}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoExTemplate.Common.Identifer", "Common\Identifier\SoExTemplate.Common.Identifer.csproj", "{C43D685E-8181-4E9C-BEE2-530BDB807B00}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoExTemplate.Common.Identifier", "Common\Identifier\SoExTemplate.Common.Identifier.csproj", "{C43D685E-8181-4E9C-BEE2-530BDB807B00}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoExTemplate.Common.Value", "Common\Value\SoExTemplate.Common.Value.csproj", "{0AD2672A-0DF9-447B-ABB0-BE6348B7DB1E}"
 EndProject
