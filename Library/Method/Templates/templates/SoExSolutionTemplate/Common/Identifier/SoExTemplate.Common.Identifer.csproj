@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+<!--#if( stronglyTypedIds ) -->
+  <ItemGroup>
+    <PackageReference Include="StronglyTypedId" Version="1.0.0-beta08" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="StronglyTypedIds" />
+  </ItemGroup>
+<!--#endif -->
+
 </Project>

@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+<!--#if( vogenValueObjects ) -->
+  <ItemGroup>
+    <PackageReference Include="Vogen" Version="8.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Vogen" />
+  </ItemGroup>
+<!--#endif -->
+
 </Project>

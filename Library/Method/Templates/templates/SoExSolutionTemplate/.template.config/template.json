@@ -13,6 +13,17 @@
       "language": "C#",
       "type": "solution"
     },
-    "sourceName": "SoExTemplate"    
+    "sourceName": "SoExTemplate",
+    "symbols": {
+        "stronglyTypedIds": {
+            "datatype": "boolean",
+            "type": "parameter",
+            "defaultValue": "false"
+        },
+        "vogenValueObjects": {
+            "datatype": "boolean",
+            "type": "parameter",
+            "defaultValue": "false"
+        }
+    }
   }
-  
