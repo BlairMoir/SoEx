@@ -4,7 +4,7 @@ layout: home
 
 hero:  
   image:
-    src: images/SoExLogo.png
+    src: public/SoExLogo.png
     alt: SoEx
 ---
 Documentation for SoEx 

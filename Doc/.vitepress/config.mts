@@ -8,7 +8,7 @@ export default defineConfig({
   ignoreDeadLinks: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    logo: '/SoEx/images/SoExIcon.svg',
+    logo: 'public/SoExIcon.svg',
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Documentation', link: '/tutorial' }
