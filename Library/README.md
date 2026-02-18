@@ -1,3 +1,4 @@
+![SoExLogo](../SoExLogo.png "SoEx Logo")
 # SoEx Library
 
 SoEx is a collection of NuGet packages that allows you to host your POCO service implementations In-Process or using a

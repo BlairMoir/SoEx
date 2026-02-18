@@ -1,3 +1,4 @@
+![SoExLogo](SoExLogo.png "SoEx Logo")
 # Service Oriented Examples (SoEx)
 Example Vertical Swathe of a Method Informed System
 
