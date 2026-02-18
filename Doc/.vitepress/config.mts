@@ -4,10 +4,11 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   base: "/SoEx/",
   title: "SoEx",
-  description: "A VitePress Site",
+  description: "SoEx Documentation",
   ignoreDeadLinks: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    logo: 'images/SoExIcon.svg',
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Documentation', link: '/tutorial' }
