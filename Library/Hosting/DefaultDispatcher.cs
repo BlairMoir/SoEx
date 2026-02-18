@@ -1,0 +1,113 @@
+using System.Diagnostics;
+using System.Reflection;
+using Autofac;
+using Microsoft.Extensions.Logging;
+using SoEx.Abstractions;
+using SoEx.Context;
+
+namespace SoEx.Hosting
+{
+    public class DefaultDispatcher : IDispatcher
+    {
+        readonly ILogger<DefaultDispatcher> _logger;
+        readonly IHostAndClientLookup _subsystemlifeTimeScope;
+        readonly IAmbientContext _callerAmbientContext;
+        readonly IEnumerable<IContextFlowPolicy> _policies;
+        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, IHostAndClientLookup subsystemlifeTimeScope, IAmbientContext callerAmbientContext, IEnumerable<IContextFlowPolicy> policies)
+        {
+            _subsystemlifeTimeScope = subsystemlifeTimeScope;
+            _callerAmbientContext = callerAmbientContext;
+            _policies = policies;
+            _logger = logger;
+        }
+
+        public async Task<InvocationResponse> Dispatch<I>(InvocationRequest invocationRequest) where I : class
+        {
+            ((AmbientContext)_callerAmbientContext).Deserialize(invocationRequest.AmbientContext);
+
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{nameof(DefaultDispatcher)} {typeof(I)} {invocationRequest.MethodName}"))
+            {
+                try
+                {
+                    InvocationResponse invocationResponse = new InvocationResponse();
+
+                    ISubSystemHost subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
+                    using (var requestLifetime = subSystemHost.BeginRequestLifetimeScope())
+                    {
+                        IAmbientContext operationAmbientContext = requestLifetime.Resolve<IAmbientContext>();
+                        FlowIncoming(_callerAmbientContext, operationAmbientContext);
+
+                        var scopeProperties = ScopeProperties(operationAmbientContext);
+                        using (_logger.BeginScope(scopeProperties))
+                        {
+                            AddScopePropertiesToActivity(activity, scopeProperties);
+                            I host = requestLifetime.ResolveNamed<I>("Endpoint");
+                            var method = typeof(I).GetMethod(invocationRequest.MethodName);
+                            Debug.Assert(method is not null);
+                            var result = method.Invoke(host, invocationRequest.Arguments);
+                            Debug.Assert(result is not null);
+
+                            if (invocationRequest.TResult is null)
+                            {
+                                await (Task)result;
+                            }
+                            else
+                            {
+                                var responseObject = await Convert((Task)result);
+                                invocationResponse.Response = responseObject;
+                            }
+                            FlowContextToCaller(_callerAmbientContext, operationAmbientContext);
+                            invocationResponse.AmbientContext = ((AmbientContext)_callerAmbientContext).Serialize();
+
+                            return invocationResponse;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    activity?.SetStatus(ActivityStatusCode.Error);
+                    activity?.AddException(ex);
+                    throw;
+                }
+            }
+        }
+
+        private static async Task<object> Convert(Task task)
+        {
+            await task;
+            var property = task.GetType().GetProperty("Result", BindingFlags.Public | BindingFlags.Instance);
+            if (property == null)
+                throw new InvalidOperationException("Task does not have a return value (" + task.GetType().ToString() + ")");
+            return property.GetValue(task) ?? throw new InvalidOperationException("Result property is null");
+        }
+
+        private static void AddScopePropertiesToActivity(Activity? activity, Dictionary<string, object> scopeProperties)
+        {
+            foreach (var property in scopeProperties)
+            {
+                activity?.AddTag(property.Key, property.Value);
+            }
+        }
+
+        private void FlowIncoming(IAmbientContext caller, IAmbientContext invoked)
+        {
+            foreach (IContextFlowPolicy policy in _policies)
+            {
+                policy.Incoming(caller, invoked);
+            }
+        }
+
+        private void FlowContextToCaller(IAmbientContext caller, IAmbientContext invoked)
+        {
+            foreach (IContextFlowPolicy policy in _policies)
+            {
+                policy.Outgoing(invoked, caller);
+            }
+        }
+
+        private Dictionary<string, object> ScopeProperties(IAmbientContext invokedContext)
+        {
+            return _policies.SelectMany(s => s.ScopeProperties(invokedContext)).ToDictionary();
+        }
+    }
+}

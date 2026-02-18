@@ -1,4 +1,4 @@
-namespace SoEx
+﻿namespace SoEx
 {
     public static class Proxy
     {
@@ -12,7 +12,6 @@ namespace SoEx
             ArgumentNullException.ThrowIfNull(service);
             return CreateProxy<I>();
         }
-
         private static I CreateProxy<I>() where I : class
         {
             return Container.Resolve<I>();

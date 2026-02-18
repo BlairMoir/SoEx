@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Endpoint\SoEx.Endpoint.csproj" />
+    <ProjectReference Include="..\..\Topology\SoEx.Topology.csproj" />
+    <ProjectReference Include="..\..\Abstractions\SoEx.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Diagnostics\SoEx.Diagnostics.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Composition" Version="17.13.41" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all" Version="17.14.15" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" PrivateAssets="all" Version="0.3.242" />
+    <PackageReference Include="StreamJsonRpc" Version="2.22.23" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.10" />
+    <PackageReference Include="System.Text.Json" Version="9.0.10" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageOutputPath>../../../nupkgs</PackageOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
+</Project>

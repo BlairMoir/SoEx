@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Interface\SoExTemplate.ComponentType.ComponentName.Interface.csproj" />
+      <ProjectReference Include="$(SolutionDir)\iFx\Proxy\$(SolutionName).iFx.Proxy.csproj" />
+      <ProjectReference Include="$(SolutionDir)\iFx\Service\$(SolutionName).iFx.Service.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+</Project>

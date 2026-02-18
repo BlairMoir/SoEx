@@ -1,0 +1,25 @@
+
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Blair Moir",
+  "classifications": ["SoEx"],
+  "name": "SoEx Interface Template",
+  "description": "Interface template for use with methodsketch",
+  "groupIdentity": "SoEx.Template.Interface",
+  "identity": "SoEx.Template.MethodInterface",
+  "shortName": "method.interface",
+  "defaultName": "ComponentA",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "SoExTemplate",
+  "symbols": {
+    "enforceDesign": {
+      "datatype": "boolean",
+      "type": "parameter",
+      "defaultValue": "false"
+    }
+  }
+}
+  

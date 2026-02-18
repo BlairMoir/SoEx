@@ -1,28 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <ItemGroup>
-    <PackageReference Include="Autofac.Extras.DynamicProxy" Version="7.1.0" />
-    <PackageReference Include="Castle.Core.AsyncInterceptor" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-    <PackageReference Include="SoEx.Container" Version="0.0.0-alpha-1.3" />
-    <PackageReference Include="SoEx.Context.Abstractions" Version="0.0.0-alpha-1.1" />
-    <PackageReference Include="SoEx.Interceptors.DynamicProxy" Version="0.0.0-alpha-1.3" />
-    <PackageReference Include="SoEx.Context" Version="0.0.0-alpha-1.2" />
+    <ProjectReference Include="..\Topology\SoEx.Topology.csproj" />
+    <ProjectReference Include="..\Hosting\SoEx.Hosting.csproj" />
+    <ProjectReference Include="..\Transport\InProc\SoEx.Transport.InProc.csproj" />    
+    <ProjectReference Include="..\Transport\ThreadChannel\SoEx.Transport.ThreadChannel.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
-    <PackageId>SoEx.Test</PackageId>
-    <Version>0.0.0-alpha-1.3</Version>
-    <Authors>Blair Moir</Authors>
-    <Copyright>Copyright (c) Blair Moir 2024</Copyright>
-    <PackageProjectUrl>https://github.com/BlairMoir/SoEx/tree/primary/Library</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/BlairMoir/SoEx</RepositoryUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
-    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>SoEx.Test</PackageId>
+    <PackageOutputPath>../../nupkgs</PackageOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
+
 </Project>

@@ -1,0 +1,1 @@
+Templates to create solutions and projects using SoEx

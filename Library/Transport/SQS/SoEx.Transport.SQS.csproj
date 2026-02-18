@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>SoEx.Transport.SQS</PackageId>
+    <PackageOutputPath>../../../nupkgs</PackageOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Abstractions\SoEx.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Topology\SoEx.Topology.csproj" />
+    <ProjectReference Include="..\..\Diagnostics\SoEx.Diagnostics.csproj" />
+    <ProjectReference Include="..\..\Endpoint\SoEx.Endpoint.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+  </ItemGroup>
+
+</Project>

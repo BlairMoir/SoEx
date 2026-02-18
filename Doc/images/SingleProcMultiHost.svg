@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="449.35818mm"
+   height="203.62216mm"
+   viewBox="0 0 449.35818 203.62216"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="Triangle-6-3"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135-5-8" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Triangle-0"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135-2" />
+    </marker>
+  </defs>
+  <g
+     id="layer6"
+     transform="translate(35.950261,-278.60626)">
+    <g
+       id="layer5"
+       style="display:inline"
+       transform="translate(-8.7716815,-8.1357295)">
+      <rect
+         style="fill:#737373;fill-opacity:1;stroke:#000000;stroke-width:0.902728;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1-3"
+         width="448.45541"
+         height="202.71941"
+         x="-26.727213"
+         y="287.19336" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="111.83111"
+         y="291.2153"
+         id="text1-9"><tspan
+           id="tspan1-0"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="111.83111"
+           y="291.2153">dotnet Host Process</tspan></text>
+      <rect
+         style="display:inline;fill:#878787;fill-opacity:1;stroke:#000000;stroke-width:0.528162;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1-0-2"
+         width="166.00214"
+         height="187.46494"
+         x="239.46989"
+         y="294.05908" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="299.8819"
+         y="299.09512"
+         id="text1-2-27"><tspan
+           id="tspan1-3-3"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="299.8819"
+           y="299.09512">Microsoft.Extensions.Hosting.IHost</tspan></text>
+      <rect
+         style="display:inline;fill:#9b9b9b;fill-opacity:1;stroke:#000000;stroke-width:0.481122;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1-0-8-9"
+         width="153.70306"
+         height="168.00818"
+         x="245.61943"
+         y="303.08099" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="316.56046"
+         y="306.64093"
+         id="text1-2-2-0"><tspan
+           id="tspan1-3-6-23"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="316.56046"
+           y="306.64093">System</tspan></text>
+      <rect
+         style="display:inline;fill:#bfbfbf;fill-opacity:1;stroke:#000000;stroke-width:0.799305;stroke-dasharray:none;stroke-opacity:1"
+         id="rect2-9"
+         width="137.13866"
+         height="148.75616"
+         x="253.90163"
+         y="310.99841" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="313.4816"
+         y="314.73242"
+         id="text1-2-2-6-7"><tspan
+           id="tspan1-3-6-2-0"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="313.4816"
+           y="314.73242">SubSystem</tspan></text>
+      <rect
+         style="display:inline;fill:#dfdfdf;fill-opacity:1;stroke:#000000;stroke-width:0.749777;stroke-dasharray:none;stroke-opacity:1"
+         id="rect3-5-3"
+         width="113.00465"
+         height="62.827415"
+         x="265.7178"
+         y="385.43918" />
+      <g
+         id="g7-1-9"
+         transform="translate(261.36136,374.15724)"
+         style="display:inline;fill:#ffffff;fill-opacity:1">
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+           id="rect4-2-8"
+           width="39.171688"
+           height="18.708866"
+           x="76.297096"
+           y="51.157059" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.175px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+           x="84.689209"
+           y="55.427155"
+           id="text1-2-2-6-3-7-4-6"><tspan
+             id="tspan1-3-6-2-84-3-6-5"
+             style="fill:#ffffff;fill-opacity:1;stroke-width:0.265"
+             x="84.689209"
+             y="55.427155">MyEngine</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:3.175px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+           x="57.723549"
+           y="59.766064"
+           id="text1-2-2-6-3-7-7-7-7"><tspan
+             id="tspan1-3-6-2-84-3-5-5-6"
+             style="fill:#ffffff;fill-opacity:1;stroke-width:0.265"
+             x="57.723549"
+             y="59.766064">IMyEngine</tspan></text>
+        <path
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.262737;stroke-dasharray:none;stroke-opacity:1"
+           d="M 76.331042,54.66497 H 61.388469"
+           id="path4-50-2" />
+        <circle
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+           id="path5-5-7"
+           cx="60.435589"
+           cy="54.647827"
+           r="1.0076904" />
+      </g>
+      <rect
+         style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.327845;stroke-dasharray:none;stroke-opacity:1"
+         id="rect4-8-2-0"
+         width="60.156322"
+         height="18.646021"
+         x="316.06119"
+         y="394.06323" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="336.90063"
+         y="398.74142"
+         id="text1-2-2-6-3-7-3-0-3"><tspan
+           id="tspan1-3-6-2-84-3-1-7-9"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="336.90063"
+           y="398.74142">IEndpoint</tspan></text>
+      <path
+         style="display:inline;fill:none;stroke:#000000;stroke-width:0.497625;stroke-dasharray:none;stroke-opacity:1"
+         d="M 316.29189,398.98166 H 262.6892"
+         id="path4-5-7-9" />
+      <circle
+         style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         id="path5-8-9-9"
+         cx="261.66324"
+         cy="398.96454"
+         r="1.0076904" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="268.13333"
+         y="404.86929"
+         id="text1-2-2-6-3-7-7-4-7-1"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="268.13333"
+           y="404.86929"
+           id="tspan3">InProcEndpoint&lt;IMyEngine&gt;</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="320.70355"
+         y="409.52869"
+         id="text7-3-2"><tspan
+           id="tspan7-9-3"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="320.70355"
+           y="409.52869">Dispatch&lt;IMyEngine&gt;()</tspan></text>
+      <path
+         style="display:inline;fill:none;stroke:#000000;stroke-width:0.311409;stroke-dasharray:1.86845, 1.86845;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#Triangle-6-3)"
+         d="M 321.8227,427.46039 V 413.33144"
+         id="path7-9-6" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="313.0145"
+         y="391.12378"
+         id="text1-2-2-6-3-4-5"><tspan
+           id="tspan1-3-6-2-84-9-5"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="313.0145"
+           y="391.12378">Component</tspan></text>
+      <rect
+         style="display:inline;fill:#dfdfdf;fill-opacity:1;stroke:#000000;stroke-width:0.749777;stroke-dasharray:none;stroke-opacity:1"
+         id="rect3-1"
+         width="113.00465"
+         height="62.827415"
+         x="265.96863"
+         y="317.2959" />
+      <g
+         id="g7-4"
+         transform="translate(261.6122,306.01397)"
+         style="display:inline;fill:#ffffff;fill-opacity:1">
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+           id="rect4-7"
+           width="39.171688"
+           height="18.708866"
+           x="76.297096"
+           y="51.157059" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.175px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+           x="84.689209"
+           y="55.427155"
+           id="text1-2-2-6-3-7-1"><tspan
+             id="tspan1-3-6-2-84-3-3"
+             style="fill:#ffffff;fill-opacity:1;stroke-width:0.265"
+             x="84.689209"
+             y="55.427155">MyManager</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:3.175px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+           x="57.723549"
+           y="59.766064"
+           id="text1-2-2-6-3-7-7-8"><tspan
+             id="tspan1-3-6-2-84-3-5-4"
+             style="fill:#ffffff;fill-opacity:1;stroke-width:0.265"
+             x="57.723549"
+             y="59.766064">IMyManager</tspan></text>
+        <path
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.262737;stroke-dasharray:none;stroke-opacity:1"
+           d="M 76.331042,54.66497 H 61.388469"
+           id="path4-8" />
+        <circle
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+           id="path5-0"
+           cx="60.435589"
+           cy="54.647827"
+           r="1.0076904" />
+      </g>
+      <rect
+         style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.327845;stroke-dasharray:none;stroke-opacity:1"
+         id="rect4-8-4"
+         width="60.156322"
+         height="18.646021"
+         x="316.31201"
+         y="325.91998" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="337.15146"
+         y="330.59814"
+         id="text1-2-2-6-3-7-3-6"><tspan
+           id="tspan1-3-6-2-84-3-1-0"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="337.15146"
+           y="330.59814">IEndpoint</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="268.38419"
+         y="336.72601"
+         id="text1-2-2-6-3-7-7-4-6"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="268.38419"
+           y="336.72601"
+           id="tspan6-9">InProcEndpoint&lt;IMyManager&gt;</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="320.95438"
+         y="341.38541"
+         id="text7-4"><tspan
+           id="tspan7-1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="320.95438"
+           y="341.38541">Dispatch&lt;IMyManager&gt;()</tspan></text>
+      <path
+         style="display:inline;fill:none;stroke:#000000;stroke-width:0.311409;stroke-dasharray:1.86845, 1.86845;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#Triangle-0)"
+         d="M 322.07354,359.31713 V 345.18818"
+         id="path7-3" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="303.88449"
+         y="322.98053"
+         id="text1-2-2-6-3-78"><tspan
+           id="tspan1-3-6-2-84-8"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="303.88449"
+           y="322.98053">Entry Point Component</tspan></text>
+      <rect
+         style="display:inline;fill:#878787;fill-opacity:1;stroke:#000000;stroke-width:0.528162;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1-0-2-1"
+         width="166.00214"
+         height="187.46494"
+         x="-19.225048"
+         y="296.08459" />
+      <rect
+         style="display:inline;fill:#878787;fill-opacity:1;stroke:#000000;stroke-width:0.312048;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1-0-2-1-8"
+         width="74.440903"
+         height="145.92647"
+         x="154.63043"
+         y="297.58057" />
+      <rect
+         style="display:inline;fill:#9b9b9b;fill-opacity:1;stroke:#000000;stroke-width:0.481122;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1-0-8-9-7"
+         width="153.70306"
+         height="168.00818"
+         x="-13.07552"
+         y="305.10651" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="57.865524"
+         y="308.66644"
+         id="text1-2-2-0-5"><tspan
+           id="tspan1-3-6-23-5"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="57.865524"
+           y="308.66644">ServiceCollection</tspan></text>
+      <rect
+         style="display:inline;fill:#dfdfdf;fill-opacity:1;stroke:#000000;stroke-width:0.422482;stroke-dasharray:none;stroke-opacity:1"
+         id="rect3-1-1"
+         width="113.33194"
+         height="19.890457"
+         x="7.1100492"
+         y="319.15778" />
+      <path
+         style="display:inline;fill:none;stroke:#000000;stroke-width:0.757312;stroke-dasharray:none;stroke-opacity:1"
+         d="M 316.54273,330.8384 H 192.39716"
+         id="path4-5-3" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="40.49765"
+         y="329.91074"
+         id="text1-2-2-6-3-78-2"><tspan
+           id="tspan1-3-6-2-84-8-5"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="40.49765"
+           y="329.91074">Client&lt;IMyManager&gt;</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="78.134033"
+         y="332.22217"
+         id="text1-2-2-6-3-78-2-6"><tspan
+           id="tspan1-3-6-2-84-8-5-5"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="78.134033"
+           y="332.22217">InProcChannel&lt;IMyManager&gt;</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="12.864663"
+         y="323.8909"
+         id="text1-2-2-6-3-78-2-5"><tspan
+           id="tspan1-3-6-2-84-8-5-7"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="12.864663"
+           y="323.8909">Proxy.For&lt;IMyManager&gt;()</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="165.56421"
+         y="309.03653"
+         id="text1-2-2-6-3-78-2-3"><tspan
+           id="tspan1-3-6-2-84-8-5-1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="165.56421"
+           y="309.03653">InProcLIsteners</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="165.56421"
+           y="312.93179"
+           id="tspan2">.ConcurrentDictionary&lt;Uri, object&gt;</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         x="38.27317"
+         y="302.07465"
+         id="text1-2-27-6"><tspan
+           id="tspan1-3-3-0"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.1162px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.265"
+           x="38.27317"
+           y="302.07465">Microsoft.Extensions.Hosting.IHost</tspan></text>
+      <circle
+         style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+         id="path5-8-2"
+         cx="190.84631"
+         cy="330.82126"
+         r="1.0076904" />
+      <path
+         style="fill:#ffffff;stroke:#000000;stroke-width:0.261527;marker-end:url(#Triangle-0)"
+         d="m 120.16394,331.16784 67.24568,-0.59657"
+         id="path2" />
+    </g>
+  </g>
+</svg>

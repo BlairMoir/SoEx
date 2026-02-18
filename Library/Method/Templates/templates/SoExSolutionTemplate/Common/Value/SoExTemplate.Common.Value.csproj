@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+<!--#if( vogenValueObjects ) -->
+  <ItemGroup>
+    <PackageReference Include="Vogen" Version="8.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Vogen" />
+  </ItemGroup>
+<!--#endif -->
+
+</Project>
