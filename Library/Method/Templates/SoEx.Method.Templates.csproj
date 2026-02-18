@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageType>Template</PackageType>
-    <PackageVersion>1.0.0-alpha-2.2.2</PackageVersion>
+    <PackageVersion>1.0.0-alpha-2.2.3</PackageVersion>
     <PackageId>SoEx.Method.Templates</PackageId>
     <Title>SoEx Method Templates</Title>
     <Authors>Blair Moir</Authors>
@@ -18,6 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="templates\SoExSolutionTemplate\Common\Identifier\SoExTemplateCommonIdentifier.cs" />
+    <Compile Include="templates\SoExSolutionTemplate\Common\Value\SoExTemplateCommonValue.cs" />
     <Compile Include="templates\SoExSolutionTemplate\iFx\Hosting\InProc\InProcHostApplications.cs" />
     <Compile Include="templates\SoExSolutionTemplate\iFx\Hosting\InProc\Test\TestClient.cs" />
     <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
