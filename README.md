@@ -1,4 +1,7 @@
 ![SoExLogo](Doc/public/SoExLogo.png "SoEx Logo")
+
+* [SoEx Tutorial](https://blairmoir.github.io/SoEx/tutorial.html)
+
 # Service Oriented Examples (SoEx)
 Example Vertical Swathe of a Method Informed System
 
