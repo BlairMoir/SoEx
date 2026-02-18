@@ -4,6 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   base: "/SoEx/",
   title: "SoEx",
+  head: [['link', { rel: 'icon', href: '/favicon.png'}]],
   description: "SoEx Documentation",
   ignoreDeadLinks: true,
   themeConfig: {
@@ -22,7 +23,6 @@ export default defineConfig({
           { text: 'How To', link: '/howto' },
           { text: 'Reference', link: '/reference' },
           { text: 'Explanation', link: '/explanation' }
-
         ]
       }
     ],
