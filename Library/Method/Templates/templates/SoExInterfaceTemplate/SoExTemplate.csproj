@@ -18,7 +18,7 @@
 <!--#if( enforceDesign ) -->
   <ItemGroup>
     <PackageReference Include="System.ServiceModel.Primitives" Version="8.0.0" />
-      <PackageReference Include="SoEx.Method.Analyzer" Version="1.0.1">
+      <PackageReference Include="SoEx.Method.Analyzer" Version="1.0.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime;build;native;analyzers;buildtransitive</IncludeAssets>
       </PackageReference>
