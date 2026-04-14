@@ -8,8 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
   </ItemGroup>
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+  <PropertyGroup>    
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageOutputPath>../../../nupkgs</PackageOutputPath>

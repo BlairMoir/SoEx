@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+  <PropertyGroup>    
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>SoEx.Transport.SQS</PackageId>
@@ -19,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SQS" Version="4.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.2.25" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
   </ItemGroup>
 
 </Project>

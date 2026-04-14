@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+  <PropertyGroup>    
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>SoEx.Transport.SBQueue</PackageId>
@@ -20,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
   </ItemGroup>
 
 </Project>

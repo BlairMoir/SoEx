@@ -10,7 +10,7 @@
     <PackageReference Include="Autofac" Version="8.4.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />
-    <PackageReference Include="SoEx.Topology" Version="0.0.0-alpha-2.1" />
+    <PackageReference Include="SoEx.Topology" Version="0.0.0-alpha-2.3" />
   </ItemGroup>
 
 </Project>

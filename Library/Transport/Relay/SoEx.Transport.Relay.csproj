@@ -6,9 +6,9 @@
     <ProjectReference Include="..\..\Diagnostics\SoEx.Diagnostics.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Relay" Version="3.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Azure.Relay" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
   </ItemGroup>
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>

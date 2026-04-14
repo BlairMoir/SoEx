@@ -8,11 +8,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+  <PropertyGroup>    
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>SoEx.Transport.ThreadChannel</PackageId>

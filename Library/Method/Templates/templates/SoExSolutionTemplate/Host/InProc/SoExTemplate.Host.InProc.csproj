@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SoEx.Container" Version="0.0.0-alpha-2.1" />
+    <PackageReference Include="SoEx.Container" Version="0.0.0-alpha-2.3" />
   </ItemGroup>
 
   <ItemGroup>

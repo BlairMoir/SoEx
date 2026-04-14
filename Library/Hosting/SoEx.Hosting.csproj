@@ -9,11 +9,11 @@
     <ProjectReference Include="..\Context\Common\SoEx.Context.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="8.4.0" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Autofac" Version="9.1.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="Autofac.Extras.DynamicProxy" Version="7.1.0" />
     <PackageReference Include="Castle.Core.AsyncInterceptor" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
   <PropertyGroup>

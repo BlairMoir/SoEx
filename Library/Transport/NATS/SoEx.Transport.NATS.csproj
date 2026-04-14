@@ -6,10 +6,9 @@
     <ProjectReference Include="..\..\Topology\SoEx.Topology.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NATS.Net" Version="2.6.11" />
+    <PackageReference Include="NATS.Net" Version="2.7.3" />
   </ItemGroup>
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+  <PropertyGroup>    
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageOutputPath>../../../nupkgs</PackageOutputPath>
