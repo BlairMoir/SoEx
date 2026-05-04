@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
-using SoEx.Abstractions;
 using SoEx.Context;
+using SoEx.Exceptions;
 using SoEx.Hosting;
 using SoEx.Topology;
 using SoEx.Transport.InProc;
@@ -15,10 +15,16 @@ namespace SoEx.Test
 
         Type[]? _policies;
         Type[]? _generics;
+        TestExceptionMode _testExceptionMode = new TestExceptionMode();
 
         public void DefaultConfiguration(SoEx.Topology.System topology)
         {
             _topology = topology;
+        }
+
+        public void SoExTestExceptionMode(ExceptionMode exceptionMode)
+        {
+            _testExceptionMode =  new TestExceptionMode(){ Mode = exceptionMode };
         }
 
         public void DefaultPolicies(Type[] policies)
@@ -73,6 +79,7 @@ namespace SoEx.Test
             builder.RegisterGeneric(typeof(UnsafeThreadChannelChannel<>)).As(typeof(UnsafeThreadChannelChannel<>));
             builder.RegisterGeneric(typeof(UnsafeThreadEventChannel<>)).As(typeof(UnsafeThreadEventChannel<>)).SingleInstance();
             builder.RegisterType<InProcListeners>().SingleInstance().AsSelf();
+            builder.RegisterInstance(_testExceptionMode).AsSelf();
 
             if (_policies is not null)
             {

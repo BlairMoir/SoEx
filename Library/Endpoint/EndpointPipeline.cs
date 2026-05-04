@@ -13,11 +13,13 @@ namespace SoEx.Endpoint
     {
         readonly IHostAndClientLookup _subsystemlifeTimeScope;
         readonly ILogger<EndpointPipeline> _logger;
+        readonly ExceptionMode _exceptionMode;
 
-        public EndpointPipeline(ILogger<EndpointPipeline> logger, IHostAndClientLookup subsystemlifeTimeScope)
+        public EndpointPipeline(ILogger<EndpointPipeline> logger, IHostAndClientLookup subsystemlifeTimeScope, TestExceptionMode? testExceptionMode = null)
         {
             _subsystemlifeTimeScope = subsystemlifeTimeScope;
             _logger = logger;
+            _exceptionMode = testExceptionMode?.Mode ?? ExceptionMode.Production;
         }
 
         public async Task<byte[]> ServicePipeLine<I>(byte[] payload, IPipeline? pipeline, Activity? parentActivity) where I : class
@@ -44,6 +46,10 @@ namespace SoEx.Endpoint
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error executing service pipeline");
+
+                if (_exceptionMode == ExceptionMode.Bare)
+                    throw;
+
                 throw new ServiceException("Error executing service pipeline", ex);
             }
         }

@@ -16,11 +16,13 @@ namespace SoEx.Channel
     {
         readonly ILifetimeScope _scope;
         readonly ILogger<ChannelPipeline> _logger;
+        readonly ExceptionMode _exceptionMode;
 
-        public ChannelPipeline(ILogger<ChannelPipeline> logger, ILifetimeScope scope)
+        public ChannelPipeline(ILogger<ChannelPipeline> logger, ILifetimeScope scope, TestExceptionMode? testExceptionMode = null)
         {
             _scope = scope;
             _logger = logger;
+            _exceptionMode = testExceptionMode?.Mode ?? ExceptionMode.Production;
         }
 
         public async Task<InvocationResponse> ClientPipeLine(InvocationRequest request, IChannel channel, Activity? parentActivity)
@@ -42,12 +44,25 @@ namespace SoEx.Channel
                 Debug.Assert(deserializedResponse is not null);
                 return deserializedResponse;
             }
-            catch (ServiceException)
+            catch (ServiceException ex)
             {
+                if (_exceptionMode == ExceptionMode.Bare)
+                    throw;
+
+                if(_exceptionMode == ExceptionMode.Wrapped)
+                    throw new ClientException("Error during service invocation", ex);
+
+                // fall through equivalent to
+                // if(_exceptionMode == ExceptionMode.Production)
                 throw new ClientException("Error during service invocation");
             }
             catch (Exception ex)
             {
+                if (_exceptionMode == ExceptionMode.Bare)
+                    throw;
+
+                // fall through equivalent to
+                // if(_exceptionOptions.Mode == ExceptionMode.Production || _exceptionOptions.Mode == ExceptionMode.Wrapped)
                 throw new ClientException("Error communicationg with service", ex);
             }
         }
