@@ -30,7 +30,7 @@
         <CompilerVisibleProperty Include="ProjectName" />
     </ItemGroup>
     <ItemGroup>
-        <AdditionalFiles Include="$(SolutionDir)\modelanalyzer.json" />
+        <AdditionalFiles Include="..\..\..\..\modelanalyzer.json" />
     </ItemGroup>
     <PropertyGroup>
         <WarningsAsErrors>PCV001</WarningsAsErrors>
