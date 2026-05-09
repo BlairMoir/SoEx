@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SoEx.Proxy" Version="0.0.0-alpha-2.3" />
+    <PackageReference Include="SoEx.Proxy" Version="0.0.0-alpha-2.4" />
   </ItemGroup>
 
 </Project>
