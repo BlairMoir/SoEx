@@ -82,7 +82,11 @@ namespace SoEx.Hosting.Default
             InvocationContext invocationContext = new InvocationContext(typeof(I), invocationRequest.MethodName);
             FrameworkContext operationFrameworkContext = (FrameworkContext)requestLifetime.Resolve<IFrameworkContext>();
             operationFrameworkContext.SetOrReplace(invocationContext);
-            if (!_callerFrameworkContext.Contains<EntryContext>())
+            if (_callerFrameworkContext.Contains<EntryContext>())
+            {
+                operationFrameworkContext.SetOrReplace(_callerFrameworkContext.Get<EntryContext>());
+            }
+            else
             {
                 operationFrameworkContext.SetOrReplace(new EntryContext(invocationContext));
             }
