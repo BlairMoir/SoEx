@@ -65,7 +65,7 @@ namespace SoEx.Hosting
             container.RegisterType<TransportFactory>().AsSelf();
             container.RegisterType(pipeline.MessageSerializer).As<IMessageSerializer>();
             container.RegisterType(pipeline.Dispatcher).As<IDispatcher>();
-            container.RegisterType(pipeline.TelemeteryConfidentiality).As<ITelemetryConfidentiality>();
+            container.RegisterType(pipeline.TelemetryConfidentiality).As<ITelemetryConfidentiality>();
             container.RegisterType(pipeline.MessageProtection).As<IMessageProtection>();
             container.RegisterType<AmbientContext>().As<IAmbientContext>().InstancePerLifetimeScope();
             container.RegisterType<FrameworkContext>().As<IFrameworkContext>().InstancePerLifetimeScope();
