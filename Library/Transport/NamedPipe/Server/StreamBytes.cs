@@ -14,8 +14,10 @@ public class StreamBytes
 
     public byte[] ReadBytes()
     {
-        Span<byte> header = new byte[4];
-        int length = BinaryPrimitives.ReadInt16BigEndian(header);
+        Span<byte> header = stackalloc byte[4];
+        ioStream.ReadExactly(header);
+        int length = BinaryPrimitives.ReadInt32BigEndian(header);
+
         if ((uint)length > MaxBytesPerMessage)
         {
             throw new InvalidDataException("Named pipe payload too large");
@@ -33,7 +35,7 @@ public class StreamBytes
         {
             throw new InvalidDataException("Named pipe payload too large");
         }
-        Span<byte> header = new byte[4];
+        Span<byte> header = stackalloc byte[4];
         BinaryPrimitives.WriteInt32BigEndian(header, bytes.Length);
         ioStream.Write(header);
         ioStream.Write(bytes, 0, bytes.Length);
