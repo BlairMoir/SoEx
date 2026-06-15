@@ -12,13 +12,15 @@ namespace SoEx.Hosting.Default
         readonly ILogger<DefaultDispatcher> _logger;
         readonly IHostAndClientLookup _subsystemlifeTimeScope;
         readonly IAmbientContext _callerAmbientContext;
+        readonly IFrameworkContext _callerFrameworkContext;
         readonly IEnumerable<IContextFlowPolicy> _policies;
         readonly ITelemetryConfidentiality _telemetryConfidentiality;
 
-        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, IHostAndClientLookup subsystemlifeTimeScope, IAmbientContext callerAmbientContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies)
+        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, IHostAndClientLookup subsystemlifeTimeScope, IAmbientContext callerAmbientContext,IFrameworkContext callerFrameworkContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies)
         {
             _subsystemlifeTimeScope = subsystemlifeTimeScope;
             _callerAmbientContext = callerAmbientContext;
+            _callerFrameworkContext = callerFrameworkContext;
             _policies = policies;
             _logger = logger;
             _telemetryConfidentiality = telemetryConfidentiality;
@@ -33,12 +35,13 @@ namespace SoEx.Hosting.Default
                 try
                 {
                     InvocationResponse invocationResponse = new InvocationResponse();
-
                     ISubSystemHost subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
                     using (var requestLifetime = subSystemHost.BeginRequestLifetimeScope())
                     {
+                        IncomingFrameworkContext<I>(invocationRequest, requestLifetime);
                         IAmbientContext operationAmbientContext = requestLifetime.Resolve<IAmbientContext>();
                         FlowIncoming(_callerAmbientContext, operationAmbientContext);
+
                         var scopeProperties = ScopeProperties(operationAmbientContext);
                         using (_logger.BeginScope(scopeProperties))
                         {
@@ -60,7 +63,6 @@ namespace SoEx.Hosting.Default
                             }
                             FlowContextToCaller(_callerAmbientContext, operationAmbientContext);
                             invocationResponse.AmbientContext = ((AmbientContext)_callerAmbientContext).Serialize();
-
                             return invocationResponse;
                         }
                     }
@@ -70,6 +72,19 @@ namespace SoEx.Hosting.Default
                     activity?.SetStatus(ActivityStatusCode.Error);
                     throw;
                 }
+            }
+        }
+
+        private void IncomingFrameworkContext<I>(InvocationRequest invocationRequest, ILifetimeScope requestLifetime)
+            where I : class
+        {
+            ((FrameworkContext)_callerFrameworkContext).Deserialize(invocationRequest.FrameworkContext);
+            InvocationContext invocationContext = new InvocationContext(typeof(I), invocationRequest.MethodName);
+            FrameworkContext operationFrameworkContext = (FrameworkContext)requestLifetime.Resolve<IFrameworkContext>();
+            operationFrameworkContext.SetOrReplace(invocationContext);
+            if (!_callerFrameworkContext.Contains<EntryContext>())
+            {
+                operationFrameworkContext.SetOrReplace(new EntryContext(invocationContext));
             }
         }
 

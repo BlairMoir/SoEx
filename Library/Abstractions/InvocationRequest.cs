@@ -9,5 +9,6 @@ namespace SoEx.Abstractions
         public required string MethodName { get; set; }
         public object[] Arguments { get; set; } = [];
         public byte[]? AmbientContext { get; set; }
+        public byte[]? FrameworkContext { get; set; }
     }
 }

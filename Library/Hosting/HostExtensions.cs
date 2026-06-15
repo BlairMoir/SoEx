@@ -68,6 +68,7 @@ namespace SoEx.Hosting
             container.RegisterType(pipeline.TelemeteryConfidentiality).As<ITelemetryConfidentiality>();
             container.RegisterType(pipeline.MessageProtection).As<IMessageProtection>();
             container.RegisterType<AmbientContext>().As<IAmbientContext>().InstancePerLifetimeScope();
+            container.RegisterType<FrameworkContext>().As<IFrameworkContext>().InstancePerLifetimeScope();
         }
 
         private static void RegisterSystem(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology)

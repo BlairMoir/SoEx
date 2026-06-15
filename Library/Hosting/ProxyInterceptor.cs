@@ -10,12 +10,15 @@ namespace SoEx.Hosting
     public class ProxyInterceptor : AsyncInterceptorBase, IInterceptor
     {
         TransportFactory _transportFactory;
-        AmbientContext _context;
+        AmbientContext _ambientContext;
+        FrameworkContext _frameworkContext;
         IChannelPipeline _channelPipline;
-        public ProxyInterceptor(TransportFactory transportFactory, IAmbientContext context, IChannelPipeline channelPipline)
+
+        public ProxyInterceptor(TransportFactory transportFactory, IAmbientContext ambientContext, IFrameworkContext frameworkContext , IChannelPipeline channelPipline)
         {
             _transportFactory = transportFactory;
-            _context = (AmbientContext)context;
+            _ambientContext = (AmbientContext)ambientContext;
+            _frameworkContext = (FrameworkContext)frameworkContext;
             _channelPipline = channelPipline;
         }
 
@@ -32,9 +35,9 @@ namespace SoEx.Hosting
                 {
                     Type targetInterface = invocation.Method.DeclaringType ?? throw new ArgumentException("Proxy Interceptor requires an interface");
                     IChannel channel = _transportFactory.Client(targetInterface) as IChannel ?? throw new NullReferenceException();
-                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, AmbientContext = _context.Serialize() };
+                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, AmbientContext = _ambientContext.Serialize(), FrameworkContext =  _frameworkContext.Serialize() };
                     var invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
-                    _context.Deserialize(invocationResponse.AmbientContext);
+                    _ambientContext.Deserialize(invocationResponse.AmbientContext);
                 }
                 catch
                 {
@@ -51,9 +54,9 @@ namespace SoEx.Hosting
                 {
                     Type targetInterface = invocation.Method.DeclaringType ?? throw new ArgumentException("Proxy Interceptor requires an interface");
                     IChannel channel = _transportFactory.Client(targetInterface) as IChannel ?? throw new NullReferenceException();
-                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, TResult = typeof(TResult), AmbientContext = _context.Serialize() };
+                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, TResult = typeof(TResult), AmbientContext = _ambientContext.Serialize(), FrameworkContext =  _frameworkContext.Serialize() };
                     var invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
-                    _context.Deserialize(invocationResponse.AmbientContext);
+                    _ambientContext.Deserialize(invocationResponse.AmbientContext);
                     return (TResult)invocationResponse.Response!;
                 }
                 catch
