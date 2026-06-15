@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using SoEx.Abstractions;
 using SoEx.Context;
 
-namespace SoEx.Hosting
+namespace SoEx.Hosting.Default
 {
     public class DefaultDispatcher : IDispatcher
     {
@@ -13,12 +13,15 @@ namespace SoEx.Hosting
         readonly IHostAndClientLookup _subsystemlifeTimeScope;
         readonly IAmbientContext _callerAmbientContext;
         readonly IEnumerable<IContextFlowPolicy> _policies;
-        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, IHostAndClientLookup subsystemlifeTimeScope, IAmbientContext callerAmbientContext, IEnumerable<IContextFlowPolicy> policies)
+        readonly ITelemetryConfidentiality _telemetryConfidentiality;
+
+        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, IHostAndClientLookup subsystemlifeTimeScope, IAmbientContext callerAmbientContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies)
         {
             _subsystemlifeTimeScope = subsystemlifeTimeScope;
             _callerAmbientContext = callerAmbientContext;
             _policies = policies;
             _logger = logger;
+            _telemetryConfidentiality = telemetryConfidentiality;
         }
 
         public async Task<InvocationResponse> Dispatch<I>(InvocationRequest invocationRequest) where I : class
@@ -36,7 +39,6 @@ namespace SoEx.Hosting
                     {
                         IAmbientContext operationAmbientContext = requestLifetime.Resolve<IAmbientContext>();
                         FlowIncoming(_callerAmbientContext, operationAmbientContext);
-
                         var scopeProperties = ScopeProperties(operationAmbientContext);
                         using (_logger.BeginScope(scopeProperties))
                         {
@@ -66,7 +68,6 @@ namespace SoEx.Hosting
                 catch (Exception ex)
                 {
                     activity?.SetStatus(ActivityStatusCode.Error);
-                    activity?.AddException(ex);
                     throw;
                 }
             }
@@ -107,7 +108,9 @@ namespace SoEx.Hosting
 
         private Dictionary<string, object> ScopeProperties(IAmbientContext invokedContext)
         {
-            return _policies.SelectMany(s => s.ScopeProperties(invokedContext)).ToDictionary();
+            var flattenedProperties = _policies.SelectMany(s => s.ScopeProperties(invokedContext));
+            var protectedProperties = flattenedProperties.ToDictionary( kvp => kvp.Key, kvp => (object)_telemetryConfidentiality.Protect(kvp.Value));
+            return protectedProperties;
         }
     }
 }

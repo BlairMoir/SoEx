@@ -11,6 +11,8 @@ namespace SoEx.Topology
     {
         public Type Dispatcher { get; }
         public Type MessageSerializer { get; }
+        public Type TelemeteryConfidentiality { get; }
+        public Type MessageProtection { get; }
         public Type[] ServiceInterceptors { get; }
     }
 }

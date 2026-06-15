@@ -14,12 +14,14 @@ namespace SoEx.Endpoint
         readonly IHostAndClientLookup _subsystemlifeTimeScope;
         readonly ILogger<EndpointPipeline> _logger;
         readonly ExceptionMode _exceptionMode;
+        readonly ITelemetryConfidentiality _telemetryConfidentiality;
 
-        public EndpointPipeline(ILogger<EndpointPipeline> logger, IHostAndClientLookup subsystemlifeTimeScope, TestExceptionMode? testExceptionMode = null)
+        public EndpointPipeline(ILogger<EndpointPipeline> logger, IHostAndClientLookup subsystemlifeTimeScope, ITelemetryConfidentiality  telemetryConfidentiality, TestExceptionMode? testExceptionMode = null)
         {
             _subsystemlifeTimeScope = subsystemlifeTimeScope;
             _logger = logger;
             _exceptionMode = testExceptionMode?.Mode ?? ExceptionMode.Production;
+            _telemetryConfidentiality = telemetryConfidentiality;
         }
 
         public async Task<byte[]> ServicePipeLine<I>(byte[] payload, IPipeline? pipeline, Activity? parentActivity) where I : class
@@ -45,8 +47,8 @@ namespace SoEx.Endpoint
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error executing service pipeline");
-
+                _logger.LogError("Error executing service pipeline: {ExceptionType}, {ExceptionStackTrace}", ex.GetType(), ex.StackTrace);
+                _logger.LogDebug("{ExceptionMessage}", _telemetryConfidentiality.Protect(ex.Message));
                 if (_exceptionMode == ExceptionMode.Bare)
                     throw;
 

@@ -10,6 +10,7 @@ using SoEx.Abstractions;
 using SoEx.Channel;
 using SoEx.Context;
 using SoEx.Endpoint;
+using SoEx.Hosting.Default;
 using SoEx.Topology;
 
 namespace SoEx.Hosting
@@ -64,6 +65,8 @@ namespace SoEx.Hosting
             container.RegisterType<TransportFactory>().AsSelf();
             container.RegisterType(pipeline.MessageSerializer).As<IMessageSerializer>();
             container.RegisterType(pipeline.Dispatcher).As<IDispatcher>();
+            container.RegisterType(pipeline.TelemeteryConfidentiality).As<ITelemetryConfidentiality>();
+            container.RegisterType(pipeline.MessageProtection).As<IMessageProtection>();
             container.RegisterType<AmbientContext>().As<IAmbientContext>().InstancePerLifetimeScope();
         }
 

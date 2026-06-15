@@ -1,15 +1,18 @@
 using Castle.DynamicProxy;
 using Microsoft.Extensions.Logging;
+using SoEx.Abstractions;
 
 namespace SoEx.Hosting
 {
     public class ErrorInterceptor : AsyncInterceptorBase, IInterceptor
     {
         private readonly ILogger<ErrorInterceptor> _logger;
+        private readonly ITelemetryConfidentiality _telemetryConfidentiality;
 
-        public ErrorInterceptor(ILogger<ErrorInterceptor> logger)
+        public ErrorInterceptor(ILogger<ErrorInterceptor> logger, ITelemetryConfidentiality  telemetryConfidentiality)
         {
             _logger = logger;
+            _telemetryConfidentiality =  telemetryConfidentiality;
         }
 
         public void Intercept(IInvocation invocation)
@@ -25,7 +28,8 @@ namespace SoEx.Hosting
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "{ExceptionMessage}", ex.Message);
+                _logger.LogError("{ExceptionType}, {ExceptionStackTrace}", ex.GetType(), ex.StackTrace);
+                _logger.LogDebug("{ExceptionMessage}", _telemetryConfidentiality.Protect(ex.Message));
                 throw;
             }
         }
@@ -39,7 +43,8 @@ namespace SoEx.Hosting
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "{ExceptionMessage}", ex.Message);
+                _logger.LogError("{ExceptionType}, {ExceptionStackTrace}", ex.GetType(), ex.StackTrace);
+                _logger.LogDebug("{ExceptionMessage}", _telemetryConfidentiality.Protect(ex.Message));
                 throw;
             }
         }
