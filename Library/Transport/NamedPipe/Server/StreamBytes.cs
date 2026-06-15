@@ -1,8 +1,11 @@
 
+using System.Buffers.Binary;
+
 namespace SoEx.Transport.NamedPipe;
 public class StreamBytes
 {
     private Stream ioStream;
+    private const int MaxBytesPerMessage = 16 * 1024 * 1024;
 
     public StreamBytes(Stream ioStream)
     {
@@ -11,27 +14,31 @@ public class StreamBytes
 
     public byte[] ReadBytes()
     {
-        int len;
-        len = ioStream.ReadByte() * 256;
-        len += ioStream.ReadByte();
-        var inBuffer = new byte[len];
-        ioStream.ReadExactly(inBuffer, 0, len);
+        Span<byte> header = new byte[4];
+        int length = BinaryPrimitives.ReadInt16BigEndian(header);
+        if ((uint)length > MaxBytesPerMessage)
+        {
+            throw new InvalidDataException("Named pipe payload too large");
+        }
+
+        byte[] inBuffer = new byte[length];
+        ioStream.ReadExactly(inBuffer, 0, length);
 
         return inBuffer;
     }
 
     public int WriteBytes(byte[] bytes)
     {
-        int len = bytes.Length;
-        if (len > UInt16.MaxValue)
+        if (bytes.Length > MaxBytesPerMessage)
         {
-            len = (int)UInt16.MaxValue;
+            throw new InvalidDataException("Named pipe payload too large");
         }
-        ioStream.WriteByte((byte)(len / 256));
-        ioStream.WriteByte((byte)(len & 255));
-        ioStream.Write(bytes, 0, len);
+        Span<byte> header = new byte[4];
+        BinaryPrimitives.WriteInt32BigEndian(header, bytes.Length);
+        ioStream.Write(header);
+        ioStream.Write(bytes, 0, bytes.Length);
         ioStream.Flush();
 
-        return bytes.Length + 2;
+        return bytes.Length + 4;
     }
 }
