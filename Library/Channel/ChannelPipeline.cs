@@ -31,16 +31,20 @@ namespace SoEx.Channel
             {
                 Debug.Assert(channel is not null);
                 Type serializerType = channel.Pipeline?.MessageSerializer ?? typeof(IMessageSerializer);
+                Type protectorType = channel.Pipeline?.MessageProtection ?? typeof(IMessageProtection);
+                var protector =  (IMessageProtection)_scope.Resolve(protectorType);
                 var serializer = (IMessageSerializer)_scope.Resolve(serializerType);
-                var serializedRequest = serializer.Serialize(request);
-                var response = await channel.InvokeResult(serializedRequest);
+                byte[] serializedRequest = serializer.Serialize(request);
+                byte[] protectedRequest = await protector.Protect(serializedRequest);
+                byte[] protectedResponse = await channel.InvokeResult(protectedRequest);
+                byte[] serializedResponse = await protector.Unprotect(protectedResponse);
 
-                if (response.Length == 0)
+                if (serializedResponse.Length == 0)
                 {
                     return new InvocationResponse();
                 }
 
-                var deserializedResponse = serializer.Deserialize<InvocationResponse>(response);
+                var deserializedResponse = serializer.Deserialize<InvocationResponse>(serializedResponse);
                 Debug.Assert(deserializedResponse is not null);
                 return deserializedResponse;
             }

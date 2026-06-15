@@ -15,6 +15,7 @@ namespace SoEx.Endpoint
         readonly ILogger<EndpointPipeline> _logger;
         readonly ExceptionMode _exceptionMode;
         readonly ITelemetryConfidentiality _telemetryConfidentiality;
+        readonly IMessageProtection _messageProtection;
 
         public EndpointPipeline(ILogger<EndpointPipeline> logger, IHostAndClientLookup subsystemlifeTimeScope, ITelemetryConfidentiality  telemetryConfidentiality, TestExceptionMode? testExceptionMode = null)
         {
@@ -30,18 +31,23 @@ namespace SoEx.Endpoint
             {
                 Type dispatcherType = pipeline?.Dispatcher ?? typeof(IDispatcher);
                 Type serializerType = pipeline?.MessageSerializer ?? typeof(IMessageSerializer);
+                Type protectorType = pipeline?.MessageProtection ?? typeof(IMessageProtection);
                 var subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
                 using (Autofac.ILifetimeScope requestScope = subSystemHost.BeginRequestLifetimeScope())
                 {
                     var dispatcher = (IDispatcher)requestScope.Resolve(dispatcherType);
                     var serializer = (IMessageSerializer)requestScope.Resolve(serializerType);
+                    var protector = (IMessageProtection)requestScope.Resolve(protectorType);
 
-                    InvocationRequest? request = serializer.Deserialize<InvocationRequest>(payload);
+                    byte[] serializedRequest = await protector.Unprotect(payload);
+                    InvocationRequest? request = serializer.Deserialize<InvocationRequest>(serializedRequest);
                     using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(EndpointPipeline)}", ActivityKind.Server, request?.ActivityId))
                     {
                         Debug.Assert(request is not null);
                         var response = await dispatcher.Dispatch<I>(request);
-                        return serializer.Serialize(response);
+                        byte[] serializedResponse = serializer.Serialize(response);
+                        byte[] protectedResponse = await protector.Protect(serializedResponse);
+                        return protectedResponse;
                     }
                 }
             }
