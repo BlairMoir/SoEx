@@ -11,7 +11,7 @@ namespace SoEx.Transport.ASBTopic
         {
             SubSystem = subsystem;
             Contract = typeof(I);
-            Transport = new ASBTopicEventTransport() { Address = new Uri($"soex.nats://{typeof(I)}") };
+            Transport = new ASBTopicEventTransport() { Address = new Uri(config.ConnectionString) };
             _topicConfig = config;
         }
 

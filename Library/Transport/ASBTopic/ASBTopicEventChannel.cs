@@ -23,9 +23,9 @@ namespace SoEx.Transport.ASBTopic
 
         public void Bind(Binding binding)
         {
-            if (binding is ASBTopicEventBinding<I> natsEventBinding)
+            if (binding is ASBTopicEventBinding<I> topicEventBinding)
             {
-                _binding = natsEventBinding;
+                _binding = topicEventBinding;
                 _client = new ServiceBusClient(_binding.Config.ConnectionString);
                 _sender = _client.CreateSender(ASBTopicSubject.For<I>());
             }

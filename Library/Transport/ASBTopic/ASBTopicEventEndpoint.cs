@@ -32,9 +32,9 @@ namespace SoEx.Transport.ASBTopic
 
         public void Bind(Binding binding, string componentName)
         {
-            if (binding is ASBTopicEventBinding<I> namedPipeBinding)
+            if (binding is ASBTopicEventBinding<I> topicEventBinding)
             {
-                _binding = namedPipeBinding;
+                _binding = topicEventBinding;
                 _subscriber = componentName;
             }
         }
@@ -66,14 +66,26 @@ namespace SoEx.Transport.ASBTopic
 
         private async Task ConfigureServiceBus(string connectionString, string topicName)
         {
-            var adminClient = new ServiceBusAdministrationClient(connectionString);
-            if (!await adminClient.TopicExistsAsync(topicName))
+            try
             {
-                await adminClient.CreateTopicAsync(topicName);
+                var adminClient = new ServiceBusAdministrationClient(connectionString);
+                if (!await adminClient.TopicExistsAsync(topicName))
+                {
+                    await adminClient.CreateTopicAsync(topicName);
+                }
+
+                if (!await adminClient.SubscriptionExistsAsync(topicName, _subscriber))
+                {
+                    await adminClient.CreateSubscriptionAsync(topicName, _subscriber);
+                }
             }
-            if (!await adminClient.SubscriptionExistsAsync(topicName, _subscriber))
+            catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
             {
-                await adminClient.CreateSubscriptionAsync(topicName, _subscriber);
+                _logger.LogDebug("Topic/Subscription already exists topic:{Topic} subscriber:{Subscriber}",topicName, _subscriber);
+            }
+            catch (ServiceBusException ex)
+            {
+                _logger.LogWarning("Could not check Topic/Subscription exists topic:{Topic} subscriber:{Subscriber} reason:{Reason} ", topicName, _subscriber, ex.Reason);
             }
         }
 
