@@ -58,6 +58,11 @@ namespace SoEx.Hosting.Default
                             var result = method.Invoke(host, arguments);
                             Debug.Assert(result is not null);
 
+                            if (result is not Task)
+                            {
+                                throw new NotSupportedException("SoEx contracts must be async");
+                            }
+
                             if (invocationRequest.TResult is null)
                             {
                                 await (Task)result;
@@ -73,7 +78,7 @@ namespace SoEx.Hosting.Default
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     activity?.SetStatus(ActivityStatusCode.Error);
                     throw;

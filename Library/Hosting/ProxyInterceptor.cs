@@ -24,6 +24,14 @@ namespace SoEx.Hosting
 
         public void Intercept(IInvocation invocation)
         {
+            var returnType = invocation.Method.ReturnType;
+            if (
+                returnType != typeof(Task) &&
+                !(returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>)))
+            {
+                throw new NotSupportedException("SoEx contracts must be async");
+            }
+
             this.ToInterceptor().Intercept(invocation);
         }
 
