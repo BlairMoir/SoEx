@@ -143,6 +143,7 @@ namespace SoEx.Hosting
 
         private static void RegisterHost(ContainerBuilder componentContainer, Topology.Host component, Type[] componentEndpointContracts, IPipeline pipeline, HostRole role)
         {
+            componentContainer.RegisterInstance(new Role(role)).AsSelf();
             if (component is HostMock hostMock)
             {
                 foreach (var componentContract in componentEndpointContracts)
@@ -166,7 +167,6 @@ namespace SoEx.Hosting
             {
                 foreach (var cepc in componentEndpointContracts)
                 {
-                    componentContainer.RegisterInstance(new Role(role)).AsSelf();
                     componentContainer.RegisterType(component.Implementation).Named("Endpoint", cepc)
                     .EnableInterfaceInterceptors()
                     .InterceptedBy(pipeline.ServiceInterceptors);
