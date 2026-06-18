@@ -15,7 +15,6 @@ namespace SoEx.Endpoint
         readonly ILogger<EndpointPipeline> _logger;
         readonly ExceptionMode _exceptionMode;
         readonly ITelemetryConfidentiality _telemetryConfidentiality;
-        readonly IMessageProtection _messageProtection;
 
         public EndpointPipeline(ILogger<EndpointPipeline> logger, IHostAndClientLookup subsystemlifeTimeScope, ITelemetryConfidentiality  telemetryConfidentiality, TestExceptionMode? testExceptionMode = null)
         {
