@@ -5,6 +5,7 @@ using Autofac;
 using Microsoft.Extensions.Logging;
 using SoEx.Abstractions;
 using SoEx.Context;
+using SoEx.Topology;
 
 namespace SoEx.Hosting.Default
 {
@@ -16,8 +17,9 @@ namespace SoEx.Hosting.Default
         readonly IFrameworkContext _callerFrameworkContext;
         readonly IEnumerable<IContextFlowPolicy> _policies;
         readonly ITelemetryConfidentiality _telemetryConfidentiality;
+        private readonly Topology.Role _role;
 
-        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, IHostAndClientLookup subsystemlifeTimeScope, IAmbientContext callerAmbientContext,IFrameworkContext callerFrameworkContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies)
+        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, IHostAndClientLookup subsystemlifeTimeScope, IAmbientContext callerAmbientContext,IFrameworkContext callerFrameworkContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies, Topology.Role role)
         {
             _subsystemlifeTimeScope = subsystemlifeTimeScope;
             _callerAmbientContext = callerAmbientContext;
@@ -25,6 +27,7 @@ namespace SoEx.Hosting.Default
             _policies = policies;
             _logger = logger;
             _telemetryConfidentiality = telemetryConfidentiality;
+            _role = role;
         }
 
         public async Task<InvocationResponse> Dispatch<I>(InvocationRequest invocationRequest) where I : class
@@ -94,16 +97,23 @@ namespace SoEx.Hosting.Default
         private void IncomingFrameworkContext<I>(InvocationRequest invocationRequest, ILifetimeScope requestLifetime)
             where I : class
         {
-            ((FrameworkContext)_callerFrameworkContext).Deserialize(invocationRequest.FrameworkContext);
+            var callerFrameworkContext = (FrameworkContext)_callerFrameworkContext;
+            callerFrameworkContext.Deserialize(invocationRequest.FrameworkContext);
             InvocationContext invocationContext = new InvocationContext(typeof(I), invocationRequest.MethodName);
             FrameworkContext operationFrameworkContext = (FrameworkContext)requestLifetime.Resolve<IFrameworkContext>();
             operationFrameworkContext.SetOrReplace(invocationContext);
-            if (_callerFrameworkContext.Contains<EntryContext>())
+
+            if (callerFrameworkContext.Contains<EntryContext>() && _role.HostRole == HostRole.Component )
             {
-                operationFrameworkContext.SetOrReplace(_callerFrameworkContext.Get<EntryContext>());
+                operationFrameworkContext.SetOrReplace(callerFrameworkContext.Get<EntryContext>());
             }
-            else
+            if(_role.HostRole == HostRole.EntryPoint)
             {
+                if (callerFrameworkContext.Contains<EntryContext>() )
+                {
+                    var previousEntryInvocationContext = callerFrameworkContext.Get<EntryContext>().Entry;
+                    operationFrameworkContext.SetOrReplace(new PreviousEntryContext(previousEntryInvocationContext));
+                }
                 operationFrameworkContext.SetOrReplace(new EntryContext(invocationContext));
             }
         }

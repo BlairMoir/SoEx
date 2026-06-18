@@ -64,6 +64,10 @@ namespace SoEx.Context
                 _contexts[replacement.Key] = replacement.Value;
             }
         }
+
+        public InvocationContext Invocation => Get<InvocationContext>();
+        public EntryContext Entry => Get<EntryContext>();
+        public PreviousEntryContext? Previous => (Contains<PreviousEntryContext>() ? Get<PreviousEntryContext>() : null);
     }
 }
 

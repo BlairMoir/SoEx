@@ -1,4 +1,4 @@
 namespace SoEx.Topology
 {
-    public record Role(HostRole role);
+    public record Role(HostRole HostRole);
 }
