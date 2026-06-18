@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Runtime.Serialization;
 using SoEx.Abstractions;
 
 namespace SoEx.Context
@@ -13,9 +14,14 @@ namespace SoEx.Context
             _messageSerializer = messageSerializer;
         }
 
+        private string ContextName<T>()
+        {
+            return typeof(T).FullName ?? typeof(T).Name;
+        }
+
         public void SetIfNotExists<T>(Func<T> contextFactory) where T : notnull
         {
-            string contextName = typeof(T).Name;
+            string contextName = ContextName<T>();
             if (_contexts.ContainsKey(contextName))
             {
                 return;
@@ -25,17 +31,17 @@ namespace SoEx.Context
 
         public T Get<T>() where T : notnull
         {
-            return (T)_contexts[typeof(T).Name];
+            return (T)_contexts[ContextName<T>()];
         }
 
         public bool Contains<T>() where T : notnull
         {
-            return _contexts.ContainsKey(typeof(T).Name);
+            return _contexts.ContainsKey(ContextName<T>());
         }
 
         public void SetOrReplace<T>(T context) where T : notnull
         {
-            string contextName = typeof(T).Name;
+            string contextName = ContextName<T>();
             if (_contexts.ContainsKey(contextName))
             {
                 _contexts[contextName] = context;
@@ -48,24 +54,37 @@ namespace SoEx.Context
 
         public byte[] Serialize()
         {
-            return _messageSerializer.Serialize(_contexts);
+            var backwardsCompat = new Dictionary<string, object>();
+            foreach (object value in _contexts.Values)
+            {
+                Type type = value.GetType();
+                string fullName = type.FullName ?? type.Name;
+                if (fullName != type.Name)
+                {
+                    backwardsCompat.Add(fullName, value);
+                }
+                backwardsCompat.Add(type.Name, value);
+            }
+            return _messageSerializer.Serialize(backwardsCompat);
         }
 
-        public void Deserialize(byte[]? serlializedContexts)
+        public void Deserialize(byte[]? serializedContexts)
         {
-            if (serlializedContexts is null)
+            if (serializedContexts is null)
                 return;
 
 
-            ConcurrentDictionary<string, object>? replacmentContexts = _messageSerializer.Deserialize<ConcurrentDictionary<string, object>>(serlializedContexts);
+            ConcurrentDictionary<string, object>? incoming = _messageSerializer.Deserialize<ConcurrentDictionary<string, object>>(serializedContexts);
 
-            if (replacmentContexts is null)
+            if (incoming is null)
                 return;
 
 
-            foreach (var replacement in replacmentContexts)
+            foreach (var replacement in incoming)
             {
-                _contexts.AddOrUpdate(replacement.Key, replacement.Value, (k, v) => replacement.Value);
+                // backwards compat - can just use the key once all in flight messages are upgraded.
+                Type type = replacement.Value.GetType();
+                _contexts[type.FullName ?? type.Name] = replacement.Value;
             }
         }
     }
