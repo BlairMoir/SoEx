@@ -85,12 +85,30 @@ namespace SoEx.Hosting.Default
         {
             for (int arg = 0; arg < invocationRequestArguments.Length; arg++)
             {
+                if(invocationRequestArguments[arg] is null)
+                    continue;
+
                 var paramType = parameters[arg].ParameterType;
-                if (!paramType.IsInstanceOfType(invocationRequestArguments[arg]))
+
+                if (paramType.IsInstanceOfType(invocationRequestArguments[arg]))
+                    continue;
+
+                var targetType = Nullable.GetUnderlyingType(paramType) ?? paramType;
+
+                if (targetType.IsEnum && invocationRequestArguments[arg] is string stringArgument)
                 {
-                    invocationRequestArguments[arg] = System.Convert.ChangeType(invocationRequestArguments[arg], Nullable.GetUnderlyingType(paramType) ?? paramType, CultureInfo.InvariantCulture );
+                    invocationRequestArguments[arg] = Enum.Parse(targetType, stringArgument, ignoreCase: true);
+                }
+                else if (targetType.IsEnum)
+                {
+                    invocationRequestArguments[arg] = Enum.ToObject(targetType, invocationRequestArguments[arg]);
+                }
+                else
+                {
+                    invocationRequestArguments[arg] = System.Convert.ChangeType(invocationRequestArguments[arg],targetType , CultureInfo.InvariantCulture )
                 }
             }
+
             return invocationRequestArguments;
         }
 
