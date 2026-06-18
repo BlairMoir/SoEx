@@ -105,7 +105,7 @@ namespace SoEx.Hosting
             {
                 hostApplicationContainer.CreateIsolatedScope((hostApplicationScope, componentHostContainer) =>
                 {
-                    ComponentHostFactory(hostApplicationScope, subSystem.EntryPoint, pipeline);
+                    ComponentHostFactory(hostApplicationScope, subSystem.EntryPoint, pipeline, HostRole.EntryPoint);
                 });
                 foreach (var component in subSystem.Components)
                 {
@@ -122,7 +122,7 @@ namespace SoEx.Hosting
             });
         }
 
-        private static void ComponentHostFactory(ILifetimeScope hostApplicationScope, Topology.Host host, IPipeline pipeline)
+        private static void ComponentHostFactory(ILifetimeScope hostApplicationScope, Topology.Host host, IPipeline pipeline, HostRole role = HostRole.Component)
         {
             var subSystemScope = hostApplicationScope.BeginLifetimeScope(componentContainer =>
             {
@@ -131,7 +131,7 @@ namespace SoEx.Hosting
                     componentContainer.Populate(host.ServiceCollection);
                 }
                 var componentEndpointContracts = host.Endpoints.Select(m => m.Contract).ToArray();
-                RegisterHost(componentContainer, host, componentEndpointContracts, pipeline);
+                RegisterHost(componentContainer, host, componentEndpointContracts, pipeline, role);
                 RegisterEndPoints(host, componentContainer);
                 componentContainer.CreateIsolatedScope((systemScope, componentHostContainer) =>
                 {
@@ -141,7 +141,7 @@ namespace SoEx.Hosting
             });
         }
 
-        private static void RegisterHost(ContainerBuilder componentContainer, Topology.Host component, Type[] componentEndpointContracts, IPipeline pipeline)
+        private static void RegisterHost(ContainerBuilder componentContainer, Topology.Host component, Type[] componentEndpointContracts, IPipeline pipeline, HostRole role)
         {
             if (component is HostMock hostMock)
             {
@@ -166,6 +166,7 @@ namespace SoEx.Hosting
             {
                 foreach (var cepc in componentEndpointContracts)
                 {
+                    componentContainer.RegisterInstance(new Role(role)).AsSelf();
                     componentContainer.RegisterType(component.Implementation).Named("Endpoint", cepc)
                     .EnableInterfaceInterceptors()
                     .InterceptedBy(pipeline.ServiceInterceptors);
