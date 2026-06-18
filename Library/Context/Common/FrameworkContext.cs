@@ -66,8 +66,8 @@ namespace SoEx.Context
         }
 
         public InvocationContext Invocation => Get<InvocationContext>();
-        public EntryContext Entry => Get<EntryContext>();
-        public PreviousEntryContext? Previous => (Contains<PreviousEntryContext>() ? Get<PreviousEntryContext>() : null);
+        public EntryContext? Entry => Contains<EntryContext>() ? Get<EntryContext>() : null;
+        public PreviousEntryContext? Previous => Contains<PreviousEntryContext>() ? Get<PreviousEntryContext>() : null;
     }
 }
 
