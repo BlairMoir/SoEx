@@ -105,7 +105,8 @@ namespace SoEx.Hosting.Default
                 }
                 else
                 {
-                    invocationRequestArguments[arg] = System.Convert.ChangeType(invocationRequestArguments[arg],targetType , CultureInfo.InvariantCulture )
+                    invocationRequestArguments[arg] = System.Convert.ChangeType(invocationRequestArguments[arg],
+                        targetType, CultureInfo.InvariantCulture);
                 }
             }
 
