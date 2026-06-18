@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using Autofac;
 using Microsoft.Extensions.Logging;
@@ -49,7 +50,9 @@ namespace SoEx.Hosting.Default
                             I host = requestLifetime.ResolveNamed<I>("Endpoint");
                             var method = typeof(I).GetMethod(invocationRequest.MethodName);
                             Debug.Assert(method is not null);
-                            var result = method.Invoke(host, invocationRequest.Arguments);
+                            var parameters = method.GetParameters();
+                            var arguments = ArgumentTypes(parameters, invocationRequest.Arguments);
+                            var result = method.Invoke(host, arguments);
                             Debug.Assert(result is not null);
 
                             if (invocationRequest.TResult is null)
@@ -73,6 +76,19 @@ namespace SoEx.Hosting.Default
                     throw;
                 }
             }
+        }
+
+        private object[] ArgumentTypes(ParameterInfo[] parameters, object[] invocationRequestArguments)
+        {
+            for (int arg = 0; arg < invocationRequestArguments.Length; arg++)
+            {
+                var paramType = parameters[arg].ParameterType;
+                if (!paramType.IsInstanceOfType(invocationRequestArguments[arg]))
+                {
+                    invocationRequestArguments[arg] = System.Convert.ChangeType(invocationRequestArguments[arg], Nullable.GetUnderlyingType(paramType) ?? paramType, CultureInfo.InvariantCulture );
+                }
+            }
+            return invocationRequestArguments;
         }
 
         private void IncomingFrameworkContext<I>(InvocationRequest invocationRequest, ILifetimeScope requestLifetime)
