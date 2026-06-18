@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Runtime.Serialization;
 using SoEx.Abstractions;
 
 namespace SoEx.Context
@@ -61,9 +60,9 @@ namespace SoEx.Context
                 string fullName = type.FullName ?? type.Name;
                 if (fullName != type.Name)
                 {
-                    backwardsCompat.Add(fullName, value);
+                    backwardsCompat[fullName] = value;
                 }
-                backwardsCompat.Add(type.Name, value);
+                backwardsCompat[type.Name] = value;
             }
             return _messageSerializer.Serialize(backwardsCompat);
         }
