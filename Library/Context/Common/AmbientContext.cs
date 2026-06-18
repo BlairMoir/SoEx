@@ -53,7 +53,7 @@ namespace SoEx.Context
 
         public byte[] Serialize()
         {
-            var backwardsCompat = new Dictionary<string, object>();
+            var backwardsCompat = new ConcurrentDictionary<string, object>();
             foreach (object value in _contexts.Values)
             {
                 Type type = value.GetType();
