@@ -83,7 +83,7 @@ namespace SoEx.Transport.ASBTopic
             {
                 _logger.LogDebug("Topic/Subscription already exists topic:{Topic} subscriber:{Subscriber}",topicName, _subscriber);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.LogWarning("Could not check Topic/Subscription exists topic:{Topic} subscriber:{Subscriber}", topicName, _subscriber);
             }
