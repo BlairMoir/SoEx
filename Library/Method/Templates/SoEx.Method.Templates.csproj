@@ -7,7 +7,7 @@
     <Authors>Blair Moir</Authors>
     <Description>Templates to create projects for SoEx using Method Conventions.</Description>
     <PackageTags>SoEx</PackageTags>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ContentTargetFolders>content</ContentTargetFolders>
