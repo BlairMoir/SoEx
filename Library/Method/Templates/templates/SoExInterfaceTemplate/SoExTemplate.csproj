@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -17,8 +17,8 @@
 
 <!--#if( enforceDesign ) -->
   <ItemGroup>
-    <PackageReference Include="System.ServiceModel.Primitives" Version="8.0.0" />
-      <PackageReference Include="SoEx.Method.Analyzer" Version="1.0.*">
+    <PackageReference Include="System.ServiceModel.Primitives" />
+      <PackageReference Include="SoEx.Method.Analyzer">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime;build;native;analyzers;buildtransitive</IncludeAssets>
       </PackageReference>

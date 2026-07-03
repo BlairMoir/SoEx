@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\..\Endpoint\SoEx.Endpoint.csproj" />
     <ProjectReference Include="..\..\Topology\SoEx.Topology.csproj" />
@@ -6,9 +6,9 @@
     <ProjectReference Include="..\..\Diagnostics\SoEx.Diagnostics.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Relay" Version="3.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Azure.Relay" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\..\Endpoint\SoEx.Endpoint.csproj" />
@@ -8,12 +8,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Composition" Version="17.13.41" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all" Version="17.14.15" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" PrivateAssets="all" Version="0.3.269" />
-    <PackageReference Include="StreamJsonRpc" Version="2.24.84" />
-    <PackageReference Include="System.Collections.Immutable" Version="10.0.5" />
-    <PackageReference Include="System.Text.Json" Version="10.0.5" />
+    <PackageReference Include="Microsoft.VisualStudio.Composition" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" PrivateAssets="all" />
+    <PackageReference Include="StreamJsonRpc" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <PropertyGroup>    

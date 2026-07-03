@@ -6,7 +6,7 @@
     <ProjectReference Include="..\..\Topology\SoEx.Topology.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" />
   </ItemGroup>
   <PropertyGroup>    
     <ImplicitUsings>enable</ImplicitUsings>

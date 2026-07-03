@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SoEx.Container" Version="0.0.0-alpha-2.4" />
+    <PackageReference Include="SoEx.Container" />
   </ItemGroup>
 
   <ItemGroup>
