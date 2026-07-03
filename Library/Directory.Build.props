@@ -12,5 +12,6 @@
     <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 </Project>
