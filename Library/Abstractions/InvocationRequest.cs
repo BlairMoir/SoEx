@@ -7,7 +7,7 @@ namespace SoEx.Abstractions
         public required string? ActivityId { get; set; }
         public Type? TResult { get; set; }
         public required string MethodName { get; set; }
-        public object[] Arguments { get; set; } = [];
+        public object?[] Arguments { get; set; } = [];
         public byte[]? AmbientContext { get; set; }
         public byte[]? FrameworkContext { get; set; }
     }

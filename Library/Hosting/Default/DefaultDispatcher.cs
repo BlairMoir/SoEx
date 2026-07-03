@@ -86,31 +86,33 @@ namespace SoEx.Hosting.Default
             }
         }
 
-        private object[] ArgumentTypes(ParameterInfo[] parameters, object[] invocationRequestArguments)
+        private object?[] ArgumentTypes(ParameterInfo[] parameters, object?[] invocationRequestArguments)
         {
             for (int arg = 0; arg < invocationRequestArguments.Length; arg++)
             {
-                if(invocationRequestArguments[arg] is null)
+                object? value = invocationRequestArguments[arg];
+                if(value is null)
                     continue;
 
                 var paramType = parameters[arg].ParameterType;
 
-                if (paramType.IsInstanceOfType(invocationRequestArguments[arg]))
+                if (paramType.IsInstanceOfType(value))
                     continue;
 
                 var targetType = Nullable.GetUnderlyingType(paramType) ?? paramType;
 
-                if (targetType.IsEnum && invocationRequestArguments[arg] is string stringArgument)
+                if (targetType.IsEnum && value is string stringArgument)
                 {
                     invocationRequestArguments[arg] = Enum.Parse(targetType, stringArgument, ignoreCase: true);
                 }
                 else if (targetType.IsEnum)
                 {
-                    invocationRequestArguments[arg] = Enum.ToObject(targetType, invocationRequestArguments[arg]);
+
+                    invocationRequestArguments[arg] = Enum.ToObject(targetType, value);
                 }
                 else
                 {
-                    invocationRequestArguments[arg] = System.Convert.ChangeType(invocationRequestArguments[arg],
+                    invocationRequestArguments[arg] = System.Convert.ChangeType(value,
                         targetType, CultureInfo.InvariantCulture);
                 }
             }
