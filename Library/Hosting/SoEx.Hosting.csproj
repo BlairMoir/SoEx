@@ -20,7 +20,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>SoEx.Hosting</PackageId>
-    <PackageOutputPath>../../nupkgs</PackageOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\"/>
