@@ -9,5 +9,6 @@
   <ItemGroup>
     <PackageReference Include="SoEx.Context.Abstractions" />
     <PackageReference Include="SoEx.Method.Conventions" />
+    <PackageReference Include="SoEx.Hosting" />
   </ItemGroup>
 </Project>

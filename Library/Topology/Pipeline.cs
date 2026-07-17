@@ -14,5 +14,6 @@ namespace SoEx.Topology
         public Type TelemetryConfidentiality { get; }
         public Type MessageProtection { get; }
         public Type[] ServiceInterceptors { get; }
+        public Type[] KnownTypes { get; }
     }
 }

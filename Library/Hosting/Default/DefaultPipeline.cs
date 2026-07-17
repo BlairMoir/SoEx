@@ -4,10 +4,18 @@ namespace SoEx.Hosting.Default
 {
     public class DefaultPipeline : IPipeline
     {
+        public DefaultPipeline() { }
+
+        public DefaultPipeline(Type[] knownTypes)
+        {
+            KnownTypes = knownTypes;
+        }
+
         public Type Dispatcher => typeof(DefaultDispatcher);
         public Type TelemetryConfidentiality => typeof(FallbackConfidentiality);
         public Type MessageProtection => typeof(NullProtection);
         public Type MessageSerializer => typeof(SoEx.Hosting.Serializers.NewtonsoftJson.JsonMessageSerializer);
         public Type[] ServiceInterceptors => [typeof(ErrorInterceptor)];
+        public Type[] KnownTypes { get; init; } = [];
     }
 }

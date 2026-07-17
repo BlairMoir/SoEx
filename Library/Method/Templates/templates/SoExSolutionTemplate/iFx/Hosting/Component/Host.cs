@@ -22,6 +22,7 @@ public static class Host
 
         var services = Scan.ServiceTypes(companyName);
         var interfaces = Scan.ProxyTypes(companyName);
+        var dtoAndContextTypes = Scan.DtoAndContextTypes(companyName);
 
         if (services.Length == 0)
             throw new ArgumentException("You must include a reference to at least one service");
@@ -75,7 +76,7 @@ public static class Host
 
 
         HostApplicationBuilder serviceHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        serviceHostBuilder.SoEx(host);
+        serviceHostBuilder.SoEx(host, new DefaultPipeline(dtoAndContextTypes));
         serviceHostBuilder.Services.NamedPipedClient();
         serviceHostBuilder.Services.ConfigureLogging();
         serviceHostBuilder.Services.ConfigureTelemetry();

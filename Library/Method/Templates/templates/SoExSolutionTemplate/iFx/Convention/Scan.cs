@@ -52,4 +52,31 @@ public static class Scan
         }
         return foundTypes.ToArray();
     }
+
+    public static Type[] DtoAndContextTypes(string company)
+    {
+        List<Type> knownTypes = [];
+
+        string? path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        var interfaceAssemblyFiles = Directory.GetFiles(path!, $"{company}.*.{Keywords.Interface}.dll", SearchOption.TopDirectoryOnly);
+        var policyAssemblyFiles = Directory.GetFiles(path!, $"{company}.*.{Keywords.Policy}.dll", SearchOption.TopDirectoryOnly);
+        foreach (var assemblyFile in interfaceAssemblyFiles)
+        {
+            var assembly = Assembly.LoadFrom(assemblyFile);
+            var types = assembly.GetTypes().Where(t => !t.IsAbstract  );
+            knownTypes.AddRange(types);
+        }
+        foreach (var assemblyFile in policyAssemblyFiles)
+        {
+            var assembly = Assembly.LoadFrom(assemblyFile);
+            var contextAssemblies = assembly.GetReferencedAssemblies().Where(w => w.FullName.StartsWith($"{company}.Common."));
+            foreach (var contextAssembly in contextAssemblies)
+            {
+                var types = Assembly.Load(contextAssembly).GetTypes().Where( t=> t.IsValueType );
+                knownTypes.AddRange(types);
+            }
+        }
+
+        return knownTypes.ToArray();
+    }
 }

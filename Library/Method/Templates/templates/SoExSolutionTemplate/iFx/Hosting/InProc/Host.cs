@@ -60,7 +60,7 @@ public static class Host
                 clients.Add(ToClient(endpoint, subSystem.Name));
             }
         }
-        return new SoEx.Topology.System() { SubSystems = [], Clients = clients.ToArray() };
+        return new SoEx.Topology.System() { SubSystems = [], Clients = clients.ToArray(), Defaults = system.Defaults };
     }
 
     private static SoEx.Topology.Client ToClient(Binding s, string subsystemName)
