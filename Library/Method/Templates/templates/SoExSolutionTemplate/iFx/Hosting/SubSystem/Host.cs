@@ -42,6 +42,7 @@ public static class Host
         SystemBuilder systemBuilder = new SystemBuilder();
 
         var serviceTypes = Scan.ServiceTypes(companyName);
+        var dtoAndContextTypes = Scan.DtoAndContextTypes(companyName);
         var managerType = serviceTypes.Single(w => w.Name.StartsWith(subSystem) && w.Name.EndsWith("Manager"));
         var engineTypes = serviceTypes.Where(w => w.Name.EndsWith("Engine"));
         var accessTypes = serviceTypes.Where(w => w.Name.EndsWith("Access"));
@@ -90,7 +91,7 @@ public static class Host
             }
         }
 
-        return systemBuilder.Build();
+        return systemBuilder.Build( new SoEx.Hosting.Default.DefaultPipeline(dtoAndContextTypes));
     }
 
     private static IEnumerable<Type> FilterEvents(Type[] interfaces, Type[] serviceFacets, Type theService)

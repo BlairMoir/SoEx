@@ -76,7 +76,7 @@ public static class Host
 
 
         HostApplicationBuilder serviceHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        serviceHostBuilder.SoEx(host, new DefaultPipeline(dtoAndContextTypes));
+        serviceHostBuilder.SoEx(host, new SoEx.Hosting.Default.DefaultPipeline(dtoAndContextTypes));
         serviceHostBuilder.Services.NamedPipedClient();
         serviceHostBuilder.Services.ConfigureLogging();
         serviceHostBuilder.Services.ConfigureTelemetry();

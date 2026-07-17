@@ -15,12 +15,13 @@ public class ClientBuilder
         });
     }
 
-    public SoEx.Topology.System Build()
+    public SoEx.Topology.System Build(IPipeline? defaults = null)
     {
         return new SoEx.Topology.System()
         {
             Clients = _clients.ToArray(),
-            SubSystems = []
+            SubSystems = [],
+            Defaults = defaults
         };
     }
 }
