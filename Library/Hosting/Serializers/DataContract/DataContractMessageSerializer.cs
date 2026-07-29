@@ -9,11 +9,14 @@ namespace SoEx.Hosting.Serializers.DataContract;
 public class DataContractMessageSerializer : IMessageSerializer
 {
     DataContractSerializerSettings _serializerSettings;
-    public DataContractMessageSerializer(ContractResolver resolver)
+    private ContractResolver _resolver;
+
+    public DataContractMessageSerializer(Type[] knownTypes)
     {
+        _resolver = new ContractResolver(new ContractLookup(knownTypes));
         _serializerSettings = new DataContractSerializerSettings()
         {
-            DataContractResolver = resolver
+            DataContractResolver = _resolver
         };
     }
 

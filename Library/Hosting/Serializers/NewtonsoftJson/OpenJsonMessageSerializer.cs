@@ -5,7 +5,7 @@ using SoEx.Abstractions;
 
 namespace SoEx.Hosting.Serializers.NewtonsoftJson
 {
-    public class JsonMessageSerializer : IMessageSerializer
+    public class OpenJsonMessageSerializer : IMessageSerializer
     {
         private static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
         {
