@@ -63,7 +63,7 @@ namespace SoEx.Hosting
                 {
                     Type targetInterface = invocation.Method.DeclaringType ?? throw new ArgumentException("Proxy Interceptor requires an interface");
                     IChannel channel = _transportFactory.Client(targetInterface) as IChannel ?? throw new NullReferenceException();
-                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, TResult = typeof(TResult), AmbientContext = _ambientContext.Serialize(), FrameworkContext =  _frameworkContext.Serialize() };
+                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, HasResult = true, AmbientContext = _ambientContext.Serialize(), FrameworkContext =  _frameworkContext.Serialize() };
                     var invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
                     _ambientContext.Deserialize(invocationResponse.AmbientContext);
                     return (TResult)invocationResponse.Response!;

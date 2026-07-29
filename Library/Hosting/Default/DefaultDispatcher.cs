@@ -63,7 +63,7 @@ namespace SoEx.Hosting.Default
                                 throw new NotSupportedException("SoEx contracts must be async");
                             }
 
-                            if (invocationRequest.TResult is null)
+                            if (!invocationRequest.HasResult)
                             {
                                 await (Task)result;
                             }
