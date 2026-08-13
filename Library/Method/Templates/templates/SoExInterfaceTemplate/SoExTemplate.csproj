@@ -19,22 +19,22 @@
   <ItemGroup>
     <PackageReference Include="System.ServiceModel.Primitives" />
       <PackageReference Include="SoEx.Method.Analyzer">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime;build;native;analyzers;buildtransitive</IncludeAssets>
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime;build;native;analyzers;buildtransitive</IncludeAssets>
       </PackageReference>
   </ItemGroup>
     <PropertyGroup>
-        <ProjectName>$(MSBuildProjectName)</ProjectName>
+      <ProjectName>$(MSBuildProjectName)</ProjectName>
     </PropertyGroup>
     <ItemGroup>
-        <CompilerVisibleProperty Include="ProjectName" />
+      <CompilerVisibleProperty Include="ProjectName" />
     </ItemGroup>
     <ItemGroup>
-        <AdditionalFiles Include="..\..\..\..\modelanalyzer.json" />
+      <AdditionalFiles Include="..\..\..\..\modelanalyzer.json" />
     </ItemGroup>
     <PropertyGroup>
-        <WarningsAsErrors>PCV001</WarningsAsErrors>
-        <NoWarn>CS8618</NoWarn>
+      <WarningsAsErrors>$(WarningsAsErrors);PCV001</WarningsAsErrors>
+      <NoWarn>$(NoWarn);CS8618</NoWarn>
     </PropertyGroup>
 <!--#endif -->
 </Project>
