@@ -16,17 +16,17 @@
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
-    <PackageVersion Include="SoEx.Container" Version="0.0.0-alpha-3.1" />
-    <PackageVersion Include="SoEx.Context.Abstractions" Version="0.0.0-alpha-3.1" />
-    <PackageVersion Include="SoEx.Diagnostics" Version="0.0.0-alpha-3.1" />
-    <PackageVersion Include="SoEx.Hosting" Version="0.0.0-alpha-3.1" />
+    <PackageVersion Include="SoEx.Container" Version="0.0.0-alpha-3.2" />
+    <PackageVersion Include="SoEx.Context.Abstractions" Version="0.0.0-alpha-3.2" />
+    <PackageVersion Include="SoEx.Diagnostics" Version="0.0.0-alpha-3.2" />
+    <PackageVersion Include="SoEx.Hosting" Version="0.0.0-alpha-3.2" />
     <PackageVersion Include="SoEx.Method.Analyzer" Version="1.0.*" />
-    <PackageVersion Include="SoEx.Method.Conventions" Version="0.0.0-alpha-3.1" />
-    <PackageVersion Include="SoEx.Proxy" Version="0.0.0-alpha-3.1" />
-    <PackageVersion Include="SoEx.Topology" Version="0.0.0-alpha-3.1" />
-    <PackageVersion Include="SoEx.Transport.NamedPipe" Version="0.0.0-alpha-3.1" />
+    <PackageVersion Include="SoEx.Method.Conventions" Version="0.0.0-alpha-3.2" />
+    <PackageVersion Include="SoEx.Proxy" Version="0.0.0-alpha-3.2" />
+    <PackageVersion Include="SoEx.Topology" Version="0.0.0-alpha-3.2" />
+    <PackageVersion Include="SoEx.Transport.NamedPipe" Version="0.0.0-alpha-3.2" />
     <PackageVersion Include="StronglyTypedId" Version="1.0.0-beta08" />
-    <PackageVersion Include="System.ServiceModel.Primitives" Version="8.1.2" />
+    <PackageVersion Include="System.ServiceModel.Primitives" Version="9.0.0" />
     <PackageVersion Include="Vogen" Version="8.0.5" />
   </ItemGroup>
 </Project>
