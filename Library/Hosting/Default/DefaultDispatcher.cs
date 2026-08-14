@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
 using System.Reflection;
 using Autofac;
 using Microsoft.Extensions.Logging;
@@ -55,21 +54,21 @@ namespace SoEx.Hosting.Default
                             Debug.Assert(method is not null);
                             var parameters = method.GetParameters();
                             var arguments = ArgumentTypes(parameters, invocationRequest.Arguments);
-                            var result = method.Invoke(host, arguments);
-                            Debug.Assert(result is not null);
+                            var returnValue = method.Invoke(host, arguments);
+                            Debug.Assert(returnValue is not null);
 
-                            if (result is not Task)
+                            if (returnValue is not Task)
                             {
                                 throw new NotSupportedException("SoEx contracts must be async");
                             }
 
                             if (!invocationRequest.HasResult)
                             {
-                                await (Task)result;
+                                await (Task)returnValue;
                             }
                             else
                             {
-                                var responseObject = await Convert((Task)result);
+                                var responseObject = await returnValue.TaskResult();
                                 invocationResponse.Response = responseObject;
                             }
                             FlowContextToCaller(_callerAmbientContext, operationAmbientContext);
@@ -101,20 +100,8 @@ namespace SoEx.Hosting.Default
 
                 var targetType = Nullable.GetUnderlyingType(paramType) ?? paramType;
 
-                if (targetType.IsEnum && value is string stringArgument)
-                {
-                    invocationRequestArguments[arg] = Enum.Parse(targetType, stringArgument, ignoreCase: true);
-                }
-                else if (targetType.IsEnum)
-                {
+                invocationRequestArguments[arg] = value.ToArgumentType(targetType);
 
-                    invocationRequestArguments[arg] = Enum.ToObject(targetType, value);
-                }
-                else
-                {
-                    invocationRequestArguments[arg] = System.Convert.ChangeType(value,
-                        targetType, CultureInfo.InvariantCulture);
-                }
             }
 
             return invocationRequestArguments;
