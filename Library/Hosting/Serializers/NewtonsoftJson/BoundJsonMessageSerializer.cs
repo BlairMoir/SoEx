@@ -17,7 +17,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
                 TypeNameHandling = TypeNameHandling.Auto,
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead,
                 ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
-                SerializationBinder = new SerializationBinder(new KnownTypeRegistry(knownTypes.Types.ToArray())),
+                SerializationBinder = new SerializationBinder(new KnownTypeRegistry(knownTypes.Types)),
             };
         }
 

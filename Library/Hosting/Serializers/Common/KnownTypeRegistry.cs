@@ -6,7 +6,7 @@ namespace SoEx.Hosting.Serializers.Common
         private readonly Dictionary<string, Type> _discriminatorLookup = new(StringComparer.Ordinal);
         private readonly HashSet<Type> _collections = new();
 
-        public KnownTypeRegistry(Type[] knownTypes)
+        public KnownTypeRegistry(IReadOnlyCollection<Type> knownTypes)
         {
             foreach (var type in knownTypes)
                 Register(type);

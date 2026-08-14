@@ -10,7 +10,7 @@ public class ContractLookup
 
     private const string CollectionNamespace = "urn:soex:knowntypes";
 
-    public ContractLookup(params Type[] knownTypes)
+    public ContractLookup(IReadOnlyCollection<Type> knownTypes)
     {
         foreach (var type in knownTypes)
             Register(type, DtoName(type));

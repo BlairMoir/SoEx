@@ -4,7 +4,7 @@ public static class KnownCollections
 {
     private static readonly Type[] KeyTypes = { typeof(string), typeof(int), typeof(long), typeof(Guid) };
 
-    public static IEnumerable<Type> For(Type[] types)
+    public static IEnumerable<Type> For(IReadOnlyCollection<Type> types)
     {
         foreach (var type in types)
         {

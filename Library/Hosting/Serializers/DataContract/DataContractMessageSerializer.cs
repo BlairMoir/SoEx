@@ -13,7 +13,7 @@ public class DataContractMessageSerializer : IMessageSerializer
 
     public DataContractMessageSerializer(KnownTypes knownTypes)
     {
-        _resolver = new ContractResolver(new ContractLookup(knownTypes.Types.ToArray()));
+        _resolver = new ContractResolver(new ContractLookup(knownTypes.Types));
         _serializerSettings = new DataContractSerializerSettings()
         {
             DataContractResolver = _resolver
