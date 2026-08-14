@@ -39,7 +39,8 @@ namespace SoEx.Transport.NATS
                 try
                 {
                     Debug.Assert(_natsBinding is not null);
-                    await using (NatsClient nc = new NatsClient())
+                    NatsClient nc = new NatsClient();
+                    await using (nc.ConfigureAwait(false))
                     {
                         string natsSubject = $"{_natsBinding.SubSystem}-{typeof(I)}";
                         NatsMsg<byte[]> reply = await nc.RequestAsync<byte[], byte[]>(natsSubject, payload).ConfigureAwait(false);

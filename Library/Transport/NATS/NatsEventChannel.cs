@@ -38,11 +38,13 @@ namespace SoEx.Transport.NATS
             {
                 try
                 {
-                    await using (NatsClient nc = new NatsClient())
+                    NatsClient nc = new NatsClient();
+                    await using (nc.ConfigureAwait(false))
                     {
                         INatsJSContext js = nc.CreateJetStreamContext();
-                        await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(), subjects: [NatsSubject.For<I>()]));
-                        var ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload);
+                        await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(),
+                            subjects: [NatsSubject.For<I>()])).ConfigureAwait(false);
+                        var ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload).ConfigureAwait(false);
                         ack.EnsureSuccess();
                         return [];
                     }
