@@ -35,9 +35,9 @@ namespace SoEx.Channel
                 var protector =  (IMessageProtection)_scope.Resolve(protectorType);
                 var serializer = (IMessageSerializer)_scope.Resolve(serializerType);
                 byte[] serializedRequest = serializer.Serialize(request);
-                byte[] protectedRequest = await protector.Protect(serializedRequest, request.MethodName);
-                byte[] protectedResponse = await channel.InvokeResult(protectedRequest);
-                byte[] serializedResponse = await protector.Unprotect(protectedResponse);
+                byte[] protectedRequest = await protector.Protect(serializedRequest, request.MethodName).ConfigureAwait(false);
+                byte[] protectedResponse = await channel.InvokeResult(protectedRequest).ConfigureAwait(false);
+                byte[] serializedResponse = await protector.Unprotect(protectedResponse).ConfigureAwait(false);
 
                 if (serializedResponse.Length == 0)
                 {
