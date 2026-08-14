@@ -68,7 +68,7 @@ namespace SoEx.Test
         private ILifetimeScope BuildContainer(SoEx.Topology.System? system)
         {
             ContainerBuilder builder = new ContainerBuilder();
-            builder.RegisterSoEx(system ?? _topology);
+            builder.RegisterSoEx(system ?? _topology,[]);
             builder.RegisterType<LoggerFactory>()
                             .As<ILoggerFactory>()
                             .SingleInstance();
