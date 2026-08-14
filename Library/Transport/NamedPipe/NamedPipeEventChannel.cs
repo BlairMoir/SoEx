@@ -39,7 +39,7 @@ namespace SoEx.Transport.NamedPipe
                                                 PipeDirection.InOut, PipeOptions.None,
                                                 TokenImpersonationLevel.None))
                     {
-                        await pipeClient.ConnectAsync(3000);
+                        await pipeClient.ConnectAsync(3000).ConfigureAwait(false);
                         var ss = new StreamBytes(pipeClient);
                         ss.WriteBytes(payload);
                         return [];

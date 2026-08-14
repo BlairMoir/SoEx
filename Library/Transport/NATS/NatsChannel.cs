@@ -42,7 +42,7 @@ namespace SoEx.Transport.NATS
                     await using (NatsClient nc = new NatsClient())
                     {
                         string natsSubject = $"{_natsBinding.SubSystem}-{typeof(I)}";
-                        NatsMsg<byte[]> reply = await nc.RequestAsync<byte[], byte[]>(natsSubject, payload);
+                        NatsMsg<byte[]> reply = await nc.RequestAsync<byte[], byte[]>(natsSubject, payload).ConfigureAwait(false);
                         return reply.Data ?? [];
                     }
                 }

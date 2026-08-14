@@ -34,7 +34,7 @@ namespace SoEx.Transport.ThreadChannel
             {
                 try
                 {
-                    await _writer.WriteAsync(payload);
+                    await _writer.WriteAsync(payload).ConfigureAwait(false);
                     return [];
                 }
                 catch

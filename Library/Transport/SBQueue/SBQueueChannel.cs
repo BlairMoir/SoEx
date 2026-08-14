@@ -40,7 +40,7 @@ namespace SoEx.Transport.SBQueue
                 try
                 {
                     Debug.Assert(sender is not null);
-                    await sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload)));
+                    await sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload))).ConfigureAwait(false);
                     return [];
                 }
                 catch

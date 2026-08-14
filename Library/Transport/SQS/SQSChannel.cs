@@ -48,7 +48,7 @@ namespace SoEx.Transport.SQS
                         MessageGroupId = typeof(I).FullName
                     };
 
-                    await _client.SendMessageAsync(request);
+                    await _client.SendMessageAsync(request).ConfigureAwait(false);
                     return [];
                 }
                 catch

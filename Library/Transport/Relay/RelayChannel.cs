@@ -44,9 +44,9 @@ namespace SoEx.Relay
                         Content = new ByteArrayContent(payload)
                     };
                     httpRequest.Headers.Add("ServiceBusAuthorization", token);
-                    var response = _httpClient.SendAsync(httpRequest).Result;
+                    var response =await _httpClient.SendAsync(httpRequest).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
-                    var responseBytes = await response.Content.ReadAsByteArrayAsync();
+                    var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                     return responseBytes;
                 }
                 catch

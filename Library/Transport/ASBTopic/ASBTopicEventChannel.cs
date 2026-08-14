@@ -40,7 +40,7 @@ namespace SoEx.Transport.ASBTopic
                 try
                 {
                     Debug.Assert(_sender is not null);
-                    await _sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload)));
+                    await _sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload))).ConfigureAwait(false);
                     return [];
                 }
                 catch
