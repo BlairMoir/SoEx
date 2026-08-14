@@ -11,9 +11,9 @@ public class DataContractMessageSerializer : IMessageSerializer
     DataContractSerializerSettings _serializerSettings;
     private ContractResolver _resolver;
 
-    public DataContractMessageSerializer(Type[] knownTypes)
+    public DataContractMessageSerializer(KnownTypes knownTypes)
     {
-        _resolver = new ContractResolver(new ContractLookup(knownTypes));
+        _resolver = new ContractResolver(new ContractLookup(knownTypes.Types.ToArray()));
         _serializerSettings = new DataContractSerializerSettings()
         {
             DataContractResolver = _resolver

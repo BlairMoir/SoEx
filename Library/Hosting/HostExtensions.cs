@@ -20,10 +20,10 @@ namespace SoEx.Hosting
         private static readonly ProxyGenerator s_proxyGenerator = new ProxyGenerator();
         public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.System systemTopology)
         {
-            return SoEx(hostApplicationBuilder, systemTopology, []);
+            return SoEx(hostApplicationBuilder, systemTopology, new KnownTypes());
         }
 
-        public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.System systemTopology, Type[] knownTypes)
+        public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.System systemTopology, KnownTypes knownTypes)
         {
             hostApplicationBuilder.ConfigureContainer(
                 new AutofacServiceProviderFactory(hostApplicationContainer =>
@@ -36,10 +36,10 @@ namespace SoEx.Hosting
 
         public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.Host hostTopology, IPipeline? pipeline = null)
         {
-            return SoEx(hostApplicationBuilder, hostTopology, [], pipeline);
+            return SoEx(hostApplicationBuilder, hostTopology, new KnownTypes(), pipeline);
         }
 
-        public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.Host hostTopology, Type[] knownTypes, IPipeline? pipeline = null)
+        public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? pipeline = null)
         {
             hostApplicationBuilder.ConfigureContainer(
                 new AutofacServiceProviderFactory(hostApplicationContainer =>
@@ -50,20 +50,20 @@ namespace SoEx.Hosting
             return hostApplicationBuilder;
         }
 
-        public static ContainerBuilder RegisterSoEx(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, Type[] knownTypes)
+        public static ContainerBuilder RegisterSoEx(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, KnownTypes knownTypes)
         {
             hostApplicationContainer.RegisterSystem(systemTopology, knownTypes);
             return hostApplicationContainer;
         }
 
-        public static ContainerBuilder RegisterSoEx(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, Type[] knownTypes, IPipeline? pipeline)
+        public static ContainerBuilder RegisterSoEx(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? pipeline)
         {
             var componentPipeline = pipeline ?? new DefaultPipeline();
             hostApplicationContainer.RegisterComponent(hostTopology, knownTypes, componentPipeline);
             return hostApplicationContainer;
         }
 
-        private static void RegisterPipeline(this ContainerBuilder container, Type[] knownTypes, IPipeline pipeline)
+        private static void RegisterPipeline(this ContainerBuilder container, KnownTypes knownTypes, IPipeline pipeline)
         {
             container.RegisterType<EndpointLifetimeService>().As<IHostedService>();
             container.RegisterTypes(pipeline.ServiceInterceptors);
@@ -73,7 +73,9 @@ namespace SoEx.Hosting
             container.RegisterType<ProxyFactory>().AsSelf();
             container.RegisterType<ProxyInterceptor>().AsSelf();
             container.RegisterType<TransportFactory>().AsSelf();
-            container.RegisterType(pipeline.MessageSerializer).As<IMessageSerializer>();
+            container.RegisterType(pipeline.MessageSerializer).As<IMessageSerializer>()
+                .WithParameter(new TypedParameter(typeof(KnownTypes), knownTypes))
+                .SingleInstance();
             container.RegisterType(pipeline.Dispatcher).As<IDispatcher>();
             container.RegisterType(pipeline.TelemetryConfidentiality).As<ITelemetryConfidentiality>();
             container.RegisterType(pipeline.MessageProtection).As<IMessageProtection>();
@@ -81,7 +83,7 @@ namespace SoEx.Hosting
             container.RegisterType<FrameworkContext>().As<IFrameworkContext>().InstancePerLifetimeScope();
         }
 
-        private static void RegisterSystem(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, Type[] knownTypes)
+        private static void RegisterSystem(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, KnownTypes knownTypes)
         {
             var pipeline = systemTopology.Defaults ?? new DefaultPipeline();
             hostApplicationContainer.RegisterPipeline(knownTypes, pipeline);
@@ -89,7 +91,7 @@ namespace SoEx.Hosting
             hostApplicationContainer.RegisterSubSystems(systemTopology.SubSystems, pipeline);
         }
 
-        private static void RegisterComponent(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, Type[] knownTypes, IPipeline pipeline)
+        private static void RegisterComponent(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline pipeline)
         {
             hostApplicationContainer.RegisterPipeline(knownTypes, pipeline);
             RegisterComponentHost(hostApplicationContainer, hostTopology, pipeline);

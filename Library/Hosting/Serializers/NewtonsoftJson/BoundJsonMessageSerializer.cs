@@ -10,14 +10,14 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
     {
         private readonly JsonSerializerSettings jsonSerializerSettings;
 
-        public BoundJsonMessageSerializer(Type[] knownTypes)
+        public BoundJsonMessageSerializer(KnownTypes knownTypes)
         {
             jsonSerializerSettings = new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead,
                 ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
-                SerializationBinder = new SerializationBinder(new KnownTypeRegistry(knownTypes)),
+                SerializationBinder = new SerializationBinder(new KnownTypeRegistry(knownTypes.Types.ToArray())),
             };
         }
 

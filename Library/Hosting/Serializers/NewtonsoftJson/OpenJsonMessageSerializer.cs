@@ -7,12 +7,11 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 {
     public class OpenJsonMessageSerializer : IMessageSerializer
     {
-        private static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
+        private static readonly JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
         {
             TypeNameHandling = TypeNameHandling.All,
             MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead,
             ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
-            //SerializationBinder = new MethodSerializationBinder()
         };
 
         public T? Deserialize<T>(byte[] payload)

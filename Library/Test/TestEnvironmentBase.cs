@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
+using SoEx.Abstractions;
 using SoEx.Context;
 using SoEx.Exceptions;
 using SoEx.Hosting;
@@ -68,7 +69,7 @@ namespace SoEx.Test
         private ILifetimeScope BuildContainer(SoEx.Topology.System? system)
         {
             ContainerBuilder builder = new ContainerBuilder();
-            builder.RegisterSoEx(system ?? _topology,[]);
+            builder.RegisterSoEx(system ?? _topology,new KnownTypes());
             builder.RegisterType<LoggerFactory>()
                             .As<ILoggerFactory>()
                             .SingleInstance();
