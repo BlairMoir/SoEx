@@ -48,7 +48,7 @@ internal static class ArgumentTypeExtensions
             if (property == null)
                 throw new InvalidOperationException("Task does not have a return value (" + task.GetType().ToString() +
                                                     ")");
-            return property.GetValue(task) ?? throw new InvalidOperationException("Result property is null");
+            return property.GetValue(task);
         }
         throw new ArgumentException("Value must be a task");
     }
