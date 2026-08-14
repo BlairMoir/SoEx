@@ -94,14 +94,7 @@ namespace SoEx.Hosting.Default
                     continue;
 
                 var paramType = parameters[arg].ParameterType;
-
-                if (paramType.IsInstanceOfType(value))
-                    continue;
-
-                var targetType = Nullable.GetUnderlyingType(paramType) ?? paramType;
-
-                invocationRequestArguments[arg] = value.ToArgumentType(targetType);
-
+                invocationRequestArguments[arg] = value.ToArgumentType(paramType);
             }
 
             return invocationRequestArguments;

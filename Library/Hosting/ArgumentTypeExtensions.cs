@@ -8,7 +8,7 @@ internal static class ArgumentTypeExtensions
 {
     internal static T? ToResponseType<T>(this object? value)
     {
-        return (T?)value.ToArgumentType(typeof(T));
+        return (T?)value.ToTargetType(typeof(T));
     }
 
     internal static object? ToArgumentType(this object? value, Type targetType)
@@ -16,10 +16,15 @@ internal static class ArgumentTypeExtensions
         return ToTargetType(value, targetType);
     }
 
-    internal static object? ToTargetType(this object? value, Type targetType)
+    private static object? ToTargetType(this object? value, Type targetType)
     {
         if(value is null)
             return null;
+
+        if (targetType.IsInstanceOfType(value))
+            return value;
+
+        targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
         if (targetType.IsEnum && value is string stringArgument)
             return Enum.Parse(targetType, stringArgument, ignoreCase: true);
