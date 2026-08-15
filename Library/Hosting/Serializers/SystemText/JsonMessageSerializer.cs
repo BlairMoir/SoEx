@@ -8,10 +8,10 @@ namespace SoEx.Hosting.Serializers.SystemText
     {
         private readonly JsonSerializerOptions _options;
 
-        public JsonMessageSerializer(Type[] knownTypes)
+        public JsonMessageSerializer(KnownTypes knownTypes)
         {
             _options = new JsonSerializerOptions();
-            _options.Converters.Add(new KnownTypeObjectConverter(new KnownTypeRegistry(knownTypes)));
+            _options.Converters.Add(new KnownTypeObjectConverter(new KnownTypeRegistry(knownTypes.Types)));
         }
 
         public T? Deserialize<T>(byte[] payload)
