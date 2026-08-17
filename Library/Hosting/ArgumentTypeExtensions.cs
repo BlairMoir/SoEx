@@ -32,12 +32,56 @@ internal static class ArgumentTypeExtensions
         if (targetType.IsEnum)
             return Enum.ToObject(targetType, value);
 
+
+
         var converter = TypeDescriptor.GetConverter(targetType);
         if (converter.CanConvertFrom(value.GetType()))
             return converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
 
+        if (converter.CanConvertFromWrappedProperty(targetType))
+            return  converter.ConvertFromWrappedProperty(targetType, value);
+
         return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
     }
+
+    private static bool CanConvertFromWrappedProperty(this TypeConverter converter, Type targetType)
+    {
+        var property = targetType.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
+
+        if (property is null)
+            return false;
+
+        var wrappedType = property.PropertyType;
+        return converter.CanConvertFrom(wrappedType);
+    }
+    private static object? ConvertFromWrappedProperty(this TypeConverter converter,Type targetType, object value)
+    {
+        var property = targetType.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
+
+        if (property is null)
+            throw new ArgumentException($"Property does not have a value ({targetType})");
+
+        var wrappedType = property.PropertyType;
+        var wrappedValue = value.ChangeType(wrappedType);
+
+        if (wrappedValue is null)
+            return null;
+
+        return converter.ConvertFrom(null, CultureInfo.InvariantCulture, wrappedValue);
+    }
+
+    private static object? ChangeType(this object value, Type wrappedType)
+    {
+        if(value is IConvertible && typeof(IConvertible).IsAssignableFrom(wrappedType))
+            return Convert.ChangeType(value,wrappedType, CultureInfo.InvariantCulture);
+
+        var converter = TypeDescriptor.GetConverter(wrappedType);
+        if (converter.CanConvertFrom(value.GetType()))
+            return converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
+
+        throw new InvalidCastException($"Cannot convert {value.GetType()} to {wrappedType}");
+    }
+
 
     internal static async Task<object?> TaskResult(this object value)
     {
@@ -46,8 +90,7 @@ internal static class ArgumentTypeExtensions
             await task;
             var property = task.GetType().GetProperty("Result", BindingFlags.Public | BindingFlags.Instance);
             if (property == null)
-                throw new InvalidOperationException("Task does not have a return value (" + task.GetType().ToString() +
-                                                    ")");
+                throw new InvalidOperationException($"Task does not have a return value ({task.GetType()})");
             return property.GetValue(task);
         }
         throw new ArgumentException("Value must be a task");
