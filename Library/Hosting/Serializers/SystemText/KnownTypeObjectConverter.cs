@@ -25,9 +25,13 @@ public class KnownTypeObjectConverter : JsonConverter<object>
             var discriminator = typeProperty.GetString();
             if (discriminator is not null && _registry.TryGetType(discriminator, out var type))
             {
-                return _registry.IsCollection(type)
-                    ? JsonSerializer.Deserialize(root.GetProperty("$values").GetRawText(), type, options)
-                    : JsonSerializer.Deserialize(root.GetRawText(), type, options);
+                if (_registry.IsCollection(type))
+                    return JsonSerializer.Deserialize(root.GetProperty("$values").GetRawText(), type, options);
+
+                if (root.TryGetProperty("$value", out var wrappedValue))
+                    return JsonSerializer.Deserialize(wrappedValue.GetRawText(), type, options);
+
+                return JsonSerializer.Deserialize(root.GetRawText(), type, options);
             }
 
             throw new JsonException($"Discriminator '{discriminator}' is not in KnownTypes.");
@@ -73,8 +77,16 @@ public class KnownTypeObjectConverter : JsonConverter<object>
         else
         {
             using var inner = JsonSerializer.SerializeToDocument(value, runtimeType, options);
-            foreach (var property in inner.RootElement.EnumerateObject())
-                property.WriteTo(writer);
+            if (inner.RootElement.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var property in inner.RootElement.EnumerateObject())
+                    property.WriteTo(writer);
+            }
+            else
+            {
+                writer.WritePropertyName("$value");
+                inner.RootElement.WriteTo(writer);
+            }
         }
         writer.WriteEndObject();
     }
