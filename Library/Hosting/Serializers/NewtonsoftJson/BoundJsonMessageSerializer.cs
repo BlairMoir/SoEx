@@ -29,7 +29,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 
         public byte[] Serialize<T>(T? @object)
         {
-            var utf8String = JsonConvert.SerializeObject(@object, jsonSerializerSettings);
+            var utf8String = JsonConvert.SerializeObject(@object, typeof(T), jsonSerializerSettings);
             return Encoding.UTF8.GetBytes(utf8String);
         }
     }
