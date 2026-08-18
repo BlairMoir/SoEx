@@ -16,6 +16,7 @@ namespace SoEx.Test
 
         Type[]? _policies;
         Type[]? _generics;
+        KnownTypes _knownTypes = new KnownTypes();
         TestExceptionMode _testExceptionMode = new TestExceptionMode();
 
         public void DefaultConfiguration(SoEx.Topology.System topology)
@@ -33,14 +34,19 @@ namespace SoEx.Test
             _policies = policies;
         }
 
+        public void DefaultKnownTypes(Type[] knownTypes)
+        {
+            _knownTypes = new KnownTypes(knownTypes);
+        }
+
         public void GenericRegistrations(Type[] generics)
         {
             _generics = generics;
         }
 
-        public async Task TestService<S>(Func<S, Task> callerFunc, SoEx.Topology.System? system = null) where S : notnull
+        public async Task TestService<S>(Func<S, Task> callerFunc, SoEx.Topology.System? system = null, KnownTypes? knownTypes = null) where S : notnull
         {
-            var container = BuildContainer(system);
+            var container = BuildContainer(system, knownTypes);
             using (var requestScope = container.BeginLifetimeScopeAsyncLocal())
             {
                 var proxy = requestScope.Resolve<S>();
@@ -48,7 +54,7 @@ namespace SoEx.Test
             }
         }
 
-        public async Task TestComponent<I>(Func<I, Task> callerFunc, SoEx.Topology.System? system = null) where I : class
+        public async Task TestComponent<I>(Func<I, Task> callerFunc, SoEx.Topology.System? system = null, KnownTypes? knownTypes = null) where I : class
         {
             var orginalTopo = system ?? _topology;
             var subsystemName = orginalTopo.SubSystems.First().Name;
@@ -58,7 +64,7 @@ namespace SoEx.Test
                 Clients = [new Client<I>() { Service = new InProcBinding<I>(subsystemName), SubSystem = subsystemName }],
                 Defaults = orginalTopo.Defaults
             };
-            var container = BuildContainer(newTopo);
+            var container = BuildContainer(newTopo, knownTypes);
             using (var requestScope = container.BeginLifetimeScopeAsyncLocal())
             {
                 var proxy = requestScope.Resolve<I>();
@@ -66,10 +72,10 @@ namespace SoEx.Test
             }
         }
 
-        private ILifetimeScope BuildContainer(SoEx.Topology.System? system)
+        private ILifetimeScope BuildContainer(SoEx.Topology.System? system, KnownTypes? knownTypes)
         {
             ContainerBuilder builder = new ContainerBuilder();
-            builder.RegisterSoEx(system ?? _topology,new KnownTypes());
+            builder.RegisterSoEx(system ?? _topology, knownTypes ?? _knownTypes);
             builder.RegisterType<LoggerFactory>()
                             .As<ILoggerFactory>()
                             .SingleInstance();
