@@ -36,14 +36,12 @@ namespace SoEx.Hosting.Serializers.Common
             }
         }
 
-
-
         private static string Discriminate(Type type)
         {
             if (type.IsArray)
                 return $"{type.GetElementType()!.FullName}[]";
 
-            if (type.IsGenericType)
+            if (type.IsGenericType && !type.ContainsGenericParameters)
             {
                 var definition = type.GetGenericTypeDefinition();
                 var args = type.GetGenericArguments();
@@ -52,8 +50,7 @@ namespace SoEx.Hosting.Serializers.Common
                 if (definition == typeof(HashSet<>))    return $"HashSet<{args[0].FullName}>";
                 if (definition == typeof(Dictionary<,>)) return $"Dictionary<{args[0].FullName};{args[1].FullName}>";
 
-                throw new InvalidOperationException(
-                    $"No discriminator rule for '{type}'. Add one when KnownCollections grows.");
+                return $"{definition.FullName}<{string.Join(";", args.Select(Discriminate))}>";
             }
 
             return type.FullName!;

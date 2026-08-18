@@ -32,8 +32,17 @@ public class ContractLookup
 
 
     private static NameAndNamespace? DtoName(Type type) =>
-        type.FullName is null ? null : new NameAndNamespace { Name = type.Name, Namespace = type.Namespace! };
+        type.FullName is null ? null : new NameAndNamespace { Name = XmlName(type), Namespace = type.Namespace! };
 
+
+    private static string XmlName(Type type)
+    {
+        if (!type.IsGenericType)
+            return type.Name;
+
+        var definition = type.Name[..type.Name.IndexOf('`')];
+        return definition + "Of" + string.Concat(type.GetGenericArguments().Select(XmlName));
+    }
 
     private static NameAndNamespace CollectionName(Type type)
     {
