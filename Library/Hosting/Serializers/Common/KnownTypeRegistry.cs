@@ -1,3 +1,5 @@
+using SoEx.Context;
+
 namespace SoEx.Hosting.Serializers.Common
 {
     public sealed class KnownTypeRegistry
@@ -8,6 +10,10 @@ namespace SoEx.Hosting.Serializers.Common
 
         public KnownTypeRegistry(IReadOnlyCollection<Type> knownTypes)
         {
+            Register(typeof(InvocationContext));
+            Register(typeof(EntryContext));
+            Register(typeof(PreviousEntryContext));
+
             foreach (var type in knownTypes)
                 Register(type);
 
