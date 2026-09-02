@@ -20,7 +20,7 @@ public class KnownTypeObjectConverter : JsonConverter<object>
         using var doc = JsonDocument.ParseValue(ref reader);
         var root = doc.RootElement;
 
-        if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("$type", out var typeProperty))
+        if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("_$type", out var typeProperty))
         {
             var discriminator = typeProperty.GetString();
             if (discriminator is not null && _registry.TryGetType(discriminator, out var type))
@@ -67,7 +67,7 @@ public class KnownTypeObjectConverter : JsonConverter<object>
             throw new JsonException($"Type '{runtimeType.FullName}' is not in KnownTypes.");
 
         writer.WriteStartObject();
-        writer.WriteString("$type", discriminator);
+        writer.WriteString("_$type", discriminator);
 
         if (_registry.IsCollection(runtimeType))
         {
