@@ -105,7 +105,7 @@ namespace SoEx.Hosting.Default
         {
             var callerFrameworkContext = (FrameworkContext)_callerFrameworkContext;
             callerFrameworkContext.Deserialize(invocationRequest.FrameworkContext);
-            InvocationContext invocationContext = new InvocationContext(typeof(I), invocationRequest.MethodName);
+            InvocationContext invocationContext = new InvocationContext(typeof(I).FullName ?? typeof(I).Name, invocationRequest.MethodName);
             FrameworkContext operationFrameworkContext = (FrameworkContext)requestLifetime.Resolve<IFrameworkContext>();
             operationFrameworkContext.SetOrReplace(invocationContext);
 
