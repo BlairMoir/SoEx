@@ -20,10 +20,20 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
             return JsonConvert.DeserializeObject<T>(utf8String, jsonSerializerSettings);
         }
 
+        public T? Deserialize<T>(byte[] payload, Type contractType, string? methodName)
+        {
+            return Deserialize<T>(payload);
+        }
+
         public byte[] Serialize<T>(T? @object)
         {
             var utf8String = JsonConvert.SerializeObject(@object, jsonSerializerSettings);
             return Encoding.UTF8.GetBytes(utf8String);
+        }
+
+        public byte[] Serialize<T>(T? @object, Type contractType, string methodName)
+        {
+            return Serialize(@object);
         }
     }
 }

@@ -31,6 +31,11 @@ public class DataContractMessageSerializer : IMessageSerializer
         }
     }
 
+    public T? Deserialize<T>(byte[] payload, Type contractType, string? methodName)
+    {
+        return Deserialize<T>(payload);
+    }
+
     public byte[] Serialize<T>(T? @object)
     {
         StringWriter stringWriter = new StringWriter();
@@ -42,6 +47,11 @@ public class DataContractMessageSerializer : IMessageSerializer
         }
         var writtenString = stringWriter.ToString();
         return Encoding.UTF8.GetBytes(writtenString);
+    }
+
+    public byte[] Serialize<T>(T? @object, Type contractType, string methodName)
+    {
+        return Serialize(@object);
     }
 }
 
