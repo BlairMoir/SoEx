@@ -16,10 +16,10 @@ namespace SoEx.Hosting.Serializers.SystemText
         public JsonMessageSerializer(KnownTypes knownTypes)
         {
             _knownTypes = knownTypes.Types.ToArray();
-            _options = Build(_knownTypes, []);
+            _options = Build(_knownTypes, [], null);
         }
 
-        private JsonSerializerOptions Build(Type[] knownTypes, Type[] declaredTypes)
+        private JsonSerializerOptions Build(Type[] knownTypes, Type[] declaredTypes, Type? returnType)
         {
             var options = new JsonSerializerOptions();
             var resolver = new DefaultJsonTypeInfoResolver();
@@ -27,6 +27,9 @@ namespace SoEx.Hosting.Serializers.SystemText
 
             if(declaredTypes.Length > 0)
                 resolver.Modifiers.Add(info => ApplyArgumentBinding(declaredTypes, info));
+
+            if(returnType is not null)
+                resolver.Modifiers.Add(info => ApplyResponseBinding(returnType, info));
 
             options.TypeInfoResolver = resolver;
             options.Converters.Add(new KnownTypeObjectConverter(new KnownTypeRegistry(knownTypes)));
@@ -44,6 +47,19 @@ namespace SoEx.Hosting.Serializers.SystemText
             if (arguments is not null)
             {
                 arguments.CustomConverter = new ArgumentsConverter(declaredTypes);
+            }
+        }
+
+        private void ApplyResponseBinding(Type returnType, JsonTypeInfo info)
+        {
+            if (info.Type != typeof(InvocationResponse))
+                return;
+
+            JsonPropertyInfo? response = info.Properties.FirstOrDefault(p => p.Name == nameof(InvocationResponse.Response));
+
+            if (response is not null)
+            {
+                response.CustomConverter = new ResponseConverter(returnType);
             }
         }
 
@@ -76,11 +92,12 @@ namespace SoEx.Hosting.Serializers.SystemText
                 return _options;
 
             Type[] declared = ContractMethod.ParameterTypes(contract, methodName);
+            Type? returnType = ContractMethod.ReturnType(contract, methodName);
 
-            if (declared.Length == 0)
+            if (declared.Length == 0 && returnType is null)
                 return _options;
 
-            var options = _optionCache.GetOrAdd((contract, methodName), _ => Build(_knownTypes, declared));
+            var options = _optionCache.GetOrAdd((contract, methodName), _ => Build(_knownTypes, declared, returnType));
             return options;
         }
 

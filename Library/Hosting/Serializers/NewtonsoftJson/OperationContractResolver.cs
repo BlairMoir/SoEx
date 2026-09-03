@@ -5,13 +5,15 @@ using SoEx.Abstractions;
 
 namespace SoEx.Hosting.Serializers.NewtonsoftJson;
 
-public class ArgumentContractResolver : DefaultContractResolver
+public class OperationContractResolver : DefaultContractResolver
 {
     Type[] _declaredTypes;
+    Type? _returnType;
 
-    public ArgumentContractResolver(Type[] declaredTypes)
+    public OperationContractResolver(Type[] declaredTypes, Type? returnType)
     {
         _declaredTypes = declaredTypes;
+        _returnType = returnType;
         NamingStrategy = new CamelCaseNamingStrategy();
     }
 
@@ -21,6 +23,12 @@ public class ArgumentContractResolver : DefaultContractResolver
         if (member.DeclaringType == typeof(InvocationRequest) && member.Name == nameof(InvocationRequest.Arguments))
         {
             property.Converter = new ArgumentsConverter(_declaredTypes);
+        }
+
+        if ( _returnType != null && member.DeclaringType == typeof(InvocationResponse) &&
+            member.Name == nameof(InvocationResponse.Response))
+        {
+            property.Converter = new ResponseConverter(_returnType);
         }
 
         return property;

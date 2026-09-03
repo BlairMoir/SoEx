@@ -50,4 +50,26 @@ public static class ContractMethod
         return reader.ValueTextEquals("methodName"u8)
                || reader.ValueTextEquals("MethodName"u8);
     }
+
+    internal static Type? ReturnType(Type contract, string? methodName)
+    {
+        if (methodName is null)
+            return null;
+
+        var method = contract.GetMethod(methodName);
+        if (method is null)
+            return null;
+
+        Type returnType = method.ReturnType;
+
+        if (!returnType.IsGenericType || returnType.GetGenericTypeDefinition() != typeof(Task<>))
+            return null;
+
+        Type result = returnType.GetGenericArguments()[0];
+
+        if (result == typeof(object))
+            return null;
+
+        return result;
+    }
 }

@@ -15,16 +15,16 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
         public BoundJsonMessageSerializer(KnownTypes knownTypes)
         {
             _knownTypes = knownTypes.Types.ToArray();
-            jsonSerializerSettings = Build(_knownTypes,[]);
+            jsonSerializerSettings = Build(_knownTypes,[], null);
         }
 
-        private JsonSerializerSettings Build(Type[] knownTypes, Type[] declaredTypes)
+        private JsonSerializerSettings Build(Type[] knownTypes, Type[] declaredTypes, Type? returnType)
         {
             return new JsonSerializerSettings()
             {
                 TypeNameHandling = TypeNameHandling.Auto,
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead,
-                ContractResolver = new ArgumentContractResolver(declaredTypes),
+                ContractResolver = new OperationContractResolver(declaredTypes, returnType),
                 SerializationBinder = new SerializationBinder(new KnownTypeRegistry(knownTypes)),
             };
         }
@@ -35,11 +35,12 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
                 return jsonSerializerSettings;
 
             Type[] declared = ContractMethod.ParameterTypes(contract, methodName);
+            Type? returnType = ContractMethod.ReturnType(contract, methodName);
 
-            if (declared.Length == 0)
+            if (declared.Length == 0 && returnType is null)
                 return jsonSerializerSettings;
 
-            var options = _settingsCache.GetOrAdd((contract, methodName), _ => Build(_knownTypes, declared));
+            var options = _settingsCache.GetOrAdd((contract, methodName), _ => Build(_knownTypes, declared, returnType));
             return options;
         }
 
