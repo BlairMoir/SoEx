@@ -1,3 +1,4 @@
+using SoEx.Context;
 using SoEx.Hosting.Serializers.Common;
 
 namespace SoEx.Hosting.Serializers.DataContract;
@@ -12,6 +13,10 @@ public class ContractLookup
 
     public ContractLookup(IReadOnlyCollection<Type> knownTypes)
     {
+        Register(typeof(InvocationContext),DtoName(typeof(InvocationContext)));
+        Register(typeof(EntryContext), DtoName(typeof(EntryContext)));
+        Register(typeof(PreviousEntryContext), DtoName(typeof(PreviousEntryContext)));
+
         foreach (var type in knownTypes)
             Register(type, DtoName(type));
 
