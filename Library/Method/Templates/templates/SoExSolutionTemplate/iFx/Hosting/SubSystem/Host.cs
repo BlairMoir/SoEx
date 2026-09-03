@@ -92,7 +92,7 @@ public static class Host
             }
         }
 
-        return systemBuilder.Build( new SoEx.Hosting.Default.DefaultPipeline(dtoAndContextTypes));
+        return systemBuilder.Build();
     }
 
     private static IEnumerable<Type> FilterEvents(Type[] interfaces, Type[] serviceFacets, Type theService)
