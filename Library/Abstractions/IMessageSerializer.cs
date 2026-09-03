@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace SoEx.Abstractions
 {
     public interface IMessageSerializer
