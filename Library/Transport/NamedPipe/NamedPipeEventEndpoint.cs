@@ -3,23 +3,23 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Autofac;
 using SoEx.Abstractions;
+using SoEx.Endpoint;
 using SoEx.Topology;
 
 namespace SoEx.Transport.NamedPipe
 {
     public class NamedPipeEventEndpoint<I> : IEndpoint where I : class
     {
+
         readonly Channel<byte[]> _channel = System.Threading.Channels.Channel.CreateBounded<byte[]>(1000);
-        readonly IMessageSerializer _serializer;
-        readonly IHostAndClientLookup _subsystemlifeTimeScope;
+        readonly IEndpointPipeline _endpointPipeLine;
         NamedPipeEventBinding<I>? _binding;
         IIpcServer? namedPipeServer;
 
 
-        public NamedPipeEventEndpoint(IMessageSerializer serializer, IHostAndClientLookup subsystemlifeTimeScope)
+        public NamedPipeEventEndpoint(IEndpointPipeline endpointPipeLine)
         {
-            _serializer = serializer;
-            _subsystemlifeTimeScope = subsystemlifeTimeScope;
+            _endpointPipeLine = endpointPipeLine;
         }
 
         public void Bind(Binding binding, string componentName)
@@ -64,19 +64,11 @@ namespace SoEx.Transport.NamedPipe
 
         private async Task<byte[]> DispatchAsync(byte[] serializedRequest)
         {
-            InvocationRequest request = _serializer.Deserialize<InvocationRequest>(serializedRequest)!;
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(NamedPipeEndpoint<I>)}", ActivityKind.Server, request.ActivityId))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(NamedPipeEndpoint<I>)}", ActivityKind.Server))
             {
                 try
                 {
-                    var subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
-                    using (Autofac.ILifetimeScope requestScope = subSystemHost.BeginRequestLifetimeScope())
-                    {
-                        var dispatcher = requestScope.Resolve<IDispatcher>();
-                        Debug.Assert(request is not null);
-                        var response = await dispatcher.Dispatch<I>(request);
-                        return _serializer.Serialize(response);
-                    }
+                    return await _endpointPipeLine.ServicePipeLine<I>(serializedRequest, _binding?.Pipeline, activity);
                 }
                 catch
                 {
