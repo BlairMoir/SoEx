@@ -1,7 +1,9 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SoEx.Abstractions;
 using SoEx.Context;
+using SoEx.Hosting;
 using SoEx.Method.Conventions;
 using SoEx.Topology;
 using SoEx.Transport.InProc;
@@ -19,11 +21,12 @@ public static class Host
         var namespaceParts = assemblyName!.Split(".");
         string subSystem = namespaceParts[0];
         string companyName = namespaceParts[1];
+        var dtoAndContextTypes = Scan.DtoAndContextTypes(companyName);
 
         var topology = BuildSystem(subSystem, companyName, scd);
 
         HostApplicationBuilder serviceHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        serviceHostBuilder.SoEx(topology);
+        serviceHostBuilder.SoEx(topology, new KnownTypes(dtoAndContextTypes));
         serviceHostBuilder.Services.InProcClient();
         serviceHostBuilder.Services.NamedPipedClient();
         serviceHostBuilder.Services.ConfigureLogging();
@@ -43,7 +46,6 @@ public static class Host
         SystemBuilder systemBuilder = new SystemBuilder();
 
         var serviceTypes = Scan.ServiceTypes(companyName);
-        var dtoAndContextTypes = Scan.DtoAndContextTypes(companyName);
         var managerType = serviceTypes.Single(w => w.Name.StartsWith(subSystem) && w.Name.EndsWith("Manager"));
         var engineTypes = serviceTypes.Where(w => w.Name.EndsWith("Engine"));
         var accessTypes = serviceTypes.Where(w => w.Name.EndsWith("Access"));

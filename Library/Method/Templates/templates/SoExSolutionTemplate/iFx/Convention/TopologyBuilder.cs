@@ -10,7 +10,6 @@ public static class TopologyBuilder
         SystemBuilder systemBuilder = new SystemBuilder();
 
         var serviceTypes = Scan.ServiceTypes(companyName);
-        var dtoAndContextTypes = Scan.DtoAndContextTypes(companyName);
         var managerTypes = serviceTypes.Where(w => w.Name.EndsWith("Manager"));
         var engineTypes = serviceTypes.Where(w => w.Name.EndsWith("Engine"));
         var accessTypes = serviceTypes.Where(w => w.Name.EndsWith("Access"));

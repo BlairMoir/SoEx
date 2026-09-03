@@ -1,6 +1,7 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SoEx.Abstractions;
 using SoEx.Context;
 using SoEx.Hosting;
 using SoEx.Topology;
@@ -17,13 +18,14 @@ public static class Host
         var namespaceParts = assemblyName!.Split(".");
         string companyName = namespaceParts[0];
         var hostTopology = TopologyBuilder.BuildSystem(companyName, scd);
+        var dtoAndContextTypes = Scan.DtoAndContextTypes(companyName);
         var clientTopology = BuildClients(hostTopology);
         var contextPolicies = Scan.ContextPolicyTypes(companyName);
 
         HostApplicationBuilder serviceHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        serviceHostBuilder.SoEx(hostTopology);
+        serviceHostBuilder.SoEx(hostTopology, new KnownTypes(dtoAndContextTypes));
         HostApplicationBuilder clientHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        clientHostBuilder.SoEx(clientTopology);
+        clientHostBuilder.SoEx(clientTopology, new KnownTypes(dtoAndContextTypes));
 
         CommonServices(contextPolicies, serviceHostBuilder.Services, clientHostBuilder.Services);
         serviceHostBuilder.Services.ConfigureTelemetry();

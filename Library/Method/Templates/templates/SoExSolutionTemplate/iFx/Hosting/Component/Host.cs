@@ -2,6 +2,7 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SoEx.Abstractions;
 using SoEx.Context;
 using SoEx.Hosting;
 using SoEx.Topology;
@@ -76,7 +77,7 @@ public static class Host
 
 
         HostApplicationBuilder serviceHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        serviceHostBuilder.SoEx(host);
+        serviceHostBuilder.SoEx(host, new KnownTypes(dtoAndContextTypes));
         serviceHostBuilder.Services.NamedPipedClient();
         serviceHostBuilder.Services.ConfigureLogging();
         serviceHostBuilder.Services.ConfigureTelemetry();
