@@ -24,7 +24,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
             {
                 TypeNameHandling = TypeNameHandling.Auto,
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead,
-                ContractResolver = new ArgumentContractResolver(knownTypes),
+                ContractResolver = new ArgumentContractResolver(declaredTypes),
                 SerializationBinder = new SerializationBinder(new KnownTypeRegistry(knownTypes)),
             };
         }
