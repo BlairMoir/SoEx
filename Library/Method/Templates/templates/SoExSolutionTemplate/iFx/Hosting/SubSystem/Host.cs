@@ -23,6 +23,7 @@ public static class Host
         var topology = BuildSystem(subSystem, companyName, scd);
 
         HostApplicationBuilder serviceHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
+        serviceHostBuilder.SoEx(topology);
         serviceHostBuilder.Services.InProcClient();
         serviceHostBuilder.Services.NamedPipedClient();
         serviceHostBuilder.Services.ConfigureLogging();
