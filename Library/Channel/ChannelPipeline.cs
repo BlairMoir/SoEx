@@ -34,7 +34,7 @@ namespace SoEx.Channel
                 Type protectorType = channel.Pipeline?.MessageProtection ?? typeof(IMessageProtection);
                 var protector =  (IMessageProtection)_scope.Resolve(protectorType);
                 var serializer = (IMessageSerializer)_scope.Resolve(serializerType);
-                byte[] serializedRequest = serializer.Serialize(request);
+                byte[] serializedRequest = serializer.Serialize(request, channel.Contract, request.MethodName);
                 byte[] protectedRequest = await protector.Protect(serializedRequest, request.MethodName).ConfigureAwait(false);
                 byte[] protectedResponse = await channel.InvokeResult(protectedRequest).ConfigureAwait(false);
                 byte[] serializedResponse = await protector.Unprotect(protectedResponse).ConfigureAwait(false);
@@ -44,7 +44,7 @@ namespace SoEx.Channel
                     return new InvocationResponse();
                 }
 
-                var deserializedResponse = serializer.Deserialize<InvocationResponse>(serializedResponse);
+                var deserializedResponse = serializer.Deserialize<InvocationResponse>(serializedResponse, channel.Contract, request.MethodName);
                 Debug.Assert(deserializedResponse is not null);
                 return deserializedResponse;
             }

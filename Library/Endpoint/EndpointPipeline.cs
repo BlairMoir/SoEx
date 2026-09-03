@@ -39,12 +39,12 @@ namespace SoEx.Endpoint
                     var protector = (IMessageProtection)requestScope.Resolve(protectorType);
 
                     byte[] serializedRequest = await protector.Unprotect(payload);
-                    InvocationRequest? request = serializer.Deserialize<InvocationRequest>(serializedRequest);
+                    InvocationRequest? request = serializer.Deserialize<InvocationRequest>(serializedRequest, typeof(I));
                     using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(EndpointPipeline)}", ActivityKind.Server, request?.ActivityId))
                     {
                         Debug.Assert(request is not null);
                         var response = await dispatcher.Dispatch<I>(request);
-                        byte[] serializedResponse = serializer.Serialize(response);
+                        byte[] serializedResponse = serializer.Serialize(response, typeof(I), request.MethodName);
                         byte[] protectedResponse = await protector.Protect(serializedResponse);
                         return protectedResponse;
                     }
