@@ -17,6 +17,8 @@ namespace SoEx.Transport.NATS
         readonly IMessageSerializer _serializer;
         NatsBinding<I>? _natsBinding;
 
+        public Type Contract => typeof(I);
+
         public NatsChannel(IMessageSerializer serializer)
         {
             _serializer = serializer;

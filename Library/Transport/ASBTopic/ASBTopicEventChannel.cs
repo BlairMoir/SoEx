@@ -16,6 +16,8 @@ namespace SoEx.Transport.ASBTopic
         private ServiceBusClient? _client;
         ServiceBusSender? _sender;
 
+        public Type Contract => typeof(I);
+
         public ASBTopicEventChannel(IMessageSerializer serializer)
         {
             _serializer = serializer;

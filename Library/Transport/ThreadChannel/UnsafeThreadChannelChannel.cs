@@ -11,6 +11,8 @@ namespace SoEx.Transport.ThreadChannel
         private readonly ChannelWriter<byte[]> _writer;
         UnsafeThreadChannelChannel<I>? _unsafeThreadChannelChannel;
 
+        public Type Contract => typeof(I);
+
         public UnsafeThreadChannelChannel(IMessageSerializer serializer, UnsafeThreadEventChannel<I> channel)
         {
             _serializer = serializer;

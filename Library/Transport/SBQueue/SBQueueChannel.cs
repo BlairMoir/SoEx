@@ -12,6 +12,8 @@ namespace SoEx.Transport.SBQueue
         private ServiceBusClient? client;
         ServiceBusSender? sender;
 
+        public Type Contract => typeof(I);
+
         public SBQueueChannel(IMessageSerializer serializer)
         {
             _serializer = serializer;

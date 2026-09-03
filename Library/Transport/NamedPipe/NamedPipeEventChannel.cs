@@ -13,6 +13,8 @@ namespace SoEx.Transport.NamedPipe
         readonly IMessageSerializer _serializer;
         NamedPipeEventBinding<I>? _namedPipeBinding;
 
+        public Type Contract => typeof(I);
+
         public NamedPipeEventChannel(IMessageSerializer serializer)
         {
             _serializer = serializer;

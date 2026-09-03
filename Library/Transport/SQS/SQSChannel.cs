@@ -10,6 +10,8 @@ namespace SoEx.Transport.SQS
         AmazonSQSClient? _client;
         SQSBinding<I>? _sqsBinding;
 
+        public Type Contract => typeof(I);
+
         public void Bind(Binding binding)
         {
             if (binding is SQSBinding<I> sqsBinding)

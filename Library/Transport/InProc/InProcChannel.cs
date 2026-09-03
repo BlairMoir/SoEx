@@ -12,6 +12,8 @@ namespace SoEx.Transport.InProc
         InProcBinding<I>? _inProcBinding;
         readonly InProcListeners _listeners;
 
+        public Type Contract => typeof(I);
+
         public InProcChannel(ILifetimeScope scope, InProcListeners listeners)
         {
             _scope = scope;

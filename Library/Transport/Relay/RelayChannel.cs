@@ -11,6 +11,8 @@ namespace SoEx.Relay
         HttpClient _httpClient = new HttpClient();
         readonly IMessageSerializer _serializer;
 
+        public Type Contract => typeof(I);
+
         public RelayChannel(IMessageSerializer serializer)
         {
             _serializer = serializer;

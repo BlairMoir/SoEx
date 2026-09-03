@@ -12,6 +12,8 @@ namespace SoEx.Transport.Grpc
         GrpcBinding<I>? _grpcBinding;
         static readonly ConcurrentDictionary<Uri, Lazy<GrpcClient>> s_channels = new();
 
+        public Type Contract => typeof(I);
+
         public void Bind(Binding binding)
         {
             if (binding is GrpcBinding<I> grpcBinding)
