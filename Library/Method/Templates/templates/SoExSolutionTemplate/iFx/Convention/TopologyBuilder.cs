@@ -50,6 +50,6 @@ public static class TopologyBuilder
                 }
             }
         }
-        return systemBuilder.Build(new SoEx.Hosting.Default.DefaultPipeline(dtoAndContextTypes));
+        return systemBuilder.Build();
     }
 }
