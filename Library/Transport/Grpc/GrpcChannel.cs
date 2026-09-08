@@ -11,6 +11,9 @@ namespace SoEx.Transport.Grpc
     {
         GrpcBinding<I>? _grpcBinding;
         static readonly ConcurrentDictionary<Uri, Lazy<GrpcClient>> s_channels = new();
+        static readonly ConcurrentDictionary<Uri, long> s_lastFailure = new();
+        private const long FailureMemoryMillis = 45000;
+
 
         public Type Contract => typeof(I);
 
@@ -33,19 +36,21 @@ namespace SoEx.Transport.Grpc
                     Debug.Assert(_grpcBinding is not null);
 
                     // sequential failover if a backend is down
-                    Uri[] uris = _grpcBinding.Transport.Address.Uris;
+                    long now = Environment.TickCount64;
+                    Uri[] uris = _grpcBinding.Transport.Address.Uris
+                        .OrderBy( u => HasFailures(u, now)).ToArray();
                     foreach (var uri in uris[..^1])
                     {
                         try
                         {
-                            return await InvokeAsync(payload, uri).ConfigureAwait(false);
+                            return await InvokeAsync(payload, uri, activity).ConfigureAwait(false);
                         }
-                        catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable )
+                        catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
                         {
                             // continue if the backend is unreachable
                         }
                     }
-                    return await InvokeAsync(payload, uris[^1]).ConfigureAwait(false);
+                    return await InvokeAsync(payload, uris[^1],activity).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -55,12 +60,45 @@ namespace SoEx.Transport.Grpc
             }
         }
 
-        private async Task<byte[]> InvokeAsync(byte[] payload, Uri uri)
+        static bool HasFailures(Uri uri, long now)
         {
-            using (var call = InvokeGrpcCall(uri, payload))
+            if (!s_lastFailure.TryGetValue(uri, out var failedAt))
+                return false;
+
+            if (now - failedAt < FailureMemoryMillis)
+                return true;
+
+            return !s_lastFailure.TryUpdate(uri, now, failedAt);
+        }
+
+        private async Task<byte[]> InvokeAsync(byte[] payload, Uri uri, Activity? activity)
+        {
+            activity?.SetTag("server.address", uri.ToString());
+            try
             {
-                return await call.ResponseAsync.ConfigureAwait(false);
+                using (var call = InvokeGrpcCall(uri, payload))
+                {
+                    var result = await call.ResponseAsync.ConfigureAwait(false);
+                    ClearFailure(uri);
+                    return result;
+                }
             }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
+            {
+                s_lastFailure[uri] = Environment.TickCount64;
+                throw;
+            }
+            catch (RpcException)
+            {
+                ClearFailure(uri);
+                throw;
+            }
+        }
+
+        private static void ClearFailure(Uri uri)
+        {
+            if(s_lastFailure.ContainsKey(uri))
+                s_lastFailure.TryRemove(uri, out _);
         }
 
         private AsyncUnaryCall<byte[]> InvokeGrpcCall(Uri uri, byte[] payload)
