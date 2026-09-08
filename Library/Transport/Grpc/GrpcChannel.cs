@@ -49,7 +49,7 @@ namespace SoEx.Transport.Grpc
         {
             var grpcChannel = GrpcClientChannel();
             var callInvoker = grpcChannel.CreateCallInvoker();
-            var call = callInvoker.AsyncUnaryCall(GrpcInvoke.Descriptor, host: null, new CallOptions(), payload);
+            var call = callInvoker.AsyncUnaryCall(GrpcInvoke<I>.Descriptor, host: null, new CallOptions(), payload);
             return call;
         }
 

@@ -1,6 +1,6 @@
 namespace SoEx.Transport.Grpc.Protection;
 
-public class ClearTextGrpc : GrpcProtection
+public record ClearTextGrpc : GrpcProtection
 {
 
 }

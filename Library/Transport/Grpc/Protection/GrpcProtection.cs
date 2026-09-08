@@ -1,6 +1,6 @@
 namespace SoEx.Transport.Grpc.Protection;
 
-public abstract class GrpcProtection
+public abstract record GrpcProtection
 {
 
 }
