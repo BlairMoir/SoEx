@@ -65,7 +65,8 @@ public class GrpcEndpointListener
     {
         if (_listener is null)
         {
-            var builder = WebApplication.CreateSlimBuilder();
+            var builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions());
+            builder.WebHost.UseKestrelCore();
             builder.WebHost.ConfigureKestrel(ConfigureKestrel);
             builder.Services.AddGrpc();
             foreach (var provider in _dispatchProviders)
