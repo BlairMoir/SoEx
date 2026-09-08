@@ -32,7 +32,7 @@ namespace SoEx.Transport.NamedPipe
         {
             namedPipeServer = ServerFactory.Create(NamedPipeCallbackAsync, new ServerFactory.ServerOptions()
             {
-                Name = _binding?.Transport.Address.Host,
+                Name = _binding?.Transport.Address.Uri.Host,
                 AllowMultipleClients = true,
             });
             return Task.CompletedTask;

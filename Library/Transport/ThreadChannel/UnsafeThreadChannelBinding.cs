@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using SoEx.Topology;
 
 namespace SoEx.Transport.ThreadChannel
 {
@@ -9,7 +10,7 @@ namespace SoEx.Transport.ThreadChannel
         {
             Contract = typeof(I);
             SubSystem = "NotSet";
-            Transport = new UnsafeThreadChannelTransport() { Address = new Uri($"soex.channel://{typeof(I)}") };
+            Transport = new UnsafeThreadChannelTransport() { Address = new Address.Single(new Uri($"soex.channel://{typeof(I)}")) };
         }
     }
 }

@@ -37,7 +37,7 @@ namespace SoEx.Transport.InProc
                 try
                 {
 
-                    InProcEndpoint<I> host = _listeners.ForAddress<I>(_inProcBinding?.Transport.Address ?? throw new InvalidOperationException("Binding must be set before a channle is used"));
+                    InProcEndpoint<I> host = _listeners.ForAddress<I>(_inProcBinding?.Transport.Address.Uri ?? throw new InvalidOperationException("Binding must be set before a channle is used"));
                     byte[] response = await host.Send(payload).ConfigureAwait(false);
                     return response;
                 }

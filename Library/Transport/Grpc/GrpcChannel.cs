@@ -56,7 +56,7 @@ namespace SoEx.Transport.Grpc
         private GrpcClient GrpcClientChannel()
         {
             Debug.Assert(_grpcBinding is not null);
-            return s_channels.GetOrAdd(_grpcBinding.Transport.Address, LazyClient).Value;
+            return s_channels.GetOrAdd(_grpcBinding.Transport.Address.Uri, LazyClient).Value;
         }
 
         private static Lazy<GrpcClient> LazyClient(Uri uri) => new Lazy<GrpcClient>(() => GrpcClient.ForAddress(uri));

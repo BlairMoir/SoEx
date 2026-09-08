@@ -36,7 +36,7 @@ namespace SoEx.Relay
                 {
                     Debug.Assert(_relayBinding is not null);
                     var tokenProvider = _relayBinding.CreateTokenProvider();
-                    var uri = new Uri(_relayBinding.Transport.Address.OriginalString.Replace("sb://", "https://"));
+                    var uri = new Uri(_relayBinding.Transport.Address.Uri.OriginalString.Replace("sb://", "https://"));
                     var token = tokenProvider.GetTokenAsync(uri.AbsoluteUri, TimeSpan.FromHours(1)).Result.TokenString;
 
                     var httpRequest = new HttpRequestMessage()

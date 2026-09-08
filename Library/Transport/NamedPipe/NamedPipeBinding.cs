@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using SoEx.Topology;
 
 namespace SoEx.Transport.NamedPipe
 {
@@ -9,7 +10,7 @@ namespace SoEx.Transport.NamedPipe
         {
             Contract = typeof(I);
             SubSystem = subSystem;
-            Transport = new NamedPipeTransport() { Address = new Uri($"soex.namedpipe://{SubSystem}-{typeof(I)}") };
+            Transport = new NamedPipeTransport() { Address = new Address.Single(new Uri($"soex.namedpipe://{SubSystem}-{typeof(I)}")) };
         }
     }
 }

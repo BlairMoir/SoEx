@@ -36,7 +36,7 @@ namespace SoEx.Transport.InProc
         public Task Listen()
         {
             ArgumentNullException.ThrowIfNull(_binding, "Binding must be set before listening");
-            _listeners.Register(_binding.Transport.Address, this);
+            _listeners.Register(_binding.Transport.Address.Uri, this);
             return Task.CompletedTask;
         }
 

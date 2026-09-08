@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+using SoEx.Topology;
 
 namespace SoEx.Transport.ASBTopic
 {
@@ -18,10 +19,11 @@ namespace SoEx.Transport.ASBTopic
 
         public TopicConfig Config => _topicConfig;
 
-        static Uri AddressFrom(TopicConfig config)
+        static Address AddressFrom(TopicConfig config)
         {
             var match = Regex.Match(config.ConnectionString, @"Endpoint=(?<ep>[^;]+)",RegexOptions.IgnoreCase);
-            return new Uri(match.Success ? match.Groups["ep"].Value : config.ConnectionString);
+            var uri = new Uri(match.Success ? match.Groups["ep"].Value : config.ConnectionString);
+            return new Address.Single(uri);
         }
     }
 }

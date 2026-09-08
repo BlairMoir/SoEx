@@ -1,14 +1,15 @@
 
 using System.Diagnostics.CodeAnalysis;
+using SoEx.Topology;
 using SoEx.Transport.Grpc.Protection;
 
 namespace SoEx.Transport.Grpc
 {
     public class GrpcBinding<I> : Topology.Binding
     {
-        private readonly GrpcConfig _config;
+        private readonly GrpcConfig[] _config;
         [SetsRequiredMembers]
-        public GrpcBinding(string subsystem, GrpcConfig config)
+        public GrpcBinding(string subsystem, GrpcConfig[] config)
         {
             SubSystem = subsystem;
             Contract = typeof(I);
@@ -17,19 +18,26 @@ namespace SoEx.Transport.Grpc
             _config = config;
         }
 
-        public GrpcConfig Config => _config;
+        public GrpcConfig[] Config => _config;
 
-        private Uri TransportAddress(GrpcConfig config)
+        private Address TransportAddress(GrpcConfig[] config)
         {
-            string addressScheme = config.Protection switch
+            List<Uri> uriList = new List<Uri>();
+            foreach (var configItem in config)
             {
-                ClearTextGrpc => "http",
-                GrpcCertificate => "https",
-                GrpcCertificateFromPath => "https",
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                string addressScheme = configItem.Protection switch
+                {
+                    ClearTextGrpc => "http",
+                    GrpcCertificate => "https",
+                    GrpcCertificateFromPath => "https",
+                    _ => throw new ArgumentOutOfRangeException()
+                };
 
-            return new Uri($"{addressScheme}://{config.Host}:{config.Port}");
+                var uri = new Uri($"{addressScheme}://{configItem.Host}:{configItem.Port}");
+                uriList.Add(uri);
+            }
+
+            return new Address.Many(uriList.ToArray());
         }
     }
 }

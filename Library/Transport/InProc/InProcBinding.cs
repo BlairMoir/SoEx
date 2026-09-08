@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using SoEx.Topology;
 
 namespace SoEx.Transport.InProc
 {
@@ -9,7 +10,7 @@ namespace SoEx.Transport.InProc
         {
             Contract = typeof(I);
             SubSystem = subSystem;
-            Transport = new InProcTransport() { Address = new Uri($"soex.inproc://{SubSystem}-{typeof(I)}") };
+            Transport = new InProcTransport() { Address = new Address.Single(new Uri($"soex.inproc://{SubSystem}-{typeof(I)}")) };
         }
     }
 }

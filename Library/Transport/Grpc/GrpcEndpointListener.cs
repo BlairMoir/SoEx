@@ -37,7 +37,15 @@ public class GrpcEndpointListener
     private WebApplication? _listener;
     private List<IServiceMethodProvider<GrpcEndpointService>> _dispatchProviders = new();
 
-    internal void Bind(GrpcConfig config)
+    internal void Bind(GrpcConfig[] configs)
+    {
+        foreach (var config in configs)
+        {
+            Bind(config);
+        }
+    }
+
+    private void Bind(GrpcConfig config)
     {
         var listenAddress = ListenAddress.From(config);
         if (_listenEndpoints.TryGetValue(listenAddress, out var protection))

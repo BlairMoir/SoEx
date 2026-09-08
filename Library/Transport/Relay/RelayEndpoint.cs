@@ -37,7 +37,7 @@ namespace SoEx.Relay
         {
             if (_relayBinding != null)
             {
-                _listener = new HybridConnectionListener(_relayBinding.Transport.Address, _relayBinding.CreateTokenProvider());
+                _listener = new HybridConnectionListener(_relayBinding.Transport.Address.Uri, _relayBinding.CreateTokenProvider());
                 _listener.Connecting += (o, e) => { _logger.LogInformation("Connecting"); };
                 _listener.Offline += (o, e) => { _logger.LogInformation("Offline"); };
                 _listener.Online += (o, e) => { _logger.LogInformation("Online"); };

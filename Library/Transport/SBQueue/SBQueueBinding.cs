@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using SoEx.Topology;
 
 namespace SoEx.Transport.SBQueue
 {
@@ -10,7 +11,7 @@ namespace SoEx.Transport.SBQueue
         {
             Contract = typeof(I);
             SubSystem = "NotSet";
-            Transport = new SBQueueTransport() { Address = new Uri($"sb://{config.SBNamespace}.servicebus.windows.net/") };
+            Transport = new SBQueueTransport() { Address = new Address.Single(new Uri($"sb://{config.SBNamespace}.servicebus.windows.net/")) };
             _config = config;
         }
 

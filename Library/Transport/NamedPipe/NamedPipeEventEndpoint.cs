@@ -35,7 +35,7 @@ namespace SoEx.Transport.NamedPipe
             var task = Task.Factory.StartNew(ReadChannelAsync, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             namedPipeServer = ServerFactory.Create(NamedPipeCallbackAsync, new ServerFactory.ServerOptions()
             {
-                Name = _binding?.Transport.Address.Host,
+                Name = _binding?.Transport.Address.Uri.Host,
                 AllowMultipleClients = true,
             });
             return Task.CompletedTask;

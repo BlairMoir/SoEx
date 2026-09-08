@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using SoEx.Topology;
 
 namespace SoEx.Transport.NATS
 {
@@ -9,7 +10,7 @@ namespace SoEx.Transport.NATS
         {
             Contract = typeof(I);
             SubSystem = subSystem;
-            Transport = new NatsEventTransport() { Address = new Uri($"soex.nats://{typeof(I)}") };
+            Transport = new NatsEventTransport() { Address = new Address.Single(new Uri($"soex.nats://{typeof(I)}")) };
         }
     }
 }

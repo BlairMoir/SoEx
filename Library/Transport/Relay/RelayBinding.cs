@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Azure.Relay;
+using SoEx.Topology;
 
 namespace SoEx.Relay
 {
@@ -11,7 +12,7 @@ namespace SoEx.Relay
         {
             SubSystem = subsystem;
             Contract = typeof(I);
-            Transport = new RelayTransport() { Address = new Uri(string.Format("sb://{0}/{1}", config.RelayNamespace, config.ConnectionName)) };
+            Transport = new RelayTransport() { Address = new Address.Single(new Uri(string.Format("sb://{0}/{1}", config.RelayNamespace, config.ConnectionName))) };
             _config = config;
         }
 

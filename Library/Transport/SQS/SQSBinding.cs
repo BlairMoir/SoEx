@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using SoEx.Topology;
 
 namespace SoEx.Transport.SQS
 {
@@ -10,7 +11,7 @@ namespace SoEx.Transport.SQS
         {
             Contract = typeof(I);
             SubSystem = "NotSet";
-            Transport = new SQSTransport() { Address = new Uri(config.QueueUrl) };
+            Transport = new SQSTransport() { Address = new Address.Single(new Uri(config.QueueUrl)) };
             _config = config;
         }
 
