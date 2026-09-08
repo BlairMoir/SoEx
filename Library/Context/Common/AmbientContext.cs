@@ -53,18 +53,12 @@ namespace SoEx.Context
 
         public byte[] Serialize()
         {
-            var backwardsCompat = new ConcurrentDictionary<string, object>();
-            foreach (object value in _contexts.Values)
+            var outgoingBytes = new ConcurrentDictionary<string, byte[]>();
+            foreach (var pair in _contexts)
             {
-                Type type = value.GetType();
-                string fullName = type.FullName ?? type.Name;
-                if (fullName != type.Name)
-                {
-                    backwardsCompat[fullName] = value;
-                }
-                backwardsCompat[type.Name] = value;
+                outgoingBytes[pair.Key] = _messageSerializer.Serialize(pair.Value);
             }
-            return _messageSerializer.Serialize(backwardsCompat);
+            return _messageSerializer.Serialize(outgoingBytes);
         }
 
         public void Deserialize(byte[]? serializedContexts)
@@ -72,18 +66,29 @@ namespace SoEx.Context
             if (serializedContexts is null)
                 return;
 
+            ConcurrentDictionary<string, byte[]>? incomingBytes =
+                _messageSerializer.Deserialize<ConcurrentDictionary<string, byte[]>>(serializedContexts);
 
-            ConcurrentDictionary<string, object>? incoming = _messageSerializer.Deserialize<ConcurrentDictionary<string, object>>(serializedContexts);
-
-            if (incoming is null)
+            if (incomingBytes is null)
                 return;
 
-
-            foreach (var replacement in incoming)
+            foreach (var pair in incomingBytes)
             {
-                // backwards compat - can just use the key once all in flight messages are upgraded.
-                Type type = replacement.Value.GetType();
-                _contexts[type.FullName ?? type.Name] = replacement.Value;
+                object? value;
+                try
+                {
+                    value = _messageSerializer.Deserialize<object>(pair.Value);
+                }
+                catch
+                {
+                    // silently drop any contexts that are not in our known types
+                    continue;
+                }
+
+                if (value is null)
+                    continue;
+
+                _contexts[pair.Key] = value;
             }
         }
     }
