@@ -10,13 +10,13 @@ namespace SoEx.Transport.Grpc
             return collection;
         }
 
-        public static IServiceCollection RelayGrpcHostListerPerBinding(this IServiceCollection collection)
+        public static IServiceCollection GrpcHostListenerPerBinding(this IServiceCollection collection)
         {
             collection.AddTransient(typeof(GrpcEndpointListener), typeof(GrpcEndpointListener));
             return collection;
         }
 
-        public static IServiceCollection RelayGrpcHostListerShared(this IServiceCollection collection)
+        public static IServiceCollection GrpcHostListenerShared(this IServiceCollection collection)
         {
             collection.AddSingleton(typeof(GrpcEndpointListener), typeof(GrpcEndpointListener));
             return collection;
