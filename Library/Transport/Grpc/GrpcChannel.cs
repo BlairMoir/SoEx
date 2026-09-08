@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Grpc.Core;
-using SoEx.Abstractions;
+using Grpc.Net.Client;
 using SoEx.Topology;
 using GrpcClient = Grpc.Net.Client.GrpcChannel;
 
@@ -32,10 +32,20 @@ namespace SoEx.Transport.Grpc
                 {
                     Debug.Assert(_grpcBinding is not null);
 
-                    using(var call = InvokeGrpcCall(payload))
+                    // sequential failover if a backend is down
+                    Uri[] uris = _grpcBinding.Transport.Address.Uris;
+                    foreach (var uri in uris[..^1])
                     {
-                        return await call.ResponseAsync.ConfigureAwait(false);
+                        try
+                        {
+                            return await InvokeAsync(payload, uri).ConfigureAwait(false);
+                        }
+                        catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable )
+                        {
+                            // continue if the backend is unreachable
+                        }
                     }
+                    return await InvokeAsync(payload, uris[^1]).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -45,20 +55,34 @@ namespace SoEx.Transport.Grpc
             }
         }
 
-        private AsyncUnaryCall<byte[]> InvokeGrpcCall(byte[] payload)
+        private async Task<byte[]> InvokeAsync(byte[] payload, Uri uri)
         {
-            var grpcChannel = GrpcClientChannel();
+            using (var call = InvokeGrpcCall(uri, payload))
+            {
+                return await call.ResponseAsync.ConfigureAwait(false);
+            }
+        }
+
+        private AsyncUnaryCall<byte[]> InvokeGrpcCall(Uri uri, byte[] payload)
+        {
+            var grpcChannel = GrpcClientChannel(uri);
             var callInvoker = grpcChannel.CreateCallInvoker();
             var call = callInvoker.AsyncUnaryCall(GrpcInvoke<I>.Descriptor, host: null, new CallOptions(), payload);
             return call;
         }
 
-        private GrpcClient GrpcClientChannel()
+        private GrpcClient GrpcClientChannel(Uri uri)
         {
-            Debug.Assert(_grpcBinding is not null);
-            return s_channels.GetOrAdd(_grpcBinding.Transport.Address.Uri, LazyClient).Value;
+            return s_channels.GetOrAdd(uri, LazyClient).Value;
         }
 
-        private static Lazy<GrpcClient> LazyClient(Uri uri) => new Lazy<GrpcClient>(() => GrpcClient.ForAddress(uri));
+        private static Lazy<GrpcClient> LazyClient(Uri uri) => new Lazy<GrpcClient>(() =>
+            GrpcClient.ForAddress(uri, new GrpcChannelOptions()
+            {
+                HttpHandler  = new SocketsHttpHandler()
+                {
+                    ConnectTimeout = TimeSpan.FromSeconds(2)
+                }
+            }));
     }
 }
