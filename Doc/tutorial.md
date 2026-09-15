@@ -68,6 +68,8 @@ the creation of Interfaces and the referencing of projects by using [MethodSketc
 In the directory: `Component/Manager/Membership/Service`. create the implementation for the service inside file: `MembershipManager.cs`
 
 ```c#
+using Example123.Manager.Membership.Interface;
+
 namespace Example123.Manager.Membership.Service
 {
     public class MembershipManager : IMembershipManager
@@ -96,6 +98,8 @@ to
 var proxy = Proxy.ForService<IMembershipManager>();
 await proxy.Profile();
 ```
+
+Add `using Example123.Manager.Membership.Interface`
 
 Set a breakpoint inside the manager implementation and hit debug!
 
@@ -136,9 +140,11 @@ namespace Example123.Access.User.Interface
 }
 ```
 
-In the directory: `Component/User/Access/Service`. create the implementation for the service inside file: `UserAccess.cs`
+In the directory: `Component/Access/User/Service`. create the implementation for the service inside file: `UserAccess.cs`
 
 ```c#
+using Example123.Access.User.Interface;
+
 namespace Example123.Access.User.Service
 {
     public class UserAccess : IUserAccess
@@ -160,11 +166,17 @@ We will start with obtaining the proxy by dependency injection as that is what m
 Update `MembershipManager.cs`
 
 ```c#
-public class MembershipManager(IUserAccess userProxy) : IMembershipManager
-{
-    public async Task Profile()
+using Example123.Manager.Membership.Interface;
+using Example123.Access.User.Interface;
+
+namespace Example123.Manager.Membership.Service
+{    
+    public class MembershipManager(IUserAccess userProxy) : IMembershipManager
     {
-        await userProxy.Load();
+        public async Task Profile()
+        {
+            await userProxy.Load();
+        }
     }
 }
 ```
@@ -179,12 +191,19 @@ Instead of littering the constructor that is used by every single operation, we 
 Update `MembershipManager.cs`
 
 ```c#
-public class MembershipManager : IMembershipManager
+using Example123.Manager.Membership.Interface;
+using Example123.Access.User.Interface;
+using Example123.iFx.Proxy;
+
+namespace Example123.Manager.Membership.Service
 {
-    public async Task Profile()
+    public class MembershipManager : IMembershipManager
     {
-        var userProxy = Proxy.ForComponent<IUserAccess>(this);
-        await userProxy.Load();
+        public async Task Profile()
+        {
+            var userProxy = Proxy.ForComponent<IUserAccess>(this);
+            await userProxy.Load();
+        }
     }
 }
 ```
@@ -319,6 +338,7 @@ dotnet reference add Common/Policy/ --project Test/Client/PerComponent/Example12
 dotnet reference add iFx/Client/ --project Test/Client/PerComponent/Example123.PerComponent.Client.csproj
 dotnet reference add iFx/Convention --project Test/Client/PerComponent/Example123.PerComponent.Client.csproj
 dotnet reference add iFx/Observability --project Test/Client/PerComponent/Example123.PerComponent.Client.csproj
+dotnet reference add iFx/Proxy --project Test/Client/PerComponent/Example123.PerComponent.Client.csproj
 dotnet add package SoEx.Transport.NamedPipe --version 0.0.0-alpha-3.5 --project Test/Client/PerComponent/Example123.PerComponent.Client.csproj
 dotnet add package SoEx.Hosting --version 0.0.0-alpha-3.5 --project Test/Client/PerComponent/Example123.PerComponent.Client.csproj
 ```
