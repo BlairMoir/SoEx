@@ -32,7 +32,7 @@ namespace SoEx.Transport.SBQueue
             }
         }
 
-        public IPipeline? Pipeline => _sbBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _sbBinding?.Pipeline;
 
 
         public async Task<byte[]> InvokeResult(byte[] payload)

@@ -7,7 +7,7 @@ public class ChimeraEventChannel<I> : IChannel
 {
     public Type Contract => typeof(I);
     private ChimeraEventBinding<I>? _binding;
-    public IPipeline? Pipeline => _binding?.Pipeline;
+    public IBindingPipeline? Pipeline => _binding?.Pipeline;
 
     public void Bind(Binding binding)
     {

@@ -29,7 +29,7 @@ namespace SoEx.Transport.NamedPipe
             }
         }
 
-        public IPipeline? Pipeline => _namedPipeBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _namedPipeBinding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {

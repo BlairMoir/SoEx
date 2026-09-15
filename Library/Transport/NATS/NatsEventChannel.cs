@@ -32,7 +32,7 @@ namespace SoEx.Transport.NATS
             }
         }
 
-        public IPipeline? Pipeline => _natsEventBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _natsEventBinding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {

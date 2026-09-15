@@ -7,7 +7,7 @@ namespace SoEx.Topology
         public Task<byte[]> InvokeResult(byte[] invocationRequest);
         public void Bind(Binding binding);
 
-        public IPipeline? Pipeline { get; }
+        public IBindingPipeline? Pipeline { get; }
         public Type Contract { get; }
     }
 }

@@ -27,7 +27,7 @@ namespace SoEx.Transport.ThreadChannel
             }
         }
 
-        public IPipeline? Pipeline => _unsafeThreadChannelChannel?.Pipeline;
+        public IBindingPipeline? Pipeline => _unsafeThreadChannelChannel?.Pipeline;
 
 
         public async Task<byte[]> InvokeResult(byte[] payload)

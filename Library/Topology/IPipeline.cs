@@ -8,12 +8,12 @@ using SoEx.Topology.Pipeline;
 
 namespace SoEx.Topology
 {
-    public interface IPipeline
+    public interface IPipeline : IBindingPipeline
     {
-        public IPipelineDispatcher Dispatcher { get; }
-        public IPipelineSerializer MessageSerializer { get; }
+
+
         public IPipelineConfidentiality TelemetryConfidentiality { get; }
-        public IPipelineProtection MessageProtection { get; }
+
         public Type[] ServiceInterceptors { get; }
     }
 }

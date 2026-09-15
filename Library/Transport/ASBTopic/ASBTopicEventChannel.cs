@@ -33,7 +33,7 @@ namespace SoEx.Transport.ASBTopic
             }
         }
 
-        public IPipeline? Pipeline => _binding?.Pipeline;
+        public IBindingPipeline? Pipeline => _binding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {

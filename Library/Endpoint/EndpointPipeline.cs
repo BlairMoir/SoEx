@@ -24,7 +24,7 @@ namespace SoEx.Endpoint
             _telemetryConfidentiality = telemetryConfidentiality;
         }
 
-        public async Task<byte[]> ServicePipeLine<I>(byte[] payload, IPipeline? pipeline, Activity? parentActivity) where I : class
+        public async Task<byte[]> ServicePipeLine<I>(byte[] payload, IBindingPipeline? pipeline, Activity? parentActivity) where I : class
         {
             try
             {

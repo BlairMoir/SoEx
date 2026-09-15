@@ -25,7 +25,7 @@ namespace SoEx.Transport.Grpc
             }
         }
 
-        public IPipeline? Pipeline => _grpcBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _grpcBinding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {

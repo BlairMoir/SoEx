@@ -28,7 +28,7 @@ namespace SoEx.Transport.InProc
             }
         }
 
-        public IPipeline? Pipeline => _inProcBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _inProcBinding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {

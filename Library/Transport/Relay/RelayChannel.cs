@@ -26,7 +26,7 @@ namespace SoEx.Relay
             }
         }
 
-        public IPipeline? Pipeline => _relayBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _relayBinding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {

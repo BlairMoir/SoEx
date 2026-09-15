@@ -73,12 +73,12 @@ namespace SoEx.Hosting
             container.RegisterType<ProxyFactory>().AsSelf();
             container.RegisterType<ProxyInterceptor>().AsSelf();
             container.RegisterType<TransportFactory>().AsSelf();
-            container.RegisterType(pipeline.MessageSerializer.ImplementationType).As<IMessageSerializer>()
+            container.RegisterType(pipeline.MessageSerializer.ImplementationType).AsSelf().As<IMessageSerializer>()
                 .WithParameter(new TypedParameter(typeof(KnownTypes), knownTypes))
                 .SingleInstance();
-            container.RegisterType(pipeline.Dispatcher.ImplementationType).As<IDispatcher>();
-            container.RegisterType(pipeline.TelemetryConfidentiality.ImplementationType).As<ITelemetryConfidentiality>();
-            container.RegisterType(pipeline.MessageProtection.ImplementationType).As<IMessageProtection>();
+            container.RegisterType(pipeline.Dispatcher.ImplementationType).AsSelf().As<IDispatcher>();
+            container.RegisterType(pipeline.TelemetryConfidentiality.ImplementationType).AsSelf().As<ITelemetryConfidentiality>();
+            container.RegisterType(pipeline.MessageProtection.ImplementationType).AsSelf().As<IMessageProtection>();
             container.RegisterType<AmbientContext>().As<IAmbientContext>().InstancePerLifetimeScope();
             container.RegisterType<FrameworkContext>().As<IFrameworkContext>().InstancePerLifetimeScope();
         }

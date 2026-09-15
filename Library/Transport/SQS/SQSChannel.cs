@@ -31,7 +31,7 @@ namespace SoEx.Transport.SQS
             }
         }
 
-        public IPipeline? Pipeline => _sqsBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _sqsBinding?.Pipeline;
 
 
         public async Task<byte[]> InvokeResult(byte[] payload)
