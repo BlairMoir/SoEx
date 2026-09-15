@@ -441,14 +441,14 @@ InProcBinding and UnsafeThreadChannel transports
 
 
 ```bash
-dotnet new nunit -n Test.Unit.MembershipManager -o Test/Unit/Membership
+dotnet new nunit -n Test.Unit.Membership -o Test/Unit/Membership
 dotnet sln add Test/Unit/Membership
-dotnet add package Moq --project Test/Unit/Membership/Test.Unit.MembershipManager.csproj
-dotnet add package SoEx.Test --version 0.0.0-alpha-3.5 --project Test/Unit/Membership/Test.Unit.MembershipManager.csproj
-dotnet add package SoEx.Method.Conventions --version 0.0.0-alpha-3.5 --project Test/Unit/Membership/Test.Unit.MembershipManager.csproj
-dotnet reference add Component/Manager/Membership/Service/ --project Test/Unit/Membership/Test.Unit.MembershipManager.csproj
-dotnet reference add Component/Access/User/Service/ --project Test/Unit/Membership/Test.Unit.MembershipManager.csproj
-dotnet reference add Common/Policy --project Test/Unit/Membership/Test.Unit.MembershipManager.csproj
+dotnet add package Moq --project Test/Unit/Membership/Test.Unit.Membership.csproj
+dotnet add package SoEx.Test --version 0.0.0-alpha-3.5 --project Test/Unit/Membership/Test.Unit.Membership.csproj
+dotnet add package SoEx.Method.Conventions --version 0.0.0-alpha-3.5 --project Test/Unit/Membership/Test.Unit.Membership.csproj
+dotnet reference add Component/Manager/Membership/Service/ --project Test/Unit/Membership/Test.Unit.Membership.csproj
+dotnet reference add Component/Access/User/Service/ --project Test/Unit/Membership/Test.Unit.Membership.csproj
+dotnet reference add Common/Policy --project Test/Unit/Membership/Test.Unit.Membership.csproj
 ```
 
 
