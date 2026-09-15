@@ -452,39 +452,19 @@ be created automatically before your controller code is reached.
 
 ## Testing and Mocking
 
-Utilizing two class you can invoke your classes in a test harness that will communicate using the
-InProcBinding and UnsafeThreadChannel transports
-
-`SoEx.Test.ServiceRunner` will allows access a proxy to the service/component
-
-`SoEx.Test.TestEnvironmentBase` allows configuration of the test environment hosting the components
-
+Decorate tests with the `[Topology]` attribute to automatically generate a test harness.
 
 ```bash
 dotnet new nunit -n Test.Unit.Membership -o Test/Unit/Membership
 dotnet sln add Test/Unit/Membership
 dotnet add package Moq --project Test/Unit/Membership/Test.Unit.Membership.csproj
 dotnet add package SoEx.Test --version 0.0.0-alpha-3.5 --project Test/Unit/Membership/Test.Unit.Membership.csproj
+dotnet add package SoEx.Test.TopologyGenerator --version 0.0.0-alpha-3.5 --project Test/Unit/Membership/Test.Unit.Membership.csproj
 dotnet add package SoEx.Method.Conventions --version 0.0.0-alpha-3.5 --project Test/Unit/Membership/Test.Unit.Membership.csproj
 dotnet reference add Component/Manager/Membership/Service/ --project Test/Unit/Membership/Test.Unit.Membership.csproj
 dotnet reference add Component/Access/User/Service/ --project Test/Unit/Membership/Test.Unit.Membership.csproj
 dotnet reference add Common/Policy --project Test/Unit/Membership/Test.Unit.Membership.csproj
 ```
-
-
-Create the class `UnitTestEnvironment` in the folder `Test/Unit/Membership/`
-```c#
-using SoEx.Test;
-
-namespace Test.Unit.Membership
-{
-    public class UnitTestEnvironment : TestEnvironmentBase
-    {
-
-    }
-}
-```
-
 
 Create the class `MembershipManagerTests` in the folder `Test/Unit/Membership/`
 
@@ -494,175 +474,55 @@ using Example123.Access.User.Service;
 using Example123.Common.Policy;
 using Example123.Manager.Membership.Interface;
 using Example123.Manager.Membership.Service;
-using Moq;
 using SoEx.Test;
-using SoEx.Topology;
-using SoEx.Transport.InProc;
+using SoEx.Test.HarnessGenerators;
 
 namespace Test.Unit.Membership;
 
 public class MembershipManagerTests
 {
-    UnitTestEnvironment harness = new UnitTestEnvironment();
-
-    public MembershipManagerTests()
-    {
-        harness.DefaultPolicies([typeof(ContextFlowPolicy)]);
-    }
-
     [Test]
+    [Topology(typeof(Host<IMembershipManager, MembershipManager>), [
+            typeof(Host<IUserAccess, UserAccess>)
+        ])]    
     public async Task Test_With_Real_Implemenations()
     {
-        var topology = new SoEx.Topology.System()
-        {
-            SubSystems =
-            [
-                new SubSystem()
-                {
-                    Name = "Membership",
-                    EntryPoint = new Host()
-                    {
-                        Implementation = typeof(MembershipManager),
-                        Endpoints = [new InProcBinding<IMembershipManager>("Membership")],
-                        Proxies =
-                        [
-                            new SoEx.Topology.Client<IUserAccess>()
-                            {
-                                Service = new InProcBinding<IUserAccess>("Membership"),
-                                SubSystem = "Membership"
-                            }
-                        ]
-                    },
-                    Components = [
-                        new Host()
-                        {
-                            Implementation = typeof(UserAccess),
-                            Endpoints = [new InProcBinding<IUserAccess>("Membership")],
-                            Proxies = []
-                        },
-                    ]
-                }
-            ],
-            Clients = [
-                new SoEx.Topology.Client<IMembershipManager>()
-                {
-                    Service = new InProcBinding<IMembershipManager>("Membership"),
-                    SubSystem = "Membership"
-                }
-            ]
-        };
-
-        var serviceRunner = ServiceRunner.Create<IMembershipManager>(async proxy =>
+        var harness = new HarnessFor_MembershipManagerTests_Test_With_Real_Implemenations();
+        harness.DefaultPolicies([typeof(ContextFlowPolicy)]);
+            
+        await harness.TestService(async proxy =>
         {
             await proxy.Profile();
         });
-        await harness.TestService(serviceRunner, topology);
     }
-
+    
     [Test]
+    [Topology(typeof(Host<IMembershipManager, MembershipManager>), [
+            typeof(MockHost<IUserAccess>)
+        ])]      
     public async Task Test_With_MockedAccess()
     {
-        var accessMock = new Mock<IUserAccess>();
-        accessMock.Setup(x => x.Load())
-            .Returns(() =>
-                Task.CompletedTask
-                );
-
-        var topology = new SoEx.Topology.System()
-        {
-            SubSystems =
-            [
-                new SubSystem()
-                {
-                    Name = "Membership",
-                    EntryPoint = new Host()
-                    {
-                        Implementation = typeof(MembershipManager),
-                        Endpoints = [new InProcBinding<IMembershipManager>("Membership")],
-                        Proxies =
-                        [
-                            new SoEx.Topology.Client<IUserAccess>()
-                            {
-                                Service = new InProcBinding<IUserAccess>("Membership"),
-                                SubSystem = "Membership"
-                            }
-                        ]
-                    },
-                    Components = [
-                        new HostMock()
-                        {
-                            Instance =  accessMock.Object,
-                            Implementation = typeof(Mock),
-                            Endpoints = [new InProcBinding<IUserAccess>("Membership")],
-                            Proxies = []
-                        },
-                    ]
-                }
-            ],
-            Clients = [
-                new SoEx.Topology.Client<IMembershipManager>()
-                {
-                    Service = new InProcBinding<IMembershipManager>("Membership"),
-                    SubSystem = "Membership"
-                }
-            ]
-        };
-
-        var serviceRunner = ServiceRunner.Create<IMembershipManager>(async proxy =>
+        var harness = new HarnessFor_MembershipManagerTests_Test_With_MockedAccess();
+        harness.DefaultPolicies([typeof(ContextFlowPolicy)]);
+        harness.Mock_IUserAccess.Setup( x=> x.Load()).Returns(Task.CompletedTask);
+            
+        await harness.TestService(async proxy =>
         {
             await proxy.Profile();
         });
-        await harness.TestService(serviceRunner, topology);
     }
 
     [Test]
+    [Topology(typeof(Host<IUserAccess, UserAccess>), [])] 
     public async Task Test_Access_Component()
     {
-        var topology = new SoEx.Topology.System()
-        {
-            SubSystems =
-            [
-                new SubSystem()
-                {
-                    Name = "Membership",
-                    EntryPoint = new Host()
-                    {
-                        Implementation = typeof(MembershipManager),
-                        Endpoints = [],
-                        Proxies = []
-                    },
-                    Components = [
-                        new Host()
-                        {
-                            Implementation = typeof(UserAccess),
-                            Endpoints = [new InProcBinding<IUserAccess>("Membership")],
-                            Proxies = []
-                        },
-                    ]
-                }
-            ],
-            Clients = [
-                new SoEx.Topology.Client<IMembershipManager>()
-                {
-                    Service = new InProcBinding<IMembershipManager>("Membership"),
-                    SubSystem = "Membership"
-                }
-            ]
-        };
+        var harness = new HarnessFor_MembershipManagerTests_Test_Access_Component();
+        harness.DefaultPolicies([typeof(ContextFlowPolicy)]);
 
-        var serviceRunner = ServiceRunner.Create<IUserAccess>(async proxy =>
+        await harness.TestService(async proxy =>
         {
             await proxy.Load();
         });
-        await harness.TestComponent(serviceRunner, topology);
     }
 }
 ```
-
-It is possible to simplify the tests by specifying a default configuration in the test harness
-
-```c#
- harness.DefaultConfiguration(SystemTopology);
-```
-
-To keep things explicit in this example the topology is defined in each test.
