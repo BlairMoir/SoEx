@@ -160,7 +160,7 @@ namespace SoEx.Hosting.Default
         private Dictionary<string, object> ScopeProperties(IAmbientContext invokedContext)
         {
             var flattenedProperties = _policies.SelectMany(s => s.ScopeProperties(invokedContext));
-            var protectedProperties = flattenedProperties.ToDictionary( kvp => kvp.Key, kvp => (object)_telemetryConfidentiality.Protect(kvp.Value));
+            var protectedProperties = flattenedProperties.ToDictionary( kvp => kvp.Key, kvp => _telemetryConfidentiality.Protect(kvp.Value, kvp.Key));
             return protectedProperties;
         }
     }
