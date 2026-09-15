@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)</SolutionDir>
+    <SolutionName Condition="'$(SolutionName)' == ''">SoExTemplate</SolutionName>
+  </PropertyGroup>
+</Project>
