@@ -1,3 +1,4 @@
+using System.Diagnostics.Tracing;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -6,8 +7,10 @@ using SoEx.Context;
 using SoEx.Hosting;
 using SoEx.Topology;
 using SoEx.Transport.InProc;
+using SoEx.Transport.Chimera;
 using SoExTemplate.iFx.Convention;
 using SoExTemplate.iFx.Observability;
+
 
 namespace SoExTemplate.iFx.Hosting;
 public static class Host
@@ -30,6 +33,7 @@ public static class Host
         CommonServices(contextPolicies, serviceHostBuilder.Services, clientHostBuilder.Services);
         serviceHostBuilder.Services.ConfigureTelemetry();
         serviceHostBuilder.Services.InProcClientWithSpan(clientHostBuilder.Services);
+        serviceHostBuilder.Services.ChimeraClient();
 
         return new InProcHostApplications()
         {
@@ -59,6 +63,9 @@ public static class Host
             var endpoints = subSystem.EntryPoint.Endpoints;
             foreach (var endpoint in endpoints)
             {
+                if (endpoint.Contract.Name.EndsWith(Keywords.Event))
+                    continue;
+
                 clients.Add(ToClient(endpoint, subSystem.Name));
             }
         }

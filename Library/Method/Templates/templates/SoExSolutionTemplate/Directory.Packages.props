@@ -24,6 +24,7 @@
     <PackageVersion Include="SoEx.Method.Conventions" Version="0.0.0-alpha-3.6" />
     <PackageVersion Include="SoEx.Proxy" Version="0.0.0-alpha-3.6" />
     <PackageVersion Include="SoEx.Topology" Version="0.0.0-alpha-3.6" />
+    <PackageVersion Include="SoEx.Transport.Chimera" Version="0.0.0-alpha-3.6" />
     <PackageVersion Include="SoEx.Transport.NamedPipe" Version="0.0.0-alpha-3.6" />
     <PackageVersion Include="StronglyTypedId" Version="1.0.0-beta08" />
     <PackageVersion Include="System.ServiceModel.Primitives" Version="9.0.0" />

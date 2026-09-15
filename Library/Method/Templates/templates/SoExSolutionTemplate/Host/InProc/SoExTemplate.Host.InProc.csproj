@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="SoEx.Container" />
+    <PackageReference Include="SoEx.Transport.Chimera" />
   </ItemGroup>
 
   <ItemGroup>
