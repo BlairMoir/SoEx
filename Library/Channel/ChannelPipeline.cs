@@ -30,8 +30,8 @@ namespace SoEx.Channel
             try
             {
                 Debug.Assert(channel is not null);
-                Type serializerType = channel.Pipeline?.MessageSerializer ?? typeof(IMessageSerializer);
-                Type protectorType = channel.Pipeline?.MessageProtection ?? typeof(IMessageProtection);
+                Type serializerType = channel.Pipeline?.MessageSerializer.ImplementationType ?? typeof(IMessageSerializer);
+                Type protectorType = channel.Pipeline?.MessageProtection.ImplementationType ?? typeof(IMessageProtection);
                 var protector =  (IMessageProtection)_scope.Resolve(protectorType);
                 var serializer = (IMessageSerializer)_scope.Resolve(serializerType);
                 byte[] serializedRequest = serializer.Serialize(request, channel.Contract, request.MethodName);

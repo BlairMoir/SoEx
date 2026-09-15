@@ -28,9 +28,9 @@ namespace SoEx.Endpoint
         {
             try
             {
-                Type dispatcherType = pipeline?.Dispatcher ?? typeof(IDispatcher);
-                Type serializerType = pipeline?.MessageSerializer ?? typeof(IMessageSerializer);
-                Type protectorType = pipeline?.MessageProtection ?? typeof(IMessageProtection);
+                Type dispatcherType = pipeline?.Dispatcher.ImplementationType ?? typeof(IDispatcher);
+                Type serializerType = pipeline?.MessageSerializer.ImplementationType ?? typeof(IMessageSerializer);
+                Type protectorType = pipeline?.MessageProtection.ImplementationType ?? typeof(IMessageProtection);
                 var subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
                 using (Autofac.ILifetimeScope requestScope = subSystemHost.BeginRequestLifetimeScope())
                 {
