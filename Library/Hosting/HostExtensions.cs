@@ -12,6 +12,7 @@ using SoEx.Context;
 using SoEx.Endpoint;
 using SoEx.Hosting.Default;
 using SoEx.Topology;
+using SoEx.Topology.Pipeline;
 
 namespace SoEx.Hosting
 {
@@ -52,6 +53,7 @@ namespace SoEx.Hosting
 
         public static ContainerBuilder RegisterSoEx(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, KnownTypes knownTypes)
         {
+            hostApplicationContainer.RegisterBindings(systemTopology, knownTypes);
             hostApplicationContainer.RegisterSystem(systemTopology, knownTypes);
             return hostApplicationContainer;
         }
@@ -59,8 +61,75 @@ namespace SoEx.Hosting
         public static ContainerBuilder RegisterSoEx(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? pipeline)
         {
             var componentPipeline = pipeline ?? new DefaultPipeline();
+            hostApplicationContainer.RegisterBindings(hostTopology, knownTypes, pipeline);
             hostApplicationContainer.RegisterComponent(hostTopology, knownTypes, componentPipeline);
             return hostApplicationContainer;
+        }
+
+        private static void RegisterBindings(this ContainerBuilder hostApplicationContainer,  Topology.System systemTopology, KnownTypes knownTypes)
+        {
+            var clientBindings = systemTopology.Clients
+                .Select(client => client.Service.Pipeline);
+            var endpointBindings =
+                systemTopology.SubSystems
+                    .SelectMany(subsystem =>
+                        subsystem.EntryPoint.Endpoints.Select(
+                            (endpoint => endpoint.Pipeline)));
+            var endpointClientBindings =
+                systemTopology.SubSystems
+                    .SelectMany(subsystem =>
+                        subsystem.EntryPoint.Proxies.Select( s=> s.Service.Pipeline));
+            var componentBindings =
+                systemTopology.SubSystems
+                    .SelectMany(subsystem =>
+                        subsystem.Components
+                            .SelectMany(component => component.Endpoints.Select( s=> s.Pipeline)));
+            var componentClientBindings =
+                systemTopology.SubSystems
+                    .SelectMany(subsystem =>
+                        subsystem.Components
+                            .SelectMany(component => component.Proxies.Select( s=> s.Service.Pipeline)));
+
+            hostApplicationContainer.RegisterBindings(knownTypes, systemTopology.Defaults, [..clientBindings, ..endpointBindings, ..endpointClientBindings, ..componentBindings, ..componentClientBindings]);
+        }
+
+        private static void RegisterBindings(this ContainerBuilder hostApplicationContainer,  Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? defaultPipeline)
+        {
+            var clientBindings = hostTopology.Proxies.Select( s=> s.Service.Pipeline);
+            var endpointBindings = hostTopology.Endpoints.Select(s => s.Pipeline);
+            hostApplicationContainer.RegisterBindings(knownTypes, defaultPipeline, [..clientBindings, ..endpointBindings,]);
+
+        }
+
+        private static void RegisterBindings(this ContainerBuilder hostApplicationContainer, KnownTypes? knownTypes, IPipeline? defaultPipeline , params IBindingPipeline?[] bindingPipelines)
+        {
+            var pipeline = defaultPipeline ?? new DefaultPipeline();
+            HashSet<Type?> defaults = new HashSet<Type?>(){
+                    pipeline.Dispatcher.ImplementationType,
+                    pipeline.MessageProtection.ImplementationType,
+                    pipeline.MessageSerializer.ImplementationType
+                };
+
+            var registerablePipelines =
+                bindingPipelines.Where(w => w is not null)
+                    .SelectMany(s => new Type?[]
+                    {
+                        s?.Dispatcher.ImplementationType, s?.MessageProtection.ImplementationType,
+                        s?.MessageSerializer.ImplementationType
+                    })
+                    .Where(w => w is not null).Cast<Type>().Distinct();
+            foreach (var pipelineType in registerablePipelines)
+            {
+                if(defaults.Contains(pipelineType))
+                    continue;
+
+                var registration = hostApplicationContainer.RegisterType(pipelineType).AsSelf();
+                if (pipelineType.GetInterfaces().Contains(typeof(IMessageSerializer)))
+                {
+                    registration.WithParameter(new TypedParameter(typeof(KnownTypes), knownTypes))
+                        .SingleInstance();
+                }
+            }
         }
 
         private static void RegisterPipeline(this ContainerBuilder container, KnownTypes knownTypes, IPipeline pipeline)
