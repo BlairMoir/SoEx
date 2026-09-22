@@ -85,7 +85,7 @@ public void Initialize(IncrementalGeneratorInitializationContext context)
                                             {
                                                 var proxy = {{symbols.MethodNamespace}}.iFx.Proxy.Proxy.ForService<{{interfaceSymbol.Namespace}}.{{interfaceSymbol.Name}}>();
                                                 {{ (operation.ReturnType is null ? "" : "var result =") }} await proxy.{{operation.Name}}({{ String.Join(", ",operation.Parameters.Select( s=> s.Split(' ')[1])) }});
-                                                return {{ (operation.ReturnType is null ? "Ok()" : "Json(result)")}};
+                                                return {{ (operation.ReturnType is null ? "Ok()" : "result")}};
                                             }
                                     """;
                              operationSource.Append(operationText);
@@ -110,7 +110,7 @@ public void Initialize(IncrementalGeneratorInitializationContext context)
 
                                     [Route("[controller]/[action]")]
                                     [ApiController]
-                                    public partial class {{interfaceSymbol.Name}}Controller : Controller
+                                    public partial class {{interfaceSymbol.Name}}Controller : ControllerBase
                                     { {{ operationSource}}
                                     }
                                 """;
