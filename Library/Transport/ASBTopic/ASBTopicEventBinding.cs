@@ -4,7 +4,7 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.ASBTopic
 {
-    public class ASBTopicEventBinding<I> : Topology.Binding
+    public record ASBTopicEventBinding<I> : Topology.Binding
     {
         private readonly TopicConfig _topicConfig;
 

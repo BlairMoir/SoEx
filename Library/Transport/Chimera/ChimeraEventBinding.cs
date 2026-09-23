@@ -4,7 +4,7 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.Chimera;
 
-public class ChimeraEventBinding<I> : Binding
+public record ChimeraEventBinding<I> : Binding
 {
     public ChimeraOptions Options { get; }
     public string Topic { get; }

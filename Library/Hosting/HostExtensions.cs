@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.DynamicProxy;
@@ -180,7 +181,7 @@ namespace SoEx.Hosting
             });
         }
 
-        private static void RegisterSubSystems(this ContainerBuilder hostApplicationContainer, Topology.SubSystem[] subSystems, IPipeline pipeline)
+        private static void RegisterSubSystems(this ContainerBuilder hostApplicationContainer, ImmutableArray<Topology.SubSystem> subSystems, IPipeline pipeline)
         {
             foreach (Topology.SubSystem subSystem in subSystems)
             {
@@ -300,7 +301,7 @@ namespace SoEx.Hosting
             }
         }
 
-        private static void RegisterProxies(this ContainerBuilder builder, Topology.Client[] clients)
+        private static void RegisterProxies(this ContainerBuilder builder, ImmutableArray<Topology.Client> clients)
         {
             foreach (var client in clients)
             {

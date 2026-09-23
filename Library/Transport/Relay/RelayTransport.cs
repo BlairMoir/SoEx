@@ -1,6 +1,6 @@
 namespace SoEx.Relay
 {
-    public class RelayTransport : Topology.Transport
+    public record RelayTransport : Topology.Transport
     {
         public RelayTransport()
         {

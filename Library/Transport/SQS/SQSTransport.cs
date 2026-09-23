@@ -1,6 +1,6 @@
 namespace SoEx.Transport.SQS
 {
-    public class SQSTransport : Topology.Transport
+    public record SQSTransport : Topology.Transport
     {
         public SQSTransport()
         {

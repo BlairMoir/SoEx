@@ -3,7 +3,7 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.NamedPipe
 {
-    public class NamedPipeBinding<I> : Topology.Binding
+    public record NamedPipeBinding<I> : Topology.Binding
     {
         [SetsRequiredMembers]
         public NamedPipeBinding(string subSystem)

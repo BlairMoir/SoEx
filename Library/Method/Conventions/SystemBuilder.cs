@@ -248,7 +248,7 @@ public class SystemBuilder
                 Components = [.. subsystem.Engines.Select(s => s.Host), .. subsystem.Access.Select(s => s.Host)]
             });
         }
-        return new Topology.System() { Clients = [], SubSystems = subSystems.ToArray(), Defaults = defaultPipeline };
+        return new Topology.System() { Clients = [], SubSystems = [..subSystems], Defaults = defaultPipeline };
     }
 
     private void ComponentProxies(string subsystemName)

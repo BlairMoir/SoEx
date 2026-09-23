@@ -3,7 +3,7 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.InProc
 {
-    public class InProcBinding<I> : Topology.Binding
+    public record InProcBinding<I> : Topology.Binding
     {
         [SetsRequiredMembers]
         public InProcBinding(string subSystem)

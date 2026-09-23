@@ -3,7 +3,7 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.SBQueue
 {
-    public class SBQueueBinding<I> : Topology.Binding
+    public record SBQueueBinding<I> : Topology.Binding
     {
         private readonly SBConfig _config;
         [SetsRequiredMembers]

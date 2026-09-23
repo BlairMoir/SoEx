@@ -1,6 +1,6 @@
 namespace SoEx.Topology
 {
-    public abstract class Transport
+    public abstract record Transport
     {
         public required Address Address { get; init; }
         public virtual Type? ClientChannel { get; init; }

@@ -1,6 +1,6 @@
 namespace SoEx.Transport.SBQueue
 {
-    public class SBQueueTransport : Topology.Transport
+    public record SBQueueTransport : Topology.Transport
     {
         public SBQueueTransport()
         {

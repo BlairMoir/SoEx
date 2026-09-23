@@ -1,10 +1,10 @@
 namespace SoEx.Topology
 {
-    public class Client<I> : Client where I : class
+    public record Client<I> : Client where I : class
     {
     }
 
-    public abstract class Client
+    public abstract record Client
     {
         public required string SubSystem { get; init; }
         public required Binding Service { get; init; }

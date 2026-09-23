@@ -1,11 +1,11 @@
-using System.Reflection.Metadata.Ecma335;
+using System.Collections.Immutable;
 
 namespace SoEx.Topology
 {
-    public class SubSystem
+    public record SubSystem
     {
         public required Host EntryPoint { get; init; }
-        public required Host[] Components { get; init; }
+        public required ImmutableArray<Host> Components { get; init; }
         public required string Name { get; init; }
     }
 }

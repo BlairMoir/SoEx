@@ -1,6 +1,6 @@
 namespace SoEx.Transport.ThreadChannel
 {
-    public class UnsafeThreadChannelTransport : Topology.Transport
+    public record UnsafeThreadChannelTransport : Topology.Transport
     {
         public UnsafeThreadChannelTransport()
         {

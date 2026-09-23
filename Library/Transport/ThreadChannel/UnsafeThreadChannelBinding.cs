@@ -3,7 +3,7 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.ThreadChannel
 {
-    public class UnsafeThreadChannelBinding<I> : Topology.Binding
+    public record UnsafeThreadChannelBinding<I> : Topology.Binding
     {
         [SetsRequiredMembers]
         public UnsafeThreadChannelBinding()

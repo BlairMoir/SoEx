@@ -3,7 +3,7 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.NATS
 {
-    public class NatsBinding<I> : Topology.Binding
+    public record NatsBinding<I> : Topology.Binding
     {
         [SetsRequiredMembers]
         public NatsBinding(string subSystem)

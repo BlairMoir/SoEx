@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using SoEx.Abstractions;
+using System.Collections.Immutable;
 using SoEx.Topology.Pipeline;
 
 namespace SoEx.Topology
@@ -13,6 +8,6 @@ namespace SoEx.Topology
 
         public IPipelineConfidentiality TelemetryConfidentiality { get; }
 
-        public IPipelineServiceInterceptor[] ServiceInterceptors { get; }
+        public ImmutableArray<IPipelineServiceInterceptor> ServiceInterceptors { get; }
     }
 }

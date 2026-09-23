@@ -1,9 +1,11 @@
+using System.Collections.Immutable;
+
 namespace SoEx.Topology
 {
-    public class System
+    public record System
     {
-        public required SubSystem[] SubSystems { get; init; }
-        public required Client[] Clients { get; init; }
+        public required ImmutableArray<SubSystem> SubSystems { get; init; }
+        public required ImmutableArray<Client> Clients { get; init; }
         public IPipeline? Defaults { get; init; }
     }
 }

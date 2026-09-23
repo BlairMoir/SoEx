@@ -1,6 +1,6 @@
 namespace SoEx.Topology
 {
-    public class HostMock : Host
+    public record HostMock : Host
     {
         public required object Instance { get; init; }
     }

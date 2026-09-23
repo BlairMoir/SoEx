@@ -1,6 +1,6 @@
 namespace SoEx.Transport.Chimera;
 
-public class ChimeraEventTransport : Topology.Transport
+public record ChimeraEventTransport : Topology.Transport
 {
     public ChimeraEventTransport()
     {

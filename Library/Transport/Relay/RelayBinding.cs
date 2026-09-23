@@ -4,7 +4,7 @@ using SoEx.Topology;
 
 namespace SoEx.Relay
 {
-    public class RelayBinding<I> : Topology.Binding
+    public record RelayBinding<I> : Topology.Binding
     {
         private readonly RelayConfig _config;
         [SetsRequiredMembers]

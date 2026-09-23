@@ -3,7 +3,7 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.SQS
 {
-    public class SQSBinding<I> : Topology.Binding
+    public record SQSBinding<I> : Topology.Binding
     {
         private readonly SQSConfig _config;
         [SetsRequiredMembers]

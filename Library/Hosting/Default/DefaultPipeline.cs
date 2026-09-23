@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using SoEx.Topology;
 using SoEx.Topology.Pipeline;
 
@@ -14,6 +15,6 @@ namespace SoEx.Hosting.Default
 
         public IPipelineSerializer MessageSerializer { get; init; } =
             new PipelineSerializer<SoEx.Hosting.Serializers.NewtonsoftJson.OpenJsonMessageSerializer>();
-        public IPipelineServiceInterceptor[] ServiceInterceptors =>  [ new PipelineServiceInterceptor<ErrorInterceptor>()] ;
+        public ImmutableArray<IPipelineServiceInterceptor> ServiceInterceptors =>  [ new PipelineServiceInterceptor<ErrorInterceptor>()] ;
     }
 }

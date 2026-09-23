@@ -1,6 +1,6 @@
 namespace SoEx.Transport.ASBTopic
 {
-    public class ASBTopicEventTransport : Topology.Transport
+    public record ASBTopicEventTransport : Topology.Transport
     {
         public ASBTopicEventTransport()
         {

@@ -5,7 +5,7 @@ using SoEx.Transport.Grpc.Protection;
 
 namespace SoEx.Transport.Grpc
 {
-    public class GrpcBinding<I> : Topology.Binding
+    public record GrpcBinding<I> : Topology.Binding
     {
         private readonly GrpcConfig[] _config;
         [SetsRequiredMembers]
@@ -37,7 +37,7 @@ namespace SoEx.Transport.Grpc
                 uriList.Add(uri);
             }
 
-            return new Address.Many(uriList.ToArray());
+            return new Address.Many([..uriList]);
         }
     }
 }

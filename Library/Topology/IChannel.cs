@@ -1,5 +1,3 @@
-using SoEx.Abstractions;
-
 namespace SoEx.Topology
 {
     public interface IChannel

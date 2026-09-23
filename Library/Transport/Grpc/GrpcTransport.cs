@@ -1,6 +1,6 @@
 namespace SoEx.Transport.Grpc
 {
-    public class GrpcTransport : Topology.Transport
+    public record GrpcTransport : Topology.Transport
     {
         public GrpcTransport()
         {

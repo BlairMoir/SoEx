@@ -1,6 +1,6 @@
 ﻿namespace SoEx.Topology
 {
-    public abstract class Binding
+    public abstract record Binding
     {
         public required Type Contract { get; init; }
         public required Transport Transport { get; init; }
