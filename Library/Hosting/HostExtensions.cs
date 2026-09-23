@@ -135,7 +135,7 @@ namespace SoEx.Hosting
         private static void RegisterPipeline(this ContainerBuilder container, KnownTypes knownTypes, IPipeline pipeline)
         {
             container.RegisterType<EndpointLifetimeService>().As<IHostedService>();
-            container.RegisterTypes(pipeline.ServiceInterceptors);
+            container.RegisterTypes(pipeline.ServiceInterceptors.Select( s=> s.ImplementationType).ToArray());
             container.RegisterType<EndpointPipeline>().As<IEndpointPipeline>();
             container.RegisterType<ChannelPipeline>().As<IChannelPipeline>();
             container.RegisterType<RegisteredEndpoints>().SingleInstance().AsSelf();
@@ -250,7 +250,7 @@ namespace SoEx.Hosting
                 {
                     componentContainer.RegisterType(component.Implementation).Named("Endpoint", cepc)
                     .EnableInterfaceInterceptors()
-                    .InterceptedBy(pipeline.ServiceInterceptors);
+                    .InterceptedBy(pipeline.ServiceInterceptors.Select( s=> s.ImplementationType).ToArray());
                 }
                 RegisterProxies(componentContainer, component.Proxies);
             }

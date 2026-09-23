@@ -14,6 +14,6 @@ namespace SoEx.Hosting.Default
 
         public IPipelineSerializer MessageSerializer { get; init; } =
             new PipelineSerializer<SoEx.Hosting.Serializers.NewtonsoftJson.OpenJsonMessageSerializer>();
-        public Type[] ServiceInterceptors => [typeof(ErrorInterceptor)];
+        public IPipelineServiceInterceptor[] ServiceInterceptors =>  [ new PipelineServiceInterceptor<ErrorInterceptor>()] ;
     }
 }

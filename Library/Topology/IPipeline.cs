@@ -11,9 +11,8 @@ namespace SoEx.Topology
     public interface IPipeline : IBindingPipeline
     {
 
-
         public IPipelineConfidentiality TelemetryConfidentiality { get; }
 
-        public Type[] ServiceInterceptors { get; }
+        public IPipelineServiceInterceptor[] ServiceInterceptors { get; }
     }
 }
