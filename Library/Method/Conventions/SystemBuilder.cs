@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using SoEx.Topology;
 using SoEx.Transport.InProc;
 
@@ -64,14 +65,7 @@ public static class MethodSubSystemExtensions
             throw new ArgumentNullException(nameof(subSystem.EntryPoint));
         }
 
-        var entryPoint = subSystem.EntryPoint;
-        subSystem.EntryPoint = new Topology.Host()
-        {
-            Implementation = entryPoint.Implementation,
-            Endpoints = entryPoint.Endpoints,
-            Proxies = [.. entryPoint.Proxies, .. clients],
-            ServiceCollection = entryPoint.ServiceCollection
-        };
+        subSystem.EntryPoint = subSystem.EntryPoint with { Proxies =  [.. subSystem.EntryPoint.Proxies, .. clients] };
         return subSystem;
     }
 
@@ -82,13 +76,9 @@ public static class MethodSubSystemExtensions
             throw new ArgumentNullException(nameof(subSystem.EntryPoint));
         }
 
-        var entryPoint = subSystem.EntryPoint;
-        subSystem.EntryPoint = new Topology.Host()
+        subSystem.EntryPoint = subSystem.EntryPoint with
         {
-            Implementation = entryPoint.Implementation,
-            Endpoints = entryPoint.Endpoints,
-            Proxies = entryPoint.Proxies,
-            ServiceCollection = entryPoint.ServiceCollection ?? new ServiceCollection()
+            ServiceCollection = subSystem.EntryPoint.ServiceCollection ?? new ServiceCollection()
         };
         services.Invoke(subSystem.EntryPoint.ServiceCollection!);
         return subSystem;
@@ -135,14 +125,7 @@ public static class MethodSubSystemExtensions
             throw new ArgumentNullException(nameof(component.Host));
         }
 
-        var entryPoint = component.Host;
-        component.Host = new Topology.Host()
-        {
-            Implementation = entryPoint.Implementation,
-            Endpoints = entryPoint.Endpoints,
-            Proxies = [.. entryPoint.Proxies, .. clients],
-            ServiceCollection = entryPoint.ServiceCollection
-        };
+        component.Host = component.Host with { Proxies =  [.. component.Host.Proxies, .. clients]};
         return component;
     }
 }
@@ -156,14 +139,7 @@ public static class MethodComponentExtensions
             throw new ArgumentNullException(nameof(component.Host));
         }
 
-        var host = component.Host;
-        component.Host = new Topology.Host()
-        {
-            Implementation = host.Implementation,
-            Endpoints = [.. host.Endpoints, .. binding],
-            Proxies = host.Proxies,
-            ServiceCollection = host.ServiceCollection
-        };
+        component.Host = component.Host with { Endpoints = [.. component.Host.Endpoints, .. binding] };
         return component;
     }
 
@@ -188,15 +164,10 @@ public static class MethodComponentExtensions
             throw new ArgumentNullException(nameof(component.Host));
         }
 
-        var host = component.Host;
-        component.Host = new Topology.Host()
+        component.Host = component.Host with
         {
-            Implementation = host.Implementation,
-            Endpoints = host.Endpoints,
-            Proxies = host.Proxies,
-            ServiceCollection = host.ServiceCollection ?? new ServiceCollection()
+            ServiceCollection = component.Host.ServiceCollection ?? new ServiceCollection()
         };
-        services.Invoke(component.Host.ServiceCollection!);
         return component;
     }
 }
@@ -260,14 +231,7 @@ public class SystemBuilder
             subsystem.AddProxies(accessClients);
             foreach (var engine in subsystem.Engines)
             {
-                var engineHost = engine.Host;
-                engine.Host = new Topology.Host()
-                {
-                    Endpoints = engineHost.Endpoints,
-                    Implementation = engineHost.Implementation,
-                    ServiceCollection = engineHost.ServiceCollection,
-                    Proxies = [.. engineHost.Proxies, .. accessClients]
-                };
+                engine.Host =  engine.Host with { Proxies = [.. engine.Host.Proxies, .. accessClients] };
             }
         }
         foreach (var engine in subsystem.Engines)
@@ -277,15 +241,15 @@ public class SystemBuilder
         }
     }
 
-    private static Client ToClient(Binding s, string subsystemName)
+    private static readonly MethodInfo s_newClient = typeof(SystemBuilder).GetMethod(nameof(NewClient),
+        BindingFlags.NonPublic | BindingFlags.Static)!;
+    private static Client NewClient<I>(Binding service, string subsystem) where I : class
     {
-        var clientContractType = typeof(Topology.Client<>).MakeGenericType(s.Contract);
-        if (Activator.CreateInstance(clientContractType) is Client instance)
-        {
-            clientContractType.GetProperty(nameof(Client.Service))!.SetValue(instance, s);
-            clientContractType.GetProperty(nameof(Client.SubSystem))!.SetValue(instance, subsystemName);
-            return instance;
-        }
-        throw new ArgumentOutOfRangeException("this needs a proper error message");
+        return new Client<I>() {Service = service, SubSystem =  subsystem};
+    }
+    private static Client ToClient(Binding binding, string subsystemName)
+    {
+        var client = s_newClient.MakeGenericMethod(binding.Contract).Invoke(null, [ binding, subsystemName ])!;
+        return (Client)client;
     }
 }
