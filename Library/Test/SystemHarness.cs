@@ -48,16 +48,31 @@ public sealed class SystemHarness
             if (quietReads == 2)
             {
                 if (chimeraOverview.DeadLettered > 0)
-                    throw new InvalidOperationException("Found dead letters, your event handlers failed");
+                    throw new InvalidOperationException(
+                        Describe("Event handlers failed.",
+                            chimeraOverview.Subscribers,
+                            s=> s.DeadLettered > 0));
 
                 return;
             }
 
             if (DateTime.UtcNow > deadline)
             {
-                throw new TimeoutException("Events did not settle");
+                throw new TimeoutException(
+                    Describe($"Events did not settle within: {timeout}",
+                        chimeraOverview.Subscribers,
+                        s => !s.Settled));
             }
             await Task.Delay(25);
         }
+    }
+
+    private static string Describe(string message, IEnumerable<SubscriberActivity> activities, Func<SubscriberActivity, bool> filter)
+    {
+        var failures = activities.Where(filter).Select( a=>
+            $"{a.Subscriber} on {a.Topic}: behind {a.Behind}, in flight {a.InFlight}, " +
+            $"awaiting retry {a.AwaitingRetry}, dead lettered {a.DeadLettered}");
+
+        return $"{message} {string.Join("; ", failures)}";
     }
 }
