@@ -5,8 +5,8 @@ using SoEx.Context;
 using SoEx.Exceptions;
 using SoEx.Hosting;
 using SoEx.Topology;
+using SoEx.Transport.Chimera;
 using SoEx.Transport.InProc;
-using SoEx.Transport.ThreadChannel;
 
 namespace SoEx.Test
 {
@@ -83,8 +83,7 @@ namespace SoEx.Test
                 .As(typeof(ILogger<>))
                 .SingleInstance();
             builder.RegisterGeneric(typeof(InProcChannel<>)).As(typeof(InProcChannel<>));
-            builder.RegisterGeneric(typeof(UnsafeThreadChannelChannel<>)).As(typeof(UnsafeThreadChannelChannel<>));
-            builder.RegisterGeneric(typeof(UnsafeThreadEventChannel<>)).As(typeof(UnsafeThreadEventChannel<>)).SingleInstance();
+            builder.RegisterGeneric(typeof(ChimeraEventChannel<>)).As(typeof(ChimeraEventChannel<>));
             builder.RegisterType<InProcListeners>().SingleInstance().AsSelf();
             builder.RegisterInstance(_testExceptionMode).AsSelf();
 

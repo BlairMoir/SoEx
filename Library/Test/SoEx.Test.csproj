@@ -3,8 +3,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Topology\SoEx.Topology.csproj" />
     <ProjectReference Include="..\Hosting\SoEx.Hosting.csproj" />
+    <ProjectReference Include="..\Transport\Chimera\SoEx.Transport.Chimera.csproj" />
     <ProjectReference Include="..\Transport\InProc\SoEx.Transport.InProc.csproj" />    
-    <ProjectReference Include="..\Transport\ThreadChannel\SoEx.Transport.ThreadChannel.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
