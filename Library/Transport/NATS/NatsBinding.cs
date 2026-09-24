@@ -5,12 +5,12 @@ namespace SoEx.Transport.NATS
 {
     public record NatsBinding<I> : Topology.Binding
     {
-        [SetsRequiredMembers]
-        public NatsBinding(string subSystem)
+        public NatsBinding(string subSystem) : base(
+            typeof(I),
+            new NatsTransport() { Address = new Address.Single(new Uri($"soex.nats://{subSystem}-{typeof(I)}")) },
+            subSystem
+            )
         {
-            Contract = typeof(I);
-            SubSystem = subSystem;
-            Transport = new NatsTransport() { Address = new Address.Single(new Uri($"soex.nats://{SubSystem}-{typeof(I)}")) };
         }
     }
 }

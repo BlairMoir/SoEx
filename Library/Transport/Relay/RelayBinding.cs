@@ -7,12 +7,12 @@ namespace SoEx.Relay
     public record RelayBinding<I> : Topology.Binding
     {
         private readonly RelayConfig _config;
-        [SetsRequiredMembers]
-        public RelayBinding(string subsystem, RelayConfig config)
+        public RelayBinding(string subsystem, RelayConfig config) : base(
+            typeof(I),
+            new RelayTransport() { Address = new Address.Single(new Uri(string.Format("sb://{0}/{1}", config.RelayNamespace, config.ConnectionName))) },
+            subsystem
+            )
         {
-            SubSystem = subsystem;
-            Contract = typeof(I);
-            Transport = new RelayTransport() { Address = new Address.Single(new Uri(string.Format("sb://{0}/{1}", config.RelayNamespace, config.ConnectionName))) };
             _config = config;
         }
 

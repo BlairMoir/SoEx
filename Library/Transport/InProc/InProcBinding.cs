@@ -5,12 +5,12 @@ namespace SoEx.Transport.InProc
 {
     public record InProcBinding<I> : Topology.Binding
     {
-        [SetsRequiredMembers]
-        public InProcBinding(string subSystem)
+        public InProcBinding(string subSystem) : base(
+            typeof(I),
+            new InProcTransport() { Address = new Address.Single(new Uri($"soex.inproc://{subSystem}-{typeof(I)}")) },
+            subSystem
+            )
         {
-            Contract = typeof(I);
-            SubSystem = subSystem;
-            Transport = new InProcTransport() { Address = new Address.Single(new Uri($"soex.inproc://{SubSystem}-{typeof(I)}")) };
         }
     }
 }

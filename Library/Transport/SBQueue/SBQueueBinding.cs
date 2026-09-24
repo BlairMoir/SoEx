@@ -6,12 +6,12 @@ namespace SoEx.Transport.SBQueue
     public record SBQueueBinding<I> : Topology.Binding
     {
         private readonly SBConfig _config;
-        [SetsRequiredMembers]
-        public SBQueueBinding(SBConfig config)
+        public SBQueueBinding(SBConfig config) : base(
+            typeof(I),
+            new SBQueueTransport() { Address = new Address.Single(new Uri($"sb://{config.SBNamespace}.servicebus.windows.net/")) },
+            "NotSet"
+            )
         {
-            Contract = typeof(I);
-            SubSystem = "NotSet";
-            Transport = new SBQueueTransport() { Address = new Address.Single(new Uri($"sb://{config.SBNamespace}.servicebus.windows.net/")) };
             _config = config;
         }
 

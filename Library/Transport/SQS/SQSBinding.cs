@@ -6,12 +6,13 @@ namespace SoEx.Transport.SQS
     public record SQSBinding<I> : Topology.Binding
     {
         private readonly SQSConfig _config;
-        [SetsRequiredMembers]
-        public SQSBinding(SQSConfig config)
+
+        public SQSBinding(SQSConfig config) : base(
+            typeof(I),
+            new SQSTransport() { Address = new Address.Single(new Uri(config.QueueUrl)) },
+            "NotSet"
+            )
         {
-            Contract = typeof(I);
-            SubSystem = "NotSet";
-            Transport = new SQSTransport() { Address = new Address.Single(new Uri(config.QueueUrl)) };
             _config = config;
         }
 

@@ -4,20 +4,29 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.Chimera;
 
-public record ChimeraEventBinding : Binding
+public abstract record ChimeraEventBinding : Binding
 {
-    public required ChimeraOptions Options { get; init; }
-    public required string Topic { get; init; }
+    protected ChimeraEventBinding(Type contract, Topology.Transport transport, string subSystem,
+        ChimeraOptions options, string topic)
+        : base(contract, transport, subSystem)
+    {
+        Options = options;
+        Topic = topic;
+    }
+
+    public ChimeraOptions Options { get; init; }
+    public string Topic { get; }
 }
 
 public record ChimeraEventBinding<I> : ChimeraEventBinding
 {
-    public ChimeraEventBinding(string subSystem, ChimeraOptions options, string topic)
+    public ChimeraEventBinding(string subSystem, ChimeraOptions options, string topic) : base(
+        typeof(I),
+            new ChimeraEventTransport(){ Address = new Address.Single(new Uri($"soex.chimera://{topic}"))},
+                subSystem,
+            options,
+            topic
+        )
     {
-        Contract = typeof(I);
-        SubSystem = subSystem;
-        Options = options;
-        Topic = topic;
-        Transport = new ChimeraEventTransport(){ Address = new Address.Single(new Uri($"soex.chimera://{Topic}")) };
     }
 }

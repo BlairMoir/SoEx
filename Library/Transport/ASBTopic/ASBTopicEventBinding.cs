@@ -8,12 +8,12 @@ namespace SoEx.Transport.ASBTopic
     {
         private readonly TopicConfig _topicConfig;
 
-        [SetsRequiredMembers]
-        public ASBTopicEventBinding(string subsystem, TopicConfig config)
+        public ASBTopicEventBinding(string subsystem, TopicConfig config) : base(
+            typeof(I),
+            new ASBTopicEventTransport() { Address = AddressFrom(config) },
+            subsystem
+            )
         {
-            SubSystem = subsystem;
-            Contract = typeof(I);
-            Transport = new ASBTopicEventTransport() { Address = AddressFrom(config) };
             _topicConfig = config;
         }
 

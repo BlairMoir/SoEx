@@ -51,7 +51,7 @@ public static class MethodSubSystemExtensions
         var binding = (Binding)Activator.CreateInstance(genericType, subSystem.Name)!;
         if (customPipeline != null)
         {
-            binding.Pipeline = customPipeline;
+            binding = binding with { Pipeline = customPipeline };
         }
         subSystem.AddEndpoints([binding]);
         return subSystem;

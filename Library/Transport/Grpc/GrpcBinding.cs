@@ -8,19 +8,19 @@ namespace SoEx.Transport.Grpc
     public record GrpcBinding<I> : Topology.Binding
     {
         private readonly GrpcConfig[] _config;
-        [SetsRequiredMembers]
-        public GrpcBinding(string subsystem, GrpcConfig[] config)
-        {
-            SubSystem = subsystem;
-            Contract = typeof(I);
 
-            Transport = new GrpcTransport() { Address = TransportAddress(config) };
+        public GrpcBinding(string subsystem, GrpcConfig[] config) : base(
+            typeof(I),
+                new GrpcTransport() { Address = TransportAddress(config) },
+                subsystem
+            )
+        {
             _config = config;
         }
 
         public GrpcConfig[] Config => _config;
 
-        private Address TransportAddress(GrpcConfig[] config)
+        private static Address TransportAddress(GrpcConfig[] config)
         {
             List<Uri> uriList = new List<Uri>();
             foreach (var configItem in config)

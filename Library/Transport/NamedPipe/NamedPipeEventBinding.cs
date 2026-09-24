@@ -5,12 +5,12 @@ namespace SoEx.Transport.NamedPipe
 {
     public record NamedPipeEventBinding<I> : Topology.Binding
     {
-        [SetsRequiredMembers]
-        public NamedPipeEventBinding(string subSystem)
+        public NamedPipeEventBinding(string subSystem) : base(
+            typeof(I),
+            new NamedPipeEventTransport() { Address = new Address.Single(new Uri($"soex.namedpipe://{typeof(I)}")) },
+            subSystem
+            )
         {
-            Contract = typeof(I);
-            SubSystem = subSystem;
-            Transport = new NamedPipeEventTransport() { Address = new Address.Single(new Uri($"soex.namedpipe://{typeof(I)}")) };
         }
     }
 }
