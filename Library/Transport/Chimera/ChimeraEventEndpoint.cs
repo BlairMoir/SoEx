@@ -6,7 +6,13 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.Chimera;
 
-public class ChimeraEventEndpoint<I> : IEndpoint where I : class
+public class ChimeraEventEndpoint
+{
+    public ChimeraOptions? ChimeraOptions { get; protected set; }
+    public string? Topic { get; protected set; }
+}
+
+public class ChimeraEventEndpoint<I> : ChimeraEventEndpoint, IEndpoint where I : class
 {
     private ChimeraEventBinding<I>? _binding;
     private readonly IEndpointPipeline _pipeline;
@@ -26,6 +32,8 @@ public class ChimeraEventEndpoint<I> : IEndpoint where I : class
         {
             _binding = chimeraEventBinding;
             _subscriber = componentName;
+            ChimeraOptions = chimeraEventBinding.Options;
+            Topic = chimeraEventBinding.Topic;
         }
     }
 

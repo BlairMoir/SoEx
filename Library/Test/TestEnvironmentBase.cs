@@ -4,6 +4,7 @@ using SoEx.Abstractions;
 using SoEx.Context;
 using SoEx.Exceptions;
 using SoEx.Hosting;
+using SoEx.Messaging.Chimera;
 using SoEx.Topology;
 using SoEx.Transport.Chimera;
 using SoEx.Transport.InProc;
@@ -44,9 +45,15 @@ namespace SoEx.Test
             _generics = generics;
         }
 
+        public async Task TestSystem(Func<SystemHarness, Task> systemFunc, SoEx.Topology.System? system = null,
+            KnownTypes? knownTypes = null)
+        {
+            await BuildAndInvoke(systemFunc, system, knownTypes);
+        }
+
         public async Task TestService<S>(Func<S, Task> callerFunc, SoEx.Topology.System? system = null, KnownTypes? knownTypes = null) where S : notnull
         {
-            await BuildAndInvoke(callerFunc, system, knownTypes);
+            await BuildAndInvoke(system => system.Proxy(callerFunc), system, knownTypes);
         }
 
         public async Task TestComponent<I>(Func<I, Task> callerFunc, SoEx.Topology.System? system = null, KnownTypes? knownTypes = null) where I : class
@@ -59,21 +66,20 @@ namespace SoEx.Test
                 Clients = [new Client<I>() { Service = new InProcBinding<I>(subsystemName), SubSystem = subsystemName }],
                 Defaults = orginalTopo.Defaults
             };
-            await BuildAndInvoke(callerFunc, newTopo, knownTypes);
+            await BuildAndInvoke(system => system.Proxy(callerFunc) , newTopo, knownTypes);
         }
 
-        public async Task BuildAndInvoke<S>(Func<S, Task> callerFunc, SoEx.Topology.System? system = null,
-            KnownTypes? knownTypes = null) where S : notnull
+        public async Task BuildAndInvoke(Func<SystemHarness, Task> systemFunc, SoEx.Topology.System? system = null,
+            KnownTypes? knownTypes = null)
         {
             string eventDirectory =
                 Path.Combine(Path.GetTempPath(), "soex-test-events", Guid.NewGuid().ToString("N"));
             try
             {
-
                 var topology = UniqueEventsDirectory(system ?? _topology, eventDirectory);
                 using (var container = BuildContainer(topology, knownTypes))
                 {
-                    await Invoke(callerFunc, container);
+                    await Invoke(systemFunc, container);
                 }
             }
             finally
@@ -85,21 +91,30 @@ namespace SoEx.Test
             }
         }
 
-        private async Task Invoke<S>(Func<S, Task> callerFunc, ILifetimeScope container) where S : notnull
+        private async Task Invoke(Func<SystemHarness, Task> systemFunc, ILifetimeScope container)
         {
             var endpointRegister = container.Resolve<RegisteredEndpoints>();
+            var topics = container.Resolve<ChimeraTopic>();
+            ChimeraOptions? options = null;
             foreach (var endpoint in endpointRegister.Endpoints)
             {
+                if (endpoint is ChimeraEventEndpoint chimeraEventEndpoint
+                    && chimeraEventEndpoint.ChimeraOptions is not null
+                    && chimeraEventEndpoint.Topic is not null
+                    )
+                {
+                    if (options is null)
+                    {
+                        options = chimeraEventEndpoint.ChimeraOptions;
+                    }
+                    topics.For(chimeraEventEndpoint.ChimeraOptions, chimeraEventEndpoint.Topic);
+                }
                 await endpoint.Listen();
             }
 
             try
             {
-                using (var requestScope = container.BeginLifetimeScopeAsyncLocal())
-                {
-                    var proxy = requestScope.Resolve<S>();
-                    await callerFunc.Invoke(proxy);
-                }
+                await systemFunc.Invoke(new SystemHarness(container, options));
             }
             finally
             {
