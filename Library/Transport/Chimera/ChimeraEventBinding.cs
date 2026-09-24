@@ -4,12 +4,14 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.Chimera;
 
-public record ChimeraEventBinding<I> : Binding
+public record ChimeraEventBinding : Binding
 {
-    public ChimeraOptions Options { get; }
-    public string Topic { get; }
+    public required ChimeraOptions Options { get; init; }
+    public required string Topic { get; init; }
+}
 
-    [SetsRequiredMembers]
+public record ChimeraEventBinding<I> : ChimeraEventBinding
+{
     public ChimeraEventBinding(string subSystem, ChimeraOptions options, string topic)
     {
         Contract = typeof(I);

@@ -5,21 +5,21 @@ namespace SoEx.Transport.Chimera;
 
 public class ChimeraTopic : IAsyncDisposable
 {
-    private static readonly ConcurrentDictionary<string, SqliteTopicLog> s_topics = new ();
+    private readonly ConcurrentDictionary<string, SqliteTopicLog> topics = new ();
 
-    public static SqliteTopicLog For(ChimeraOptions options, string topic)
+    public SqliteTopicLog For(ChimeraOptions options, string topic)
     {
         string path = Path.GetFullPath(options.RootDirectory);
         string identifier = $"{path}|{topic}";
-        var logTopic = s_topics.GetOrAdd(identifier, _ => SqliteTopicLog.Open(topic, options) );
+        var logTopic = topics.GetOrAdd(identifier, _ => SqliteTopicLog.Open(topic, options) );
         return logTopic;
     }
 
     public async ValueTask DisposeAsync()
     {
-        foreach (var topic in s_topics)
+        foreach (var topic in topics)
         {
-            s_topics.TryRemove(topic.Key, out _);
+            topics.TryRemove(topic.Key, out _);
             await topic.Value.DisposeAsync();
         }
     }

@@ -7,7 +7,14 @@ public class ChimeraEventChannel<I> : IChannel
 {
     public Type Contract => typeof(I);
     private ChimeraEventBinding<I>? _binding;
+    private ChimeraTopic _topics;
     public IBindingPipeline? Pipeline => _binding?.Pipeline;
+
+    public ChimeraEventChannel(ChimeraTopic topics)
+    {
+        _topics = topics;
+    }
+
 
     public void Bind(Binding binding)
     {
@@ -25,7 +32,7 @@ public class ChimeraEventChannel<I> : IChannel
             try
             {
                 ArgumentNullException.ThrowIfNull(_binding);
-                var topic = ChimeraTopic.For(_binding.Options, _binding.Topic);
+                var topic = _topics.For(_binding.Options, _binding.Topic);
                 await topic.AppendAsync(invocationRequest).ConfigureAwait(false);
                 return [];
             }
