@@ -14,7 +14,7 @@ namespace SoEx.Hosting.Default
         public IPipelineProtection MessageProtection { get; init; } = new PipelineProtection<NullProtection>();
 
         public IPipelineSerializer MessageSerializer { get; init; } =
-            new PipelineSerializer<SoEx.Hosting.Serializers.NewtonsoftJson.OpenJsonMessageSerializer>();
+            new PipelineSerializer<SoEx.Hosting.Serializers.SystemText.JsonMessageSerializer>();
         public ImmutableArray<IPipelineServiceInterceptor> ServiceInterceptors =>  [ new PipelineServiceInterceptor<ErrorInterceptor>()] ;
     }
 }
