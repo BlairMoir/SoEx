@@ -181,7 +181,7 @@ public class SystemBuilder
 
         Client[] access = ClientsFor(methodSubsystem.Access, methodSubsystem.Name);
         Client[] engines = ClientsFor(methodSubsystem.Engines, methodSubsystem.Name);
-        Client[] utilities = [..ClientsFor(methodSubsystem.Engines, methodSubsystem.Name),..sharedUtilities];
+        Client[] utilities = [..ClientsFor(methodSubsystem.Utilities, methodSubsystem.Name),..sharedUtilities];
 
         var topologySubsystem = new SubSystem()
         {
