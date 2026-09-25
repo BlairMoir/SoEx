@@ -117,7 +117,9 @@ public class SystemBuilder
         var unboundEvents = subscriptions.Values.SelectMany(e=> e).Union(_events).ToArray();
         if (unboundEvents.Any())
         {
-            throw new InvalidOperationException("events not bound");
+            var message = $"Events {string.Join(", ", unboundEvents.Select(e => e.Name))} have no binding";
+            var fix = $"Define binding using {nameof(WithEvents)} before calling {nameof(Build)}";
+            throw new InvalidOperationException($"{message} {fix}");
         }
     }
 
