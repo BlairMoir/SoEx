@@ -9,7 +9,7 @@ public class SystemBuilder
     private Func<Type, Binding>? _eventBinding;
     private List<Type> _events = [];
 
-    private static string ComponentName(Type implementationType, string suffix, string error)
+    internal static string ComponentName(Type implementationType, string suffix, string error)
     {
         var typeName = implementationType.Name;
         if(!typeName.EndsWith(suffix))

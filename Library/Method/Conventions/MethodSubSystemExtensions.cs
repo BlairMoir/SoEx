@@ -63,6 +63,7 @@ public static class MethodSubSystemExtensions
 
     public static MethodComponent AddEngine(this MethodSubSystem subSystem, Type implementationType)
     {
+        SystemBuilder.ComponentName(implementationType, Keywords.Engine, "An engine must end with Engine");
         var host = new Topology.Host()
         {
             Implementation = implementationType,
@@ -80,6 +81,7 @@ public static class MethodSubSystemExtensions
 
     public static MethodComponent AddAccess(this MethodSubSystem subSystem, Type implementationType)
     {
+        SystemBuilder.ComponentName(implementationType, Keywords.Access, "An access must end with Access");
         var host = new Topology.Host()
         {
             Implementation = implementationType,
@@ -104,5 +106,14 @@ public static class MethodSubSystemExtensions
 
         component.Host = component.Host with { Proxies =  [.. component.Host.Proxies, .. clients]};
         return component;
+    }
+
+    public static MethodComponent AddUtility(this MethodSubSystem methodSubSystem, Type implementationType)
+    {
+        SystemBuilder.ComponentName(implementationType, Keywords.Utility, "A utility must end with Utility");
+        var host = new Topology.Host() { Implementation = implementationType, Endpoints = [], Proxies = [], };
+        MethodComponent methodComponent = new MethodComponent() { Host = host, SubSystem = methodSubSystem.Name };
+        methodSubSystem.Utilities = [..methodSubSystem.Utilities, methodComponent];
+        return methodComponent;
     }
 }
