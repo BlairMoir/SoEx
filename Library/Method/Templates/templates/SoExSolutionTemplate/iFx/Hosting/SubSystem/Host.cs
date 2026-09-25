@@ -110,11 +110,7 @@ public static class Host
         List<Client> eventClients = new List<Client>();
         foreach (var ev in eventTypes)
         {
-            var genericType = typeof(Client<>).MakeGenericType(ev);
-            var client = (Client)Activator.CreateInstance(genericType)!;
-            typeof(Client).GetProperty(nameof(Client.SubSystem))?.SetValue(client, "");
-            typeof(Client).GetProperty(nameof(Client.Service))?.SetValue(client, CreateNamedPipeEventBinding("", ev));
-            eventClients.Add(client);
+           eventClients.Add(CreateNamedPipeEventBinding("",ev).ToClient());
         }
         return eventClients.ToArray();
     }

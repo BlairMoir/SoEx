@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using SoEx.Abstractions;
 using SoEx.Context;
 using SoEx.Hosting;
+using SoEx.Method.Conventions;
 using SoEx.Topology;
 using SoEx.Transport.NamedPipe;
 using SoExTemplate.iFx.Convention;
@@ -51,20 +52,12 @@ public static class Host
         List<Client> clients = new List<Client>();
         foreach (var proxy in proxies)
         {
-            var genericType = typeof(Client<>).MakeGenericType(proxy);
-            var client = (Client)Activator.CreateInstance(genericType)!;
-            typeof(Client).GetProperty(nameof(Client.SubSystem))!.SetValue(client, subSystem);
-            typeof(Client).GetProperty(nameof(Client.Service))!.SetValue(client, CreateNamedPipeBinding(subSystem, proxy));
-            clients.Add(client);
+            clients.Add(CreateNamedPipeBinding(subSystem, proxy).ToClient());
         }
         List<Client> eventClients = new List<Client>();
         foreach (var ev in events)
         {
-            var genericType = typeof(Client<>).MakeGenericType(ev);
-            var client = (Client)Activator.CreateInstance(genericType)!;
-            typeof(Client).GetProperty(nameof(Client.SubSystem))!.SetValue(client, subSystem);
-            typeof(Client).GetProperty(nameof(Client.Service))!.SetValue(client, CreateNamedPipeEventBinding(subSystem, ev));
-            eventClients.Add(client);
+            eventClients.Add(CreateNamedPipeEventBinding(subSystem, ev).ToClient());
         }
 
         SoEx.Topology.Host host = new SoEx.Topology.Host()

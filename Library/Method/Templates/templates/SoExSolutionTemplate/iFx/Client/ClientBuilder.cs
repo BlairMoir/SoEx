@@ -19,7 +19,7 @@ public class ClientBuilder
     {
         return new SoEx.Topology.System()
         {
-            Clients = _clients.ToArray(),
+            Clients = [.._clients],
             SubSystems = [],
             Defaults = defaults
         };

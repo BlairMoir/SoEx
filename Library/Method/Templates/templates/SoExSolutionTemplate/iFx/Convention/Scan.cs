@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using SoEx.Context;
+using SoEx.Method.Conventions;
 
 namespace SoExTemplate.iFx.Convention;
 

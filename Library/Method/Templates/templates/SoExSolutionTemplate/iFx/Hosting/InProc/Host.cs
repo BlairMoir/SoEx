@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using SoEx.Abstractions;
 using SoEx.Context;
 using SoEx.Hosting;
+using SoEx.Method.Conventions;
 using SoEx.Topology;
 using SoEx.Transport.InProc;
 using SoEx.Transport.Chimera;
@@ -66,23 +67,9 @@ public static class Host
                 if (endpoint.Contract.Name.EndsWith(Keywords.Event))
                     continue;
 
-                clients.Add(ToClient(endpoint, subSystem.Name));
+                clients.Add(endpoint.ToClient(subSystem.Name));
             }
         }
-        return new SoEx.Topology.System() { SubSystems = [], Clients = clients.ToArray(), Defaults = system.Defaults };
+        return new SoEx.Topology.System() { SubSystems = [], Clients = [..clients], Defaults = system.Defaults };
     }
-
-    private static SoEx.Topology.Client ToClient(Binding s, string subsystemName)
-    {
-        var clientContractType = typeof(SoEx.Topology.Client<>).MakeGenericType(s.Contract);
-        if (Activator.CreateInstance(clientContractType) is SoEx.Topology.Client instance)
-        {
-            clientContractType.GetProperty(nameof(SoEx.Topology.Client.Service))!.SetValue(instance, s);
-            clientContractType.GetProperty(nameof(SoEx.Topology.Client.SubSystem))!.SetValue(instance, subsystemName);
-            return instance;
-        }
-        throw new ArgumentOutOfRangeException(nameof(instance));
-    }
-
-
 }
