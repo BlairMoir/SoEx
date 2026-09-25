@@ -179,7 +179,7 @@ public class SystemBuilder
         Client[] sharedUtilities)
     {
         if(methodSubsystem.EntryPoint is null)
-            throw new ArgumentNullException(nameof(methodSubsystem.EntryPoint));
+            throw new ArgumentNullException($"{nameof(methodSubsystem.Name)} requires an entry point");
 
         Client[] access = ClientsFor(methodSubsystem.Access, methodSubsystem.Name);
         Client[] engines = ClientsFor(methodSubsystem.Engines, methodSubsystem.Name);
