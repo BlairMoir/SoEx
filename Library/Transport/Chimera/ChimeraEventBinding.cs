@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using SoEx.Messaging.Chimera;
 using SoEx.Topology;
 
