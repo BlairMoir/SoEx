@@ -22,6 +22,7 @@
     <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.298" />
     <PackageVersion Include="NATS.Net" Version="2.8.2" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
     <PackageVersion Include="SoEx.Messaging.Chimera" Version="0.0.0-alpha-1.1" />
     <PackageVersion Include="SoEx.Messaging.Chimera.Testing" Version="0.0.0-alpha-1.1" />
     <PackageVersion Include="StreamJsonRpc" Version="2.25.29" />

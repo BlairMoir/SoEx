@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\Abstractions\SoEx.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Diagnostics\SoEx.Diagnostics.csproj" />
+    <ProjectReference Include="..\..\Endpoint\SoEx.Endpoint.csproj" />
+    <ProjectReference Include="..\..\Topology\SoEx.Topology.csproj" />
+  </ItemGroup>
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" />
+  </ItemGroup>
+</Project>
