@@ -60,9 +60,10 @@ public class SystemBuilder
 
     public Topology.System Build(IPipeline? defaultPipeline = null)
     {
+        ThrowNullEntryPoints();
         var managers = _methodSubSystems.Values.Where( m => !IsUtility(m)).ToArray();
         var subscriptions = Subscriptions(managers);
-        RefuseUnboundEvents(subscriptions);
+        ThrowUnboundEvents(subscriptions);
 
         var eventBindings = EventBindings(managers);
         Client[] eventClients = [.. eventBindings.Values.Select( c=> c.ToClient())];
@@ -92,6 +93,16 @@ public class SystemBuilder
         return system;
     }
 
+    private void ThrowNullEntryPoints()
+    {
+        var missing = _methodSubSystems.Values.Where(s => s.EntryPoint is null).Select( s=> s.Name).ToArray();
+        if (missing.Any())
+        {
+            var message = $"Subsystems {string.Join(", ", missing)} have no entry point";
+            throw new InvalidOperationException(message);
+        }
+    }
+
     private bool IsUtility(MethodSubSystem subsystem)
     {
         return _utilitySubsystems.Contains(subsystem.Name);
@@ -110,7 +121,7 @@ public class SystemBuilder
         );
     }
 
-    private void RefuseUnboundEvents(Dictionary<string, Type[]> subscriptions)
+    private void ThrowUnboundEvents(Dictionary<string, Type[]> subscriptions)
     {
         if (_eventBinding is not null)
             return;
@@ -178,9 +189,6 @@ public class SystemBuilder
     private static SubSystem Compose(MethodSubSystem methodSubsystem, Binding[] subscriptions, Client[] eventClients,
         Client[] sharedUtilities)
     {
-        if(methodSubsystem.EntryPoint is null)
-            throw new ArgumentNullException($"{nameof(methodSubsystem.Name)} requires an entry point");
-
         Client[] access = ClientsFor(methodSubsystem.Access, methodSubsystem.Name);
         Client[] engines = ClientsFor(methodSubsystem.Engines, methodSubsystem.Name);
         Client[] utilities = [..ClientsFor(methodSubsystem.Utilities, methodSubsystem.Name),..sharedUtilities];
