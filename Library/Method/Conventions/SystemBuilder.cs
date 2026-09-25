@@ -201,23 +201,4 @@ public class SystemBuilder
     {
         return host with { Proxies = [..host.Proxies, ..clients] };
     }
-
-    private void ComponentProxies(string subsystemName)
-    {
-        var subsystem = _methodSubSystems[subsystemName];
-        foreach (var access in subsystem.Access)
-        {
-            var accessClients = access.Host.Endpoints.Select(s => s.ToClient()).ToArray();
-            subsystem.AddProxies(accessClients);
-            foreach (var engine in subsystem.Engines)
-            {
-                engine.Host =  engine.Host with { Proxies = [.. engine.Host.Proxies, .. accessClients] };
-            }
-        }
-        foreach (var engine in subsystem.Engines)
-        {
-            var engineClients = engine.Host.Endpoints.Select(s => s.ToClient()).ToArray();
-            subsystem.AddProxies(engineClients);
-        }
-    }
 }
