@@ -42,6 +42,7 @@ public static class MethodComponentExtensions
         {
             ServiceCollection = component.Host.ServiceCollection ?? new ServiceCollection()
         };
+        services.Invoke(component.Host.ServiceCollection);
         return component;
     }
 }
