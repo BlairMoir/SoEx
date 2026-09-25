@@ -6,4 +6,5 @@ public class MethodSubSystem
     public Topology.Host? EntryPoint { get; set; }
     public MethodComponent[] Engines { get; set; } = [];
     public MethodComponent[] Access { get; set; } = [];
+    public MethodComponent[] Utilities { get; set; } = [];
 }

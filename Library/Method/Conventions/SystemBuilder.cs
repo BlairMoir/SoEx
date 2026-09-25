@@ -1,12 +1,11 @@
-﻿using System.Reflection;
-using SoEx.Topology;
+﻿using SoEx.Topology;
 
 namespace SoEx.Method.Conventions;
 
 public class SystemBuilder
 {
     private Dictionary<string, MethodSubSystem> _methodSubSystems = [];
-    private HashSet<string> _utiltySubsystems = [];
+    private HashSet<string> _utilitySubsystems = [];
     private Func<Type, Binding>? _eventBinding;
     private List<Type> _events = [];
 
@@ -33,7 +32,7 @@ public class SystemBuilder
             "A utility name must end in Utility");
         var subSystem = AddSubSystem(subSystemName ?? defaultSubSystemName);
         subSystem.EntryPoint = new Topology.Host() { Implementation = implementationType, Endpoints = [], Proxies = [] };
-        _utiltySubsystems.Add(subSystem.Name);
+        _utilitySubsystems.Add(subSystem.Name);
         return subSystem;
     }
 
@@ -55,25 +54,152 @@ public class SystemBuilder
 
     public SystemBuilder AddEvents(params Type[] eventTypes)
     {
-        _events.AddRange(_events.Except(_events));
+        _events.AddRange(eventTypes.Except(_events));
         return this;
     }
 
     public Topology.System Build(IPipeline? defaultPipeline = null)
     {
+        var managers = _methodSubSystems.Values.Where( m => !IsUtility(m)).ToArray();
+        var subscriptions = Subscriptions(managers);
+        RefuseUnboundEvents(subscriptions);
+
+        var eventBindings = EventBindings(managers);
+        Client[] eventClients = [.. eventBindings.Values.Select( c=> c.ToClient())];
+        Client[] sharedUtilities = SharedUtilityClients();
+
         List<Topology.SubSystem> subSystems = new List<Topology.SubSystem>();
-        foreach (var subsystemName in _methodSubSystems.Keys)
+
+        foreach (var subsystem in _methodSubSystems.Values)
         {
-            ComponentProxies(subsystemName);
-            var subsystem = _methodSubSystems[subsystemName];
-            subSystems.Add(new Topology.SubSystem()
+            if (IsUtility(subsystem))
             {
-                Name = subsystem.Name,
-                EntryPoint = subsystem.EntryPoint!,
-                Components = [.. subsystem.Engines.Select(s => s.Host), .. subsystem.Access.Select(s => s.Host)]
-            });
+                subSystems.Add(ComposeUtility(subsystem));
+            }
+            else
+            {
+                subSystems.Add(ComposeManager(subsystem, subscriptions[subsystem.Name], eventBindings, eventClients, sharedUtilities ));
+            }
         }
-        return new Topology.System() { Clients = [], SubSystems = [..subSystems], Defaults = defaultPipeline };
+
+        var system = new Topology.System()
+        {
+            Clients = [],
+            SubSystems = [ .. subSystems,],
+            Defaults = defaultPipeline,
+        };
+
+        return system;
+    }
+
+    private bool IsUtility(MethodSubSystem subsystem)
+    {
+        return _utilitySubsystems.Contains(subsystem.Name);
+    }
+
+    private static IEnumerable<Type> ImplementedEvents(MethodSubSystem subsystem)
+    {
+        return subsystem.EntryPoint!.Implementation.GetInterfaces().Where( w=> w.Name.EndsWith(Keywords.Event));
+    }
+
+    private static Dictionary<string, Type[]> Subscriptions(MethodSubSystem[] managers)
+    {
+        return managers.ToDictionary(s => s.Name, s => ImplementedEvents(s)
+            .Where( ev=> !s.EntryPoint!.Endpoints.Any( a=> a.Contract ==ev))
+            .ToArray()
+        );
+    }
+
+    private void RefuseUnboundEvents(Dictionary<string, Type[]> subscriptions)
+    {
+        if (_eventBinding is not null)
+            return;
+        var unboundEvents = subscriptions.Values.SelectMany(e=> e).Union(_events).ToArray();
+        if (unboundEvents.Any())
+        {
+            throw new InvalidOperationException("events not bound");
+        }
+    }
+
+    private Dictionary<Type, Binding> EventBindings(MethodSubSystem[] managers)
+    {
+        if (_eventBinding is null)
+            return [];
+
+        return _events.Union(managers.SelectMany(ImplementedEvents)).ToDictionary(e => e, e => _eventBinding(e));
+    }
+
+    private Client[] SharedUtilityClients()
+    {
+        return [.. _methodSubSystems.Values.Where(IsUtility).SelectMany(s => ClientsFor(s.EntryPoint!, s.Name))];
+    }
+
+    private static Client[] ClientsFor(IEnumerable<MethodComponent> components, string subSystemName)
+    {
+        return [.. components.SelectMany(c=> ClientsFor(c.Host, subSystemName))];
+    }
+
+    private static IEnumerable<Client> ClientsFor(Topology.Host host, string subSystemName)
+    {
+        return host.Endpoints.Select(s => s.ToClient(subSystemName));
+    }
+
+    private static Topology.Host EntryPoint(Topology.Host entryPoint, Binding[] subscriptions, Client[] components,
+        Client[] eventclients)
+    {
+        return entryPoint with
+        {
+            Endpoints = [..entryPoint.Endpoints, .. subscriptions],
+            Proxies =
+            [
+                ..entryPoint.Proxies, .. components,
+                ..eventclients.Where(w => !entryPoint.Proxies.Any(p => p.Service.Contract == w.Service.Contract))
+            ]
+        };
+
+    }
+
+    private static Topology.SubSystem ComposeUtility(MethodSubSystem subsystem)
+    {
+        var utilitySubsystem = Compose(subsystem, [],[],[]);
+        return utilitySubsystem;
+    }
+
+    private static Topology.SubSystem ComposeManager(MethodSubSystem subSystem, Type[] subscribedEvents,
+        Dictionary<Type, Binding> eventBindings, Client[] eventClients, Client[] sharedUtilities)
+    {
+        Binding[] subscriptions = [.. subscribedEvents.Select(e => eventBindings[e])];
+        var managerSubsystem = Compose(subSystem, subscriptions, eventClients, sharedUtilities);
+        return managerSubsystem;
+    }
+
+    private static SubSystem Compose(MethodSubSystem methodSubsystem, Binding[] subscriptions, Client[] eventClients,
+        Client[] sharedUtilities)
+    {
+        if(methodSubsystem.EntryPoint is null)
+            throw new ArgumentNullException(nameof(methodSubsystem.EntryPoint));
+
+        Client[] access = ClientsFor(methodSubsystem.Access, methodSubsystem.Name);
+        Client[] engines = ClientsFor(methodSubsystem.Engines, methodSubsystem.Name);
+        Client[] utilities = [..ClientsFor(methodSubsystem.Engines, methodSubsystem.Name),..sharedUtilities];
+
+        var topologySubsystem = new SubSystem()
+        {
+            Name = methodSubsystem.Name,
+            EntryPoint = EntryPoint(methodSubsystem.EntryPoint!, subscriptions, [ ..engines, .. access, .. utilities], eventClients),
+            Components = [
+                .. methodSubsystem.Engines.Select(e=> WithProxies(e.Host, [.. access, .. utilities])),
+                .. methodSubsystem.Access.Select(e=> WithProxies(e.Host, [.. utilities])),
+                .. methodSubsystem.Utilities.Select( u=> u.Host)
+            ]
+        };
+
+        return topologySubsystem;
+    }
+
+    private static Topology.Host WithProxies(Topology.Host host, Client[] clients)
+    {
+        return host with { Proxies = [..host.Proxies, ..clients] };
     }
 
     private void ComponentProxies(string subsystemName)
