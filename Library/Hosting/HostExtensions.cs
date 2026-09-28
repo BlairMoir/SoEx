@@ -233,9 +233,9 @@ namespace SoEx.Hosting
                     componentContainer.Register(c =>
                     {
                         List<IInterceptor> interceptors = [];
-                        foreach (Type interceptorType in pipeline.ServiceInterceptors)
+                        foreach (IPipelineServiceInterceptor serviceInterceptor in pipeline.ServiceInterceptors)
                         {
-                            var interceptor = c.Resolve(interceptorType) as IInterceptor;
+                            var interceptor = c.Resolve(serviceInterceptor.ImplementationType) as IInterceptor;
                             if (interceptor is not null)
                             {
                                 interceptors.Add(interceptor);
