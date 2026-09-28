@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
+using RabbitMQ.AMQP.Client;
+
 using SoEx.Endpoint;
 using SoEx.Topology;
-using IChannel = RabbitMQ.Client.IChannel;
+
 
 namespace SoEx.Transport.RabbitMq;
 
@@ -15,8 +15,8 @@ public class RabbitEventEndpoint<I> : IEndpoint where I : class
     IEndpointPipeline _endpointPipeLine;
     private string? _subscriber;
     private IConnection? _connection;
-    IChannel? _channel;
-    private string? _consumerTag;
+    private readonly uint _maxDeliveryAttempts = 5;
+    private IConsumer? _consumer;
 
     public RabbitEventEndpoint(ILogger<RabbitEventEndpoint<I>> logger, IEndpointPipeline endpointPipeLine)
     {
@@ -26,49 +26,46 @@ public class RabbitEventEndpoint<I> : IEndpoint where I : class
 
     public async Task Listen()
     {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.ClientProvidedName = $"event:{typeof(I).FullName} subscriber:{_subscriber}";
-        factory.ConfigureFactory(_binding!.RabbitConfig);
-
-        _connection = await factory.CreateConnectionFromConfig(_binding!.RabbitConfig);
-        IChannel channel = await _connection.CreateChannelAsync();
+        _connection = await _binding!.RabbitConfig.ConnectAsync($"event: {typeof(I).FullName} subscriber:{_subscriber}");
         var exchangeName = typeof(I).FullName!;
         var queueName = $"{typeof(I).FullName!}_{_subscriber}";
         var deadLetterName = $"{queueName}.dead";
-        await channel.ExchangeDeclareAsync(exchangeName, ExchangeType.Fanout, durable: true);
-        await channel.ExchangeDeclareAsync(deadLetterName, ExchangeType.Fanout, durable: true);
 
-        await channel.QueueDeclareAsync(queue: deadLetterName, true, false, false, new Dictionary<string, object?>()
-        {
-            { "x-queue-type", "quorum" },
-        });
+        var management = _connection.Management();
+        await management.Exchange(exchangeName).Type(ExchangeType.FANOUT).DeclareAsync();
+        await management.Exchange(deadLetterName).Type(ExchangeType.FANOUT).DeclareAsync();
+        await management.Queue(deadLetterName).Type(QueueType.QUORUM).DeclareAsync();
+        await management.Queue(queueName)
+            .Type(QueueType.QUORUM)
+            .DeadLetterExchange(deadLetterName)
+            .Arguments(new Dictionary<object, object>(){ {"x-delivery-limit", _maxDeliveryAttempts - 1} })
+            .DeclareAsync();
+        await management.Binding().SourceExchange(exchangeName).DestinationQueue(queueName).Key("").BindAsync();
+        await management.Binding().SourceExchange(deadLetterName).DestinationQueue(deadLetterName).Key("").BindAsync();
 
-        await channel.QueueDeclareAsync(queue: queueName, true, false, false, new Dictionary<string, object?>()
-        {
-            { "x-queue-type", "quorum" },
-            { "x-delivery-limit", 5 },
-            { "x-dead-letter-exchange", deadLetterName },
-        });
-        await channel.QueueBindAsync(queueName, exchangeName,"");
-        await channel.QueueBindAsync(deadLetterName, deadLetterName,"");
+        _consumer = await _connection.ConsumerBuilder().Queue(queueName).MessageHandler(Handle).BuildAndStartAsync();
+    }
 
-        var consumer = new AsyncEventingBasicConsumer(channel);
-        consumer.ReceivedAsync += async (ch, ea) =>
+    private async Task Handle(IContext context, IMessage message)
+    {
+        try
         {
-            try
+            await Dispatch((byte[])message.Body());
+            context.Accept();
+        }
+        catch (Exception ex)
+        {
+            var attempt = message.DeliveryCount() + 1;
+            if (attempt < _maxDeliveryAttempts)
             {
-                var body = ea.Body.ToArray();
-                await Dispatch(body);
-                await channel.BasicAckAsync(ea.DeliveryTag, false);
-            }
-            catch(Exception ex)
+                _logger.LogWarning(ex, "Handler for {Event} failed attempt {Attempt} of {MaxDeliveryAttempts}",
+                    typeof(I).FullName, attempt, _maxDeliveryAttempts);
+            }else
             {
-                _logger.LogError(ex, "Handler for {Event} failed", typeof(I).Name);
-                await channel.BasicNackAsync(ea.DeliveryTag, false, true);
+              _logger.LogError(ex,"Handler for {Event} failed {MaxDeliveryAttempts} times",typeof(I).FullName, _maxDeliveryAttempts);
             }
-        };
-        _channel = channel;
-        _consumerTag = await channel.BasicConsumeAsync(queueName, false, consumer);
+            context.Requeue(new Dictionary<string, object>(), deliveryFailed: true);
+        }
     }
 
     private async Task<byte[]> Dispatch(byte[] serializedRequest)
@@ -89,15 +86,10 @@ public class RabbitEventEndpoint<I> : IEndpoint where I : class
 
     public async Task Close()
     {
-        if (_channel != null && _consumerTag != null)
+        if (_consumer != null)
         {
-            await _channel.BasicCancelAsync(_consumerTag);
-        }
-
-        if (_channel != null)
-        {
-            await _channel.CloseAsync();
-            _channel.Dispose();
+            await _consumer.CloseAsync();
+            _consumer.Dispose();
         }
 
         if (_connection != null)
@@ -105,7 +97,6 @@ public class RabbitEventEndpoint<I> : IEndpoint where I : class
             await _connection.CloseAsync();
             _connection.Dispose();
         }
-
     }
 
     public void Bind(Binding binding, string componentName)

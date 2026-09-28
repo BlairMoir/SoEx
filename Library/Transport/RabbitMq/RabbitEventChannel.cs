@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using RabbitMQ.Client;
+using RabbitMQ.AMQP.Client;
+using RabbitMQ.AMQP.Client.Impl;
 using SoEx.Topology;
 
 
@@ -8,10 +10,9 @@ namespace SoEx.Transport.RabbitMq;
 public class RabbitEventChannel<I> : SoEx.Topology.IChannel
 {
     private RabbitEventBinding<I>? _binding;
-    private readonly object _syncChannel = new object();
-    private Lazy<Task<Publisher>>? _publisher;
-    private CachedString _exchangeName = new CachedString(typeof(I).FullName!);
-    private CachedString _routingKey = new CachedString("");
+    private static readonly ConcurrentDictionary<string,SharedPublisher> s_shared = new();
+    private SharedPublisher? _shared;
+    private static readonly TimeSpan s_reconectWait = TimeSpan.FromSeconds(30);
 
     public async Task<byte[]> InvokeResult(byte[] invocationRequest)
     {
@@ -20,12 +21,18 @@ public class RabbitEventChannel<I> : SoEx.Topology.IChannel
             try
             {
                 var publisher = await CurrentPublisher();
-                var props = new BasicProperties();
-                props.Persistent = true;
+                await WhileReconnectiong(publisher.Sender);
+                var result = await publisher.Sender.PublishAsync(new AmqpMessage(invocationRequest).Durable(true));
 
-                await publisher.Channel.BasicPublishAsync(_exchangeName,_routingKey,true,props,invocationRequest);
+                if (result.Outcome.State == OutcomeState.Accepted)
+                    return [];
 
-                return [];
+                if (result.Outcome.State == OutcomeState.Released)
+                {
+                    throw new InvalidOperationException($"No subscriber for {typeof(I).FullName})");
+                }
+
+                throw new InvalidOperationException($"Broker rejected {typeof(I).FullName}: {result.Outcome.Error}");
             }
             catch
             {
@@ -37,36 +44,51 @@ public class RabbitEventChannel<I> : SoEx.Topology.IChannel
 
     private async Task<Publisher> CurrentPublisher()
     {
-        var lazyPublisher = _publisher;
+        var shared = _shared!;
+        var lazyPublisher = shared.Publisher;
         var currentPublisher = lazyPublisher?.Value;
-        if (currentPublisher is not null && currentPublisher.IsCompletedSuccessfully && !currentPublisher.Result.Channel.IsClosed)
+        if (currentPublisher is not null && currentPublisher.IsCompletedSuccessfully && currentPublisher.Result.Sender.State != State.Closed)
             return currentPublisher.Result;
 
         if (currentPublisher is not null && !currentPublisher.IsCompleted)
             return await currentPublisher;
 
-        lock (_syncChannel)
+        lock (shared)
         {
-            if(ReferenceEquals(_publisher, lazyPublisher))
+            if(ReferenceEquals(shared.Publisher, lazyPublisher))
             {
                 if(lazyPublisher is not null && currentPublisher is not null &&  currentPublisher.IsCompletedSuccessfully)
                     _ = currentPublisher.Result.DisposeAsync();
-                _publisher = new Lazy<Task<Publisher>>(Open);
+                shared.Publisher = new Lazy<Task<Publisher>>(Open);
             }
-            currentPublisher = _publisher!.Value;
+            currentPublisher = shared.Publisher!.Value;
         }
         return await currentPublisher;
     }
 
+    private static async Task WhileReconnectiong(IPublisher sender)
+    {
+        var deadline = DateTime.UtcNow + s_reconectWait;
+        while (sender.State == State.Reconnecting && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(100);
+        }
+    }
+
     private async Task<Publisher> Open()
     {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.ClientProvidedName = $"event:{typeof(I).FullName} publisher";
-        factory.ConfigureFactory(_binding!.RabbitConfig);
-        var connection = await factory.CreateConnectionFromConfig(_binding.RabbitConfig);
-        var options = new CreateChannelOptions(true,true);
-        var channel = await connection.CreateChannelAsync(options);
-        return new Publisher(connection, channel);
+        var connection = await _binding!.RabbitConfig.ConnectAsync($"event:{typeof(I).FullName} publisher");
+        try
+        {
+            var sender = await connection.PublisherBuilder().Exchange(typeof(I).FullName!).Key("").BuildAsync();
+            return new Publisher(connection, sender);
+        }
+        catch
+        {
+            await connection.CloseAsync();
+            connection.Dispose();
+            throw;
+        }
     }
 
     public void Bind(Binding binding)
@@ -74,19 +96,31 @@ public class RabbitEventChannel<I> : SoEx.Topology.IChannel
         if(binding is RabbitEventBinding<I> rabbitBinding)
         {
             _binding = rabbitBinding;
+            _shared = s_shared.GetOrAdd(Key(rabbitBinding.RabbitConfig), _ => new SharedPublisher());
         }
+    }
+
+    private static string Key(RabbitConfig? config)
+    {
+        return $"{config?.HostName}|{config?.VirtualHost}|{config?.UserName}|{config?.Password}";
     }
 
     public IBindingPipeline? Pipeline => _binding?.Pipeline;
     public Type Contract => typeof(I);
 
+    private sealed class SharedPublisher
+    {
+        public Lazy<Task<Publisher>>? Publisher;
+    }
 
-    private sealed record Publisher(IConnection Connection, RabbitMQ.Client.IChannel Channel) : IAsyncDisposable
+    private sealed record Publisher(IConnection Connection, IPublisher Sender) : IAsyncDisposable
     {
         public async ValueTask DisposeAsync()
         {
-            await Channel.DisposeAsync();
-            await Connection.DisposeAsync();
+            await Sender.CloseAsync();
+            Sender.Dispose();
+            await Connection.CloseAsync();
+            Connection.Dispose();
         }
     }
 }
