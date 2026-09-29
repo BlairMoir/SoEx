@@ -26,7 +26,7 @@ public class RabbitEventEndpoint<I> : IEndpoint where I : class
 
     public async Task Listen()
     {
-        _connection = await _binding!.RabbitConfig.ConnectAsync($"event: {typeof(I).FullName} subscriber:{_subscriber}");
+        _connection = await _binding!.ConnectAsync($"event: {typeof(I).FullName} subscriber:{_subscriber}");
         var exchangeName = typeof(I).FullName!;
         var queueName = $"{typeof(I).FullName!}_{_subscriber}";
         var deadLetterName = $"{queueName}.dead";

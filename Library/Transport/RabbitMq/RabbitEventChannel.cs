@@ -77,7 +77,7 @@ public class RabbitEventChannel<I> : SoEx.Topology.IChannel
 
     private async Task<Publisher> Open()
     {
-        var connection = await _binding!.RabbitConfig.ConnectAsync($"event:{typeof(I).FullName} publisher");
+        var connection = await _binding!.ConnectAsync($"event:{typeof(I).FullName} publisher");
         try
         {
             var sender = await connection.PublisherBuilder().Exchange(typeof(I).FullName!).Key("").BuildAsync();
@@ -96,13 +96,14 @@ public class RabbitEventChannel<I> : SoEx.Topology.IChannel
         if(binding is RabbitEventBinding<I> rabbitBinding)
         {
             _binding = rabbitBinding;
-            _shared = s_shared.GetOrAdd(Key(rabbitBinding.RabbitConfig), _ => new SharedPublisher());
+            _shared = s_shared.GetOrAdd(Key(rabbitBinding), _ => new SharedPublisher());
         }
     }
 
-    private static string Key(RabbitConfig? config)
+    private static string Key(RabbitEventBinding<I> binding)
     {
-        return $"{config?.HostName}|{config?.VirtualHost}|{config?.UserName}|{config?.Password}";
+        var credentials = binding.RabbitConfig.Select(config => $"{config.UserName}|{config.Password}");
+        return $"{string.Join(",", binding.Transport.Address.Uris)}|{string.Join(", ", credentials)}";
     }
 
     public IBindingPipeline? Pipeline => _binding?.Pipeline;
