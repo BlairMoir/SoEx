@@ -15,6 +15,7 @@ namespace SoEx.Transport.NATS
 {
     public class NatsEventEndpoint<I> : IEndpoint where I : class
     {
+        private readonly uint _maxDeliveryAttempts = 5;
         readonly ILogger<NatsEventEndpoint<I>> _logger;
         private NatsEventBinding<I>? _binding;
         IEndpointPipeline _endpointPipeLine;
@@ -59,7 +60,7 @@ namespace SoEx.Transport.NATS
 
             INatsJSContext js = _natsClient.CreateJetStreamContext();
             await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(), subjects: [NatsSubject.For<I>()]));
-            INatsJSConsumer consumer = await js.CreateConsumerAsync(NatsSubject.For<I>(), new ConsumerConfig(_queueGroup));
+            INatsJSConsumer consumer = await js.CreateOrUpdateConsumerAsync(NatsSubject.For<I>(), new ConsumerConfig(_queueGroup){ MaxDeliver =  _maxDeliveryAttempts });
 
             await foreach (NatsJSMsg<byte[]> msg in consumer.ConsumeAsync<byte[]>(cancellationToken: source.Token))
             {
@@ -72,6 +73,22 @@ namespace SoEx.Transport.NATS
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, ex.Message);
+                    try
+                    {
+                        ulong attempt = msg.Metadata?.NumDelivered ?? 1;
+                        if (attempt < _maxDeliveryAttempts)
+                        {
+                            await msg.NakAsync(TimeSpan.FromSeconds(attempt));
+                        }
+                        else
+                        {
+                            await msg.AckTerminateAsync();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, e.Message);
+                    }
                 }
             }
         }
