@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Net;
 using Grpc.AspNetCore.Server.Model;
 using Microsoft.AspNetCore.Builder;
@@ -37,7 +38,7 @@ public class GrpcEndpointListener
     private WebApplication? _listener;
     private List<IServiceMethodProvider<GrpcEndpointService>> _dispatchProviders = new();
 
-    internal void Bind(GrpcConfig[] configs)
+    internal void Bind(ImmutableArray<GrpcConfig> configs)
     {
         foreach (var config in configs)
         {

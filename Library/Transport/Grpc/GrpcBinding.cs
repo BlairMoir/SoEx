@@ -1,4 +1,5 @@
 
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using SoEx.Topology;
 using SoEx.Transport.Grpc.Protection;
@@ -7,9 +8,9 @@ namespace SoEx.Transport.Grpc
 {
     public record GrpcBinding<I> : Topology.Binding
     {
-        private readonly GrpcConfig[] _config;
+        private readonly ImmutableArray<GrpcConfig> _config;
 
-        public GrpcBinding(string subsystem, GrpcConfig[] config) : base(
+        public GrpcBinding(string subsystem, ImmutableArray<GrpcConfig> config) : base(
             typeof(I),
                 new GrpcTransport() { Address = TransportAddress(config) },
                 subsystem
@@ -18,10 +19,15 @@ namespace SoEx.Transport.Grpc
             _config = config;
         }
 
-        public GrpcConfig[] Config => _config;
+        public ImmutableArray<GrpcConfig> Config => _config;
 
-        private static Address TransportAddress(GrpcConfig[] config)
+        private static Address TransportAddress(ImmutableArray<GrpcConfig> config)
         {
+            if (config.IsDefaultOrEmpty)
+            {
+                throw new ArgumentException("At least one GRPC host is required", nameof(config));
+            }
+
             List<Uri> uriList = new List<Uri>();
             foreach (var configItem in config)
             {
