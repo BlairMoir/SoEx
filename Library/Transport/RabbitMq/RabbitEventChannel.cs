@@ -29,7 +29,7 @@ public class RabbitEventChannel<I> : SoEx.Topology.IChannel
 
                 if (result.Outcome.State == OutcomeState.Released)
                 {
-                    throw new InvalidOperationException($"No subscriber for {typeof(I).FullName})");
+                    throw new InvalidOperationException($"No subscriber for {typeof(I).FullName}");
                 }
 
                 throw new InvalidOperationException($"Broker rejected {typeof(I).FullName}: {result.Outcome.Error}");
