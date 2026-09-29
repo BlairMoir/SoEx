@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using Microsoft.VisualStudio.Threading;
 
 namespace SoEx.Transport.NamedPipe;
 
@@ -97,7 +96,7 @@ internal class IpcServer : IDisposable, IIpcServer
         try
         {
 #pragma warning disable VSTHRD003 // Avoid awaiting foreign Tasks (this is ours, and we know it never picks up a SyncContext)
-            await this.listeningTask.WithTimeout(serverTaskShutdownTimeout).ConfigureAwait(false);
+            await this.listeningTask.WaitAsync(serverTaskShutdownTimeout).ConfigureAwait(false);
 #pragma warning restore VSTHRD003 // Avoid awaiting foreign Tasks
         }
         catch (TimeoutException)
@@ -153,7 +152,7 @@ internal class IpcServer : IDisposable, IIpcServer
                 if (!cancellationToken.IsCancellationRequested)
                 {
                     // We invoke the callback in a fire-and-forget fashion as documented. It handles its own exceptions.
-                    ClientConnectedAsync(pipeServer).Forget();
+                    _ = ClientConnectedAsync(pipeServer);
 
                     // Prepare to listen for another connection, or exit as requested.
                     if (this.Options.AllowMultipleClients)
@@ -245,8 +244,7 @@ internal class IpcServer : IDisposable, IIpcServer
             try
             {
                 // Always yield before invoking the callback so as to avoid slowing down our incoming read loop.
-                await TaskScheduler.Default.SwitchTo(alwaysYield: true);
-                await this.createAndConfigureService(stream).ConfigureAwait(false);
+                await Task.Run(() => this.createAndConfigureService(stream)).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

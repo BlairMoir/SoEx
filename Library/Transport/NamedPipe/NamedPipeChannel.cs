@@ -39,7 +39,7 @@ namespace SoEx.Transport.NamedPipe
                 {
                     Debug.Assert(_namedPipeBinding is not null);
                     using (var pipeClient = new NamedPipeClientStream(".", _namedPipeBinding.Transport.Address.Uri.Host,
-                                                PipeDirection.InOut, PipeOptions.None,
+                                                PipeDirection.InOut, PipeOptions.CurrentUserOnly,
                                                 TokenImpersonationLevel.None))
                     {
                         await pipeClient.ConnectAsync(3000).ConfigureAwait(false);
