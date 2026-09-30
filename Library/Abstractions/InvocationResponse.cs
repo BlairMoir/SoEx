@@ -1,8 +1,8 @@
 namespace SoEx.Abstractions
 {
-    public class InvocationResponse
+    public sealed class InvocationResponse
     {
-        public object? Response { get; set; }
-        public byte[]? AmbientContext { get; set; }
+        public object? Response { get; init; }
+        public byte[]? AmbientContext { get; init; }
     }
 }

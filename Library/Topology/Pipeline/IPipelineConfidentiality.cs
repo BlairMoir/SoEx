@@ -6,7 +6,7 @@ public interface IPipelineConfidentiality : IPipelineType
 {
 }
 
-public class PipelineConfidentiality<T> : IPipelineConfidentiality where T : ITelemetryConfidentiality
+public record PipelineConfidentiality<T> : IPipelineConfidentiality where T : ITelemetryConfidentiality
 {
     public Type ImplementationType => typeof(T);
 }

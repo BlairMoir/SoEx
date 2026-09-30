@@ -6,7 +6,7 @@ public interface IPipelineDispatcher : IPipelineType
 {
 }
 
-public class PipelineDispatcher<T> : IPipelineDispatcher where T : IDispatcher
+public record PipelineDispatcher<T> : IPipelineDispatcher where T : IDispatcher
 {
     public Type ImplementationType => typeof(T);
 }

@@ -4,7 +4,7 @@ using SoEx.Topology.Pipeline;
 
 namespace SoEx.Hosting.Default
 {
-    public class DefaultPipeline : IPipeline
+    public record DefaultPipeline : IPipeline
     {
         public IPipelineDispatcher Dispatcher { get; init; } = new PipelineDispatcher<DefaultDispatcher>();
 

@@ -37,7 +37,7 @@ namespace SoEx.Hosting.Default
             {
                 try
                 {
-                    InvocationResponse invocationResponse = new InvocationResponse();
+
                     ISubSystemHost subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
                     using (var requestLifetime = subSystemHost.BeginRequestLifetimeScope())
                     {
@@ -62,6 +62,7 @@ namespace SoEx.Hosting.Default
                                 throw new NotSupportedException("SoEx contracts must be async");
                             }
 
+                            object? response = null;
                             if (!invocationRequest.HasResult)
                             {
                                 await (Task)returnValue;
@@ -69,10 +70,15 @@ namespace SoEx.Hosting.Default
                             else
                             {
                                 var responseObject = await returnValue.TaskResult();
-                                invocationResponse.Response = responseObject;
+                                response = responseObject;
                             }
+
                             FlowContextToCaller(_callerAmbientContext, operationAmbientContext);
-                            invocationResponse.AmbientContext = ((AmbientContext)_callerAmbientContext).Serialize();
+                            InvocationResponse invocationResponse = new InvocationResponse()
+                            {
+                                Response = response,
+                                AmbientContext = ((AmbientContext)_callerAmbientContext).Serialize()
+                            };
                             return invocationResponse;
                         }
                     }
