@@ -7,6 +7,7 @@ using Autofac;
 using Autofac.Core;
 using Microsoft.Extensions.Logging;
 using SoEx.Abstractions;
+using SoEx.Abstractions.Protection;
 using SoEx.Exceptions;
 using SoEx.Topology;
 
@@ -32,12 +33,19 @@ namespace SoEx.Channel
                 Debug.Assert(channel is not null);
                 Type serializerType = channel.Pipeline?.MessageSerializer.ImplementationType ?? typeof(IMessageSerializer);
                 Type protectorType = channel.Pipeline?.MessageProtection.ImplementationType ?? typeof(IMessageProtection);
-                var protector =  (IMessageProtection)_scope.Resolve(protectorType);
+                Parameter[] protectionOptionsParameter = [];
+                var protectionOptions = channel.Pipeline?.MessageProtection.Options;
+                if (protectionOptions is not null)
+                {
+                    protectionOptionsParameter = [new TypedParameter(protectionOptions.GetType(), protectionOptions)];
+                }
+                Abstractions.Protection.ClientContext protectionContext = new ClientContext(){ Contract = channel.Contract, MethodName = request.MethodName};
+                var protector =  (IMessageProtection)_scope.Resolve(protectorType, protectionOptionsParameter);
                 var serializer = (IMessageSerializer)_scope.Resolve(serializerType);
                 byte[] serializedRequest = serializer.Serialize(request, channel.Contract, request.MethodName);
-                byte[] protectedRequest = await protector.Protect(serializedRequest, request.MethodName).ConfigureAwait(false);
+                byte[] protectedRequest = await protector.Protect(serializedRequest, protectionContext).ConfigureAwait(false);
                 byte[] protectedResponse = await channel.InvokeResult(protectedRequest).ConfigureAwait(false);
-                byte[] serializedResponse = await protector.Unprotect(protectedResponse).ConfigureAwait(false);
+                byte[] serializedResponse = await protector.Unprotect(protectedResponse, protectionContext).ConfigureAwait(false);
 
                 if (serializedResponse.Length == 0)
                 {
