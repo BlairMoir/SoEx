@@ -54,26 +54,26 @@ public class MessageSecurity
         return bySigningKeyId;
     }
 
-    internal sealed class RequestPolicy(Peer? receipient, Dictionary<string, Peer> callers, TimeSpan window, bool bindsReplies)
+    internal sealed class RequestPolicy(Peer? recipient, Dictionary<string, Peer> callers, TimeSpan window, bool bindsReplies)
     {
-        public Peer? Receipient { get; } =  receipient;
+        public Peer? Recipient { get; } =  recipient;
         public TimeSpan Window  { get; } = window;
         public bool BindsReplies { get; } = bindsReplies;
 
-        public Peer? CallerBy(string singingKeyId)
+        public Peer? CallerBy(string signingKeyId)
         {
-            return callers.GetValueOrDefault(singingKeyId);
+            return callers.GetValueOrDefault(signingKeyId);
         }
 
         public static RequestPolicy From(RequestProtectionOptions options)
         {
-            Peer? receipient = null;
+            Peer? recipient = null;
             if (options.Recipient is not null)
             {
-                receipient = Peer.From(options.Recipient);
+                recipient = Peer.From(options.Recipient);
             }
 
-            return new  RequestPolicy(receipient, BySigningKeyId(options.Callers), options.FreshnessWindow, options.BindRepliesToRequests);
+            return new  RequestPolicy(recipient, BySigningKeyId(options.Callers), options.FreshnessWindow, options.BindRepliesToRequests);
         }
     }
 
@@ -85,9 +85,9 @@ public class MessageSecurity
         public SymmetricKey? Previous { get; } = previous;
         public TimeSpan Window  { get; } = window;
 
-        public Peer? PublisherBy(string singingKeyId)
+        public Peer? PublisherBy(string signingKeyId)
         {
-            return publishers.GetValueOrDefault(singingKeyId);
+            return publishers.GetValueOrDefault(signingKeyId);
         }
 
         public static EventPolicy From(EventProtectionOptions options)

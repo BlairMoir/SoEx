@@ -49,7 +49,7 @@ public sealed class RequestProtection : IMessageProtection
 
     private byte[] SealRequest(ReadOnlyMemory<byte> body, string methodName)
     {
-        MessageSecurity.Peer? peer = _policy.Receipient ?? throw new MessageProtectionException(ProtectionFailure.NoRecipient);
+        MessageSecurity.Peer? peer = _policy.Recipient ?? throw new MessageProtectionException(ProtectionFailure.NoRecipient);
         Dictionary<string, object> headers = JoseEnvelope.SignedHeaders(_security.SigningKeyId, methodName, _time);
         _awaitingReplyFrom = peer;
         _requestNonce = (string)headers[JoseEnvelope.Nonce];
