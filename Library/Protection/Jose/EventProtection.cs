@@ -70,7 +70,7 @@ public sealed class EventProtection : IMessageProtection
             signed = JWT.EncodeBytes(body.ToArray(), signer, JwsAlgorithm.ES256, signedHeaders);
         }
 
-        string sealedFrame = JWT.Encode(signed, key.Key, JweAlgorithm.DIR, JweEncryption.A256GCM, extraHeaders:
+        string sealedFrame = JWT.Encode(signed, key.Key, JweAlgorithm.A256KW, JweEncryption.A256GCM, extraHeaders:
             new Dictionary<string, object>() { [JoseEnvelope.Key] = KeyId(key) });
         return JoseEnvelope.Bytes(sealedFrame);
     }
@@ -79,7 +79,7 @@ public sealed class EventProtection : IMessageProtection
     {
         string token = JoseEnvelope.Text(frame);
         IDictionary<string, object> outer = JoseEnvelope.Headers(token, 5);
-        if (JoseEnvelope.String(outer, "alg") != "dir" || JoseEnvelope.String(outer, "enc") != "A256GCM")
+        if (JoseEnvelope.String(outer, "alg") != "A256KW" || JoseEnvelope.String(outer, "enc") != "A256GCM")
         {
             throw new MessageProtectionException(ProtectionFailure.UnsupportedSuite);
         }
@@ -89,7 +89,7 @@ public sealed class EventProtection : IMessageProtection
         string signed;
         try
         {
-            signed = JWT.Decode(token, key.Key, JweAlgorithm.DIR, JweEncryption.A256GCM);
+            signed = JWT.Decode(token, key.Key, JweAlgorithm.A256KW, JweEncryption.A256GCM);
         }
         catch (Exception)
         {
