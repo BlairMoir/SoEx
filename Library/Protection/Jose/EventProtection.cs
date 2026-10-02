@@ -4,7 +4,7 @@ using Jose;
 using SoEx.Abstractions;
 using SoEx.Abstractions.Protection;
 
-namespace SoEx.Protection;
+namespace SoEx.Protection.Jose;
 
 public sealed class EventProtection : IMessageProtection
 {

@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Jose;
 
-namespace SoEx.Protection;
+namespace SoEx.Protection.Jose;
 
 internal static class JoseEnvelope
 {
