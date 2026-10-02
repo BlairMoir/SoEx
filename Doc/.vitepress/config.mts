@@ -22,7 +22,8 @@ export default defineConfig({
           { text: 'Tutorial', link: '/tutorial' },
           { text: 'How To', link: '/howto' },
           { text: 'Reference', link: '/reference' },
-          { text: 'Explanation', link: '/explanation' }
+          { text: 'Explanation', link: '/explanation' },
+          { text: 'Protection', link: '/protection' }
         ]
       }
     ],
