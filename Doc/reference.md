@@ -141,23 +141,6 @@ Binding, Endpoint, Channel, Transport for communicating between services over Az
 #### SBQueueExtensions
 #### SBQueueTransport
 
-### Unsafe Thread Channel
-
-Binding, Endpoint, Channel, Transport for communicating between services hosted in the same process
-
-::: danger
-* No reliablity
-* No retry
-
-Do not use UnsafeThreadChannelEndpoint in production, uses a System.Threading Channel internally, 
-:::
-
-#### UnsafeThreadChannelBinding
-#### UnsafeThreadChannelChannel
-#### UnsafeThreadChannelEndpoint
-#### UnsafeThreadChannelExtensions
-#### UnsafeThreadChannelTransport
-#### UnsafeThreadEventChannel
 
 ## Topology
 
