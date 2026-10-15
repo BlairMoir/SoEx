@@ -178,6 +178,7 @@ namespace SoEx.Hosting
                     callback.Invoke(parentScope, hostContainer);
                 });
                 hostAndClientLookupProcess.StoreLifetimeScope(hostScope);
+                parentScope.Disposer.AddInstanceForDisposal(hostScope);
             });
         }
 
@@ -221,6 +222,7 @@ namespace SoEx.Hosting
                     RegisterSubSystemHosts(componentHostContainer, host, systemScope);
                 });
             });
+            hostApplicationScope.Disposer.AddInstanceForDisposal(subSystemScope);
         }
 
         private static void RegisterHost(ContainerBuilder componentContainer, Topology.Host component, Type[] componentEndpointContracts, IPipeline pipeline, HostRole role)
