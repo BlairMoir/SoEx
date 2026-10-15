@@ -11,12 +11,12 @@ namespace SoEx.Endpoint
 {
     public class EndpointPipeline : IEndpointPipeline
     {
-        readonly IHostAndClientLookup _subsystemlifeTimeScope;
+        readonly ISubSystemScope _subsystemlifeTimeScope;
         readonly ILogger<EndpointPipeline> _logger;
         readonly ExceptionMode _exceptionMode;
         readonly ITelemetryConfidentiality _telemetryConfidentiality;
 
-        public EndpointPipeline(ILogger<EndpointPipeline> logger, IHostAndClientLookup subsystemlifeTimeScope, ITelemetryConfidentiality  telemetryConfidentiality, TestExceptionMode? testExceptionMode = null)
+        public EndpointPipeline(ILogger<EndpointPipeline> logger, ISubSystemScope subsystemlifeTimeScope, ITelemetryConfidentiality  telemetryConfidentiality, TestExceptionMode? testExceptionMode = null)
         {
             _subsystemlifeTimeScope = subsystemlifeTimeScope;
             _logger = logger;

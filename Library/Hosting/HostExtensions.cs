@@ -169,15 +169,15 @@ namespace SoEx.Hosting
 
         private static void CreateIsolatedScope(this ContainerBuilder parentContainer, Action<ILifetimeScope, ContainerBuilder> callback)
         {
-            HostAndClientLookup hostAndClientLookupProcess = new HostAndClientLookup();
-            parentContainer.RegisterInstance(hostAndClientLookupProcess).As<Abstractions.IHostAndClientLookup>();
+            SubSystemScope subSystemScope = new SubSystemScope();
+            parentContainer.RegisterInstance(subSystemScope).As<Abstractions.ISubSystemScope>();
             parentContainer.RegisterBuildCallback(parentScope =>
             {
                 ILifetimeScope hostScope = parentScope.BeginLifetimeScope(hostContainer =>
                 {
                     callback.Invoke(parentScope, hostContainer);
                 });
-                hostAndClientLookupProcess.StoreLifetimeScope(hostScope);
+                subSystemScope.StoreLifetimeScope(hostScope);
                 parentScope.Disposer.AddInstanceForDisposal(hostScope);
             });
         }
@@ -186,7 +186,7 @@ namespace SoEx.Hosting
         {
             foreach (Topology.SubSystem subSystem in subSystems)
             {
-                hostApplicationContainer.CreateIsolatedScope((hostApplicationScope, componentHostContainer) =>
+                hostApplicationContainer.RegisterBuildCallback(hostApplicationScope =>
                 {
                     ComponentHostFactory(hostApplicationScope, subSystem.EntryPoint, pipeline, HostRole.EntryPoint);
                 });
@@ -199,7 +199,7 @@ namespace SoEx.Hosting
 
         private static void RegisterComponentHost(ContainerBuilder hostApplicationContainer, Topology.Host component, IPipeline pipeline)
         {
-            hostApplicationContainer.CreateIsolatedScope((hostApplicationScope, componentHostContainer) =>
+            hostApplicationContainer.RegisterBuildCallback( hostApplicationScope =>
             {
                 ComponentHostFactory(hostApplicationScope, component, pipeline);
             });
@@ -207,7 +207,7 @@ namespace SoEx.Hosting
 
         private static void ComponentHostFactory(ILifetimeScope hostApplicationScope, Topology.Host host, IPipeline pipeline, HostRole role = HostRole.Component)
         {
-            var subSystemScope = hostApplicationScope.BeginLifetimeScope(componentContainer =>
+            var componentScope = hostApplicationScope.BeginLifetimeScope(componentContainer =>
             {
                 if (host.ServiceCollection is not null)
                 {
@@ -216,13 +216,13 @@ namespace SoEx.Hosting
                 var componentEndpointContracts = host.Endpoints.Select(m => m.Contract).ToArray();
                 RegisterHost(componentContainer, host, componentEndpointContracts, pipeline, role);
                 RegisterEndPoints(host, componentContainer);
-                componentContainer.CreateIsolatedScope((systemScope, componentHostContainer) =>
+                componentContainer.CreateIsolatedScope((scope, componentHostContainer) =>
                 {
                     //register inside for InProcEndpoint
-                    RegisterSubSystemHosts(componentHostContainer, host, systemScope);
+                    RegisterSubSystemHosts(componentHostContainer, host, scope);
                 });
             });
-            hostApplicationScope.Disposer.AddInstanceForDisposal(subSystemScope);
+            hostApplicationScope.Disposer.AddInstanceForDisposal(componentScope);
         }
 
         private static void RegisterHost(ContainerBuilder componentContainer, Topology.Host component, Type[] componentEndpointContracts, IPipeline pipeline, HostRole role)
@@ -259,13 +259,13 @@ namespace SoEx.Hosting
             }
         }
 
-        private static void RegisterSubSystemHosts(ContainerBuilder hostContainer, Topology.Host host, ILifetimeScope subSystemScope)
+        private static void RegisterSubSystemHosts(ContainerBuilder hostContainer, Topology.Host host, ILifetimeScope componentScope)
         {
             foreach (var endpoint in host.Endpoints)
             {
                 // ISubSystemHost<I>
                 Type genericSubSystemHostType = typeof(SubSystemHost<,>).MakeGenericType(host.Implementation, endpoint.Contract);
-                var genericSubSystemHost = Activator.CreateInstance(genericSubSystemHostType, subSystemScope);
+                var genericSubSystemHost = Activator.CreateInstance(genericSubSystemHostType, componentScope);
                 Debug.Assert(genericSubSystemHost is not null);
                 hostContainer.RegisterInstance(genericSubSystemHost).As(genericSubSystemHostType.GetInterfaces());
             }

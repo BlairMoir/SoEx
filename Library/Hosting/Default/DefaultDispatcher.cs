@@ -11,14 +11,14 @@ namespace SoEx.Hosting.Default
     public class DefaultDispatcher : IDispatcher
     {
         readonly ILogger<DefaultDispatcher> _logger;
-        readonly IHostAndClientLookup _subsystemlifeTimeScope;
+        readonly ISubSystemScope _subsystemlifeTimeScope;
         readonly IAmbientContext _callerAmbientContext;
         readonly IFrameworkContext _callerFrameworkContext;
         readonly IEnumerable<IContextFlowPolicy> _policies;
         readonly ITelemetryConfidentiality _telemetryConfidentiality;
         private readonly Topology.Role _role;
 
-        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, IHostAndClientLookup subsystemlifeTimeScope, IAmbientContext callerAmbientContext,IFrameworkContext callerFrameworkContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies, Topology.Role role)
+        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, ISubSystemScope subsystemlifeTimeScope, IAmbientContext callerAmbientContext,IFrameworkContext callerFrameworkContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies, Topology.Role role)
         {
             _subsystemlifeTimeScope = subsystemlifeTimeScope;
             _callerAmbientContext = callerAmbientContext;

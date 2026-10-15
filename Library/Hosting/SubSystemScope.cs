@@ -5,25 +5,15 @@ using SoEx.Abstractions;
 
 namespace SoEx.Hosting
 {
-    public class HostAndClientLookup : IHostAndClientLookup
+    public class SubSystemScope : ISubSystemScope
     {
-        public HostAndClientLookup()
-        {
-        }
-
         private ILifetimeScope? lifetimeScope;
-        public ISubSystemHost For(Type type)
-        {
-            Debug.Assert(lifetimeScope is not null);
-            return (ISubSystemHost)lifetimeScope.Resolve(type);
-        }
 
         public ISubSystemHost For<I>()
         {
-            return For(typeof(I));
+            Debug.Assert(lifetimeScope is not null);
+            return (ISubSystemHost)lifetimeScope.Resolve(typeof(I));
         }
-
-        public ISubSystemHost[] SubSystemHosts => lifetimeScope?.Resolve<ISubSystemHost[]>() ?? [];
 
         public void StoreLifetimeScope(ILifetimeScope scope)
         {
