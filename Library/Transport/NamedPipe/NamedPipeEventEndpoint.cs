@@ -76,14 +76,17 @@ namespace SoEx.Transport.NamedPipe
 
         private async Task NamedPipeCallbackAsync(Stream stream)
         {
-            var ss = new StreamBytes(stream);
-            var request = ss.ReadBytes();
-            await _channel.Writer.WriteAsync(request);
+            await using (stream)
+            {
+                var ss = new StreamBytes(stream);
+                var request = ss.ReadBytes();
+                await _channel.Writer.WriteAsync(request);
+            }
         }
 
         private async Task<byte[]> DispatchAsync(byte[] serializedRequest)
         {
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(NamedPipeEndpoint<I>)}", ActivityKind.Server))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(NamedPipeEventEndpoint<I>)}", ActivityKind.Server))
             {
                 try
                 {
