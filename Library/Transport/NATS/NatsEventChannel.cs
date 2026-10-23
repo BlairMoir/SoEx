@@ -16,12 +16,14 @@ namespace SoEx.Transport.NATS
     {
         readonly IMessageSerializer _serializer;
         NatsEventBinding<I>? _natsEventBinding;
+        private readonly SharedConnections<NatsClient> _connections;
 
         public Type Contract => typeof(I);
 
-        public NatsEventChannel(IMessageSerializer serializer)
+        public NatsEventChannel(IMessageSerializer serializer,  SharedConnections<NatsClient> connections)
         {
             _serializer = serializer;
+            _connections = connections;
         }
 
         public void Bind(Binding binding)
@@ -40,22 +42,45 @@ namespace SoEx.Transport.NATS
             {
                 try
                 {
-                    NatsClient nc = new NatsClient();
-                    await using (nc.ConfigureAwait(false))
-                    {
-                        INatsJSContext js = nc.CreateJetStreamContext();
-                        await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(),
-                            subjects: [NatsSubject.For<I>()])).ConfigureAwait(false);
-                        var ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload).ConfigureAwait(false);
-                        ack.EnsureSuccess();
-                        return [];
-                    }
+                    NatsClient nc = await CreateConnection().ConfigureAwait(false);
+                    INatsJSContext js = nc.CreateJetStreamContext();
+                    await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(),
+                        subjects: [NatsSubject.For<I>()])).ConfigureAwait(false);
+                    var ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload).ConfigureAwait(false);
+                    ack.EnsureSuccess();
+                    return [];
                 }
                 catch
                 {
                     activity?.SetStatus(ActivityStatusCode.Error);
                     throw;
                 }
+            }
+        }
+
+        private async Task<NatsClient> CreateConnection()
+        {
+            Debug.Assert(_natsEventBinding is not null);
+            var url = _natsEventBinding.Config.Url;
+            var client = await _connections.Get(url,
+                () => Connect(url),
+                c => c.Connection.ConnectionState == NatsConnectionState.Closed
+            ).ConfigureAwait(false);
+            return client;
+        }
+
+        private static async Task<NatsClient> Connect(string url)
+        {
+            var client = new  NatsClient(new NatsOpts(){ Url = url});
+            try
+            {
+                await client.ConnectAsync().ConfigureAwait(false);
+                return client;
+            }
+            catch
+            {
+                await client.DisposeAsync().ConfigureAwait(false);
+                throw;
             }
         }
 

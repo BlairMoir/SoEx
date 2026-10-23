@@ -6,7 +6,7 @@ namespace SoEx.Transport.SBQueue
     {
         public static void SBQueueClient(this IServiceCollection collection)
         {
-            collection.AddSingleton(typeof(SBQueueChannel<>), typeof(SBQueueChannel<>));
+            collection.AddTransient(typeof(SBQueueChannel<>), typeof(SBQueueChannel<>));
         }
     }
 }

@@ -1,12 +1,7 @@
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-using Autofac;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using Microsoft.Extensions.Logging;
-using SoEx.Abstractions;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
@@ -58,10 +53,18 @@ namespace SoEx.Transport.ASBTopic
 
         public async Task Close()
         {
-            if (processor is null)
-                return;
+            if (processor is not null)
+            {
+                await processor.StopProcessingAsync();
+                await processor.DisposeAsync().ConfigureAwait(false);
+                processor = null;
+            }
 
-            await processor.StopProcessingAsync();
+            if (client is not null)
+            {
+                await client.DisposeAsync().ConfigureAwait(false);
+                client = null;
+            }
         }
 
         private async Task ConfigureServiceBus(string connectionString, string topicName)

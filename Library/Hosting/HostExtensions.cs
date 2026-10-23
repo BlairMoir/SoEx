@@ -14,6 +14,7 @@ using SoEx.Endpoint;
 using SoEx.Hosting.Default;
 using SoEx.Topology;
 using SoEx.Topology.Pipeline;
+using SoEx.Transport;
 
 namespace SoEx.Hosting
 {
@@ -143,6 +144,7 @@ namespace SoEx.Hosting
             container.RegisterType<ProxyFactory>().AsSelf();
             container.RegisterType<ProxyInterceptor>().AsSelf();
             container.RegisterType<TransportFactory>().AsSelf();
+            container.RegisterGeneric(typeof(SharedConnections<>)).AsSelf().SingleInstance();
             container.RegisterType(pipeline.MessageSerializer.ImplementationType).AsSelf().As<IMessageSerializer>()
                 .WithParameter(new TypedParameter(typeof(KnownTypes), knownTypes))
                 .SingleInstance();

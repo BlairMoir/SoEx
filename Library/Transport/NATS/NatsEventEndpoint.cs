@@ -20,6 +20,7 @@ namespace SoEx.Transport.NATS
         private NatsEventBinding<I>? _binding;
         IEndpointPipeline _endpointPipeLine;
         private INatsClient? _natsClient;
+        private Task? _subscription;
         private string? _queueGroup;
         private CancellationTokenSource source = new CancellationTokenSource();
 
@@ -41,19 +42,42 @@ namespace SoEx.Transport.NATS
 
         public Task Listen()
         {
-            _natsClient = new NatsClient();
-            Task.Factory.StartNew(Subscribe, TaskCreationOptions.LongRunning);
+            Debug.Assert(_binding is not null);
+            _natsClient = new NatsClient(new NatsOpts(){ Url = _binding.Config.Url });
+            _subscription = Task.Run(Subscribe);
             return Task.CompletedTask;
         }
 
-        public Task Close()
+        public async Task Close()
         {
-            source.Cancel();
-            // create a mechanism to wait for the subscribe loop to be finished
-            return Task.CompletedTask;
+            await source.CancelAsync();
+            if(_subscription is not null)
+                await _subscription.ConfigureAwait(false);
+
+            if (_natsClient is not null)
+            {
+                await _natsClient.DisposeAsync().ConfigureAwait(false);
+                _natsClient = null;
+            }
         }
 
         private async Task Subscribe()
+        {
+            try
+            {
+                await MessageLoop();
+            }
+            catch (OperationCanceledException) when (source.IsCancellationRequested)
+            {
+                // stopping
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "NATS event subscription for {Contract} stopped", typeof(I));
+            }
+        }
+
+        private async Task MessageLoop()
         {
             if (_natsClient is null || _queueGroup is null)
                 return;
@@ -69,6 +93,10 @@ namespace SoEx.Transport.NATS
                     Debug.Assert(msg.Data is not null);
                     await Dispatch(msg.Data);
                     await msg.AckAsync();
+                }
+                catch (OperationCanceledException) when (source.IsCancellationRequested)
+                {
+                    break;
                 }
                 catch (Exception ex)
                 {
@@ -96,7 +124,7 @@ namespace SoEx.Transport.NATS
 
         private async Task<byte[]> Dispatch(byte[] serializedRequest)
         {
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(NatsEndpoint<I>)}", ActivityKind.Server))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(NatsEventEndpoint<I>)}", ActivityKind.Server))
             {
                 try
                 {

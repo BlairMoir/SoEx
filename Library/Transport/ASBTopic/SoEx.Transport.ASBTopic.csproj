@@ -4,6 +4,7 @@
     <ProjectReference Include="..\..\Diagnostics\SoEx.Diagnostics.csproj" />
     <ProjectReference Include="..\..\Endpoint\SoEx.Endpoint.csproj" />
     <ProjectReference Include="..\..\Topology\SoEx.Topology.csproj" />
+    <ProjectReference Include="..\Common\SoEx.Transport.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Messaging.ServiceBus" />

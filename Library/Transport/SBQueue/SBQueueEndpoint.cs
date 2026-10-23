@@ -1,8 +1,6 @@
 using System.Diagnostics;
-using Autofac;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Logging;
-using SoEx.Abstractions;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
@@ -47,6 +45,14 @@ namespace SoEx.Transport.SBQueue
             if (processor is not null)
             {
                 await processor.StopProcessingAsync();
+                await processor.DisposeAsync().ConfigureAwait(false);
+                processor = null;
+            }
+
+            if (client is not null)
+            {
+                await client.DisposeAsync().ConfigureAwait(false);
+                client = null;
             }
         }
 

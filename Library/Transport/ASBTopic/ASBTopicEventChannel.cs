@@ -1,8 +1,4 @@
 using System.Diagnostics;
-using System.IO.Pipes;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Principal;
-using Autofac;
 using Azure.Messaging.ServiceBus;
 using SoEx.Abstractions;
 using SoEx.Topology;
@@ -13,14 +9,15 @@ namespace SoEx.Transport.ASBTopic
     {
         readonly IMessageSerializer _serializer;
         ASBTopicEventBinding<I>? _binding;
-        private ServiceBusClient? _client;
-        ServiceBusSender? _sender;
+        private readonly SharedConnections<ServiceBusClient> _connections;
 
         public Type Contract => typeof(I);
 
-        public ASBTopicEventChannel(IMessageSerializer serializer)
+
+        public ASBTopicEventChannel(IMessageSerializer serializer, SharedConnections<ServiceBusClient> connections)
         {
             _serializer = serializer;
+            _connections = connections;
         }
 
         public void Bind(Binding binding)
@@ -28,8 +25,6 @@ namespace SoEx.Transport.ASBTopic
             if (binding is ASBTopicEventBinding<I> topicEventBinding)
             {
                 _binding = topicEventBinding;
-                _client = new ServiceBusClient(_binding.Config.ConnectionString);
-                _sender = _client.CreateSender(ASBTopicSubject.For<I>());
             }
         }
 
@@ -37,12 +32,17 @@ namespace SoEx.Transport.ASBTopic
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {
+
+
             using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(ASBTopicEventChannel<I>)}"))
             {
                 try
                 {
-                    Debug.Assert(_sender is not null);
-                    await _sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload))).ConfigureAwait(false);
+                    var sender = await CreateSender().ConfigureAwait(false);
+                    await using (sender.ConfigureAwait(false))
+                    {
+                        await sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload))).ConfigureAwait(false);
+                    }
                     return [];
                 }
                 catch
@@ -51,6 +51,18 @@ namespace SoEx.Transport.ASBTopic
                     throw;
                 }
             }
+        }
+
+        private async Task<ServiceBusSender> CreateSender()
+        {
+            Debug.Assert(_binding != null);
+            var connectionString = _binding.Config.ConnectionString;
+            var client = await _connections.Get( connectionString,
+                    () => Task.FromResult(new ServiceBusClient(connectionString)),
+                    c => c.IsClosed ).
+                ConfigureAwait(false);
+            var sender = client.CreateSender(ASBTopicSubject.For<I>());
+            return sender;
         }
     }
 }

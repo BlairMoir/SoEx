@@ -1,11 +1,7 @@
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Autofac;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Net;
-using SoEx.Abstractions;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
@@ -17,6 +13,7 @@ namespace SoEx.Transport.NATS
         NatsBinding<I>? _binding;
         IEndpointPipeline _endpointPipeLine;
         private INatsClient? _natsClient;
+        private Task? _subscription;
         CancellationTokenSource source = new CancellationTokenSource();
 
 
@@ -36,19 +33,42 @@ namespace SoEx.Transport.NATS
 
         public Task Listen()
         {
-            _natsClient = new NatsClient();
-            Task.Factory.StartNew(Subscribe, TaskCreationOptions.LongRunning);
+            Debug.Assert(_binding is not null);
+            _natsClient = new NatsClient(new NatsOpts(){ Url = _binding.Config.Url });
+            _subscription = Task.Run(Subscribe);
             return Task.CompletedTask;
         }
 
-        public Task Close()
+        public async Task Close()
         {
-            source.Cancel();
-            // create a mechanism to wait for the subscribe loop to be finished
-            return Task.CompletedTask;
+            await source.CancelAsync();
+            if(_subscription is not null)
+                await _subscription.ConfigureAwait(false);
+
+            if (_natsClient is not null)
+            {
+                await _natsClient.DisposeAsync().ConfigureAwait(false);
+                _natsClient = null;
+            }
         }
 
         private async Task Subscribe()
+        {
+            try
+            {
+                await MessageLoop();
+            }
+            catch (OperationCanceledException) when (source.IsCancellationRequested)
+            {
+                // stopping
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "NATS subscription for {Contract} stopped", typeof(I));
+            }
+        }
+
+        private async Task MessageLoop()
         {
             Debug.Assert(_natsClient is not null);
             Debug.Assert(_binding is not null);
@@ -60,6 +80,10 @@ namespace SoEx.Transport.NATS
                     Debug.Assert(msg.Data is not null);
                     var dispatchResult = await Dispatch(msg.Data);
                     await msg.ReplyAsync(dispatchResult, cancellationToken: source.Token);
+                }
+                catch (OperationCanceledException) when (source.IsCancellationRequested)
+                {
+                    break;
                 }
                 catch (Exception ex)
                 {
