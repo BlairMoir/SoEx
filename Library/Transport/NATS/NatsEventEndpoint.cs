@@ -75,45 +75,64 @@ namespace SoEx.Transport.NATS
 
         private async Task MessageLoop()
         {
+            Debug.Assert(_binding is not null);
             if (_natsClient is null || _queueGroup is null)
                 return;
 
             INatsJSContext js = _natsClient.CreateJetStreamContext();
             await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(), subjects: [NatsSubject.For<I>()]));
             INatsJSConsumer consumer = await js.CreateOrUpdateConsumerAsync(NatsSubject.For<I>(), new ConsumerConfig(_queueGroup){ MaxDeliver =  _maxDeliveryAttempts });
-
-            await foreach (NatsJSMsg<byte[]> msg in consumer.ConsumeAsync<byte[]>(cancellationToken: source.Token))
+            int maxConcurrent = _binding.Config.MaxConcurrentMessages;
+            using var slots = new SemaphoreSlim(maxConcurrent);
+            try
             {
+                await foreach (NatsJSMsg<byte[]> msg in consumer.ConsumeAsync<byte[]>(cancellationToken: source.Token))
+                {
+                    await slots.WaitAsync(source.Token);
+                    _ = HandleMessage(msg, slots);
+                }
+            }
+            finally
+            {
+                for (int i = 0; i < maxConcurrent; i++)
+                {
+                    await slots.WaitAsync();
+                }
+            }
+        }
+
+        private async Task HandleMessage(NatsJSMsg<byte[]> msg, SemaphoreSlim slots)
+        {
+            await Task.Yield();
+            try
+            {
+                Debug.Assert(msg.Data is not null);
+                await Dispatch(msg.Data);
+                await msg.AckAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
                 try
                 {
-                    Debug.Assert(msg.Data is not null);
-                    await Dispatch(msg.Data);
-                    await msg.AckAsync();
-                }
-                catch (OperationCanceledException) when (source.IsCancellationRequested)
-                {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, ex.Message);
-                    try
+                    ulong attempt = msg.Metadata?.NumDelivered ?? 1;
+                    if (attempt < _maxDeliveryAttempts)
                     {
-                        ulong attempt = msg.Metadata?.NumDelivered ?? 1;
-                        if (attempt < _maxDeliveryAttempts)
-                        {
-                            await msg.NakAsync(TimeSpan.FromSeconds(attempt));
-                        }
-                        else
-                        {
-                            await msg.AckTerminateAsync();
-                        }
+                        await msg.NakAsync(TimeSpan.FromSeconds(attempt));
                     }
-                    catch (Exception e)
+                    else
                     {
-                        _logger.LogError(e, e.Message);
+                        await msg.AckTerminateAsync();
                     }
                 }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, e.Message);
+                }
+            }
+            finally
+            {
+                slots.Release();
             }
         }
 

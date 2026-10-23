@@ -73,22 +73,43 @@ namespace SoEx.Transport.NATS
             Debug.Assert(_natsClient is not null);
             Debug.Assert(_binding is not null);
             string subject = $"{_binding.SubSystem}-{typeof(I)}";
-            await foreach (NatsMsg<byte[]> msg in _natsClient.SubscribeAsync<byte[]>(subject, cancellationToken: source.Token))
+            int maxConcurrent = _binding.Config.MaxConcurrentMessages;
+            using var slots = new SemaphoreSlim(maxConcurrent);
+
+            try
             {
-                try
+                await foreach (NatsMsg<byte[]> msg in _natsClient.SubscribeAsync<byte[]>(subject,
+                                   queueGroup: subject, cancellationToken: source.Token))
                 {
-                    Debug.Assert(msg.Data is not null);
-                    var dispatchResult = await Dispatch(msg.Data);
-                    await msg.ReplyAsync(dispatchResult, cancellationToken: source.Token);
+                    await slots.WaitAsync(source.Token);
+                    _ = HandleMessage(msg, slots);
                 }
-                catch (OperationCanceledException) when (source.IsCancellationRequested)
+            }
+            finally
+            {
+                for (int i = 0; i < maxConcurrent; i++)
                 {
-                    break;
+                    await slots.WaitAsync();
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, ex.Message);
-                }
+            }
+        }
+
+        private async Task HandleMessage(NatsMsg<byte[]> msg, SemaphoreSlim slots)
+        {
+            await Task.Yield();
+            try
+            {
+                Debug.Assert(msg.Data is not null);
+                var dispatchResult = await Dispatch(msg.Data);
+                await msg.ReplyAsync(dispatchResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
+            finally
+            {
+                slots.Release();
             }
         }
 
