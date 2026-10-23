@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using System.Threading.Channels;
-using System.Threading.Tasks;
-using Autofac;
-using SoEx.Abstractions;
+using Microsoft.Extensions.Logging;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
@@ -11,14 +9,17 @@ namespace SoEx.Transport.NamedPipe
     public class NamedPipeEventEndpoint<I> : IEndpoint where I : class
     {
 
-        readonly Channel<byte[]> _channel = System.Threading.Channels.Channel.CreateBounded<byte[]>(1000);
+        readonly ILogger<NamedPipeEventEndpoint<I>> _logger;
+        private Channel<byte[]> _channel = System.Threading.Channels.Channel.CreateBounded<byte[]>(1000) ;
         readonly IEndpointPipeline _endpointPipeLine;
         NamedPipeEventBinding<I>? _binding;
         IIpcServer? namedPipeServer;
+        private Task? _reader;
 
 
-        public NamedPipeEventEndpoint(IEndpointPipeline endpointPipeLine)
+        public NamedPipeEventEndpoint( ILogger<NamedPipeEventEndpoint<I>> logger ,  IEndpointPipeline endpointPipeLine)
         {
+            _logger = logger;
             _endpointPipeLine = endpointPipeLine;
         }
 
@@ -32,26 +33,44 @@ namespace SoEx.Transport.NamedPipe
 
         public Task Listen()
         {
-            var task = Task.Factory.StartNew(ReadChannelAsync, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            ArgumentNullException.ThrowIfNull(_binding);
+            _channel = System.Threading.Channels.Channel.CreateBounded<byte[]>(1000);
+            _reader = Task.Run(ReadChannelAsync);
             namedPipeServer = ServerFactory.Create(NamedPipeCallbackAsync, new ServerFactory.ServerOptions()
             {
-                Name = _binding?.Transport.Address.Uri.Host,
+                Name = _binding.Transport.Address.Uri.Host,
                 AllowMultipleClients = true,
             });
             return Task.CompletedTask;
         }
 
-        public Task Close()
+        public async Task Close()
         {
-            return Task.CompletedTask;
+            if (namedPipeServer is not null)
+            {
+                await namedPipeServer.DisposeAsync();
+                namedPipeServer = null;
+            }
+            _channel.Writer.TryComplete();
+            if (_reader is not null)
+            {
+                await _reader;
+                _reader = null;
+            }
         }
 
         private async Task ReadChannelAsync()
         {
-            while (await _channel.Reader.WaitToReadAsync())
+            await foreach(byte[] request in _channel.Reader.ReadAllAsync())
             {
-                var request = await _channel.Reader.ReadAsync();
-                await DispatchAsync(request);
+                try
+                {
+                    await DispatchAsync(request);
+                }
+                catch(Exception exception)
+                {
+                    _logger.LogError(exception, exception.Message);
+                }
             }
         }
 

@@ -30,25 +30,33 @@ namespace SoEx.Transport.NamedPipe
 
         public Task Listen()
         {
+            ArgumentNullException.ThrowIfNull(_binding);
             namedPipeServer = ServerFactory.Create(NamedPipeCallbackAsync, new ServerFactory.ServerOptions()
             {
-                Name = _binding?.Transport.Address.Uri.Host,
+                Name = _binding.Transport.Address.Uri.Host,
                 AllowMultipleClients = true,
             });
             return Task.CompletedTask;
         }
 
-        public Task Close()
+        public async Task Close()
         {
-            return Task.CompletedTask;
+            if(namedPipeServer is not null)
+            {
+                await namedPipeServer.DisposeAsync();
+                namedPipeServer = null;
+            }
         }
 
         private async Task NamedPipeCallbackAsync(Stream stream)
         {
-            var ss = new StreamBytes(stream);
-            var request = ss.ReadBytes();
-            var response = await DispatchAsync(request);
-            ss.WriteBytes(response);
+            await using (stream)
+            {
+                var ss = new StreamBytes(stream);
+                var request = ss.ReadBytes();
+                var response = await DispatchAsync(request);
+                ss.WriteBytes(response);
+            }
         }
 
         private async Task<byte[]> DispatchAsync(byte[] serializedRequest)
