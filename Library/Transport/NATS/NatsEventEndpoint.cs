@@ -1,13 +1,9 @@
 using System.Diagnostics;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-using Autofac;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.JetStream.Models;
 using NATS.Net;
-using SoEx.Abstractions;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
