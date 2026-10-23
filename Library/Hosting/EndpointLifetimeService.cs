@@ -1,8 +1,7 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
+using System.Xml;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SoEx.Topology;
 
 namespace SoEx.Hosting;
 
@@ -39,16 +38,10 @@ public class EndpointLifetimeService : IHostedLifecycleService
         _logger.LogDebug("The host has started, attempting to start listeners");
         foreach (var endpoint in _registeredEndpoints.Endpoints)
         {
-            try
-            {
-                startupTasks.Add(endpoint.Listen());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Endpoint listen error: {ErrorMessage}", ex.Message);
-            }
+            startupTasks.Add(Listen(endpoint));
         }
-        await Task.WhenAll(startupTasks).ContinueWith(_ => _logger.LogDebug("Listeners started"));
+        await Task.WhenAll(startupTasks);
+        _logger.LogDebug("Listeners started");
     }
 
     public async Task StoppingAsync(CancellationToken cancellationToken)
@@ -59,18 +52,44 @@ public class EndpointLifetimeService : IHostedLifecycleService
         {
             try
             {
-                shutdownTasks.Add(endpoint.Close());
+                shutdownTasks.Add(Close(endpoint));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Endpoint listen error: {ErrorMessage}", ex.Message);
             }
         }
-        await Task.WhenAll(shutdownTasks).ContinueWith(_ => _logger.LogDebug("Listeners closed"));
+
+        await Task.WhenAll(shutdownTasks);
+        _logger.LogDebug("Listeners closed");
     }
 
     public Task StoppedAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
+    }
+
+    private async Task Listen(IEndpoint endpoint)
+    {
+        try
+        {
+            await endpoint.Listen();
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Endpoint {Endpoint} did not start listening", endpoint.GetType());
+        }
+    }
+
+    private async Task Close(IEndpoint endpoint)
+    {
+        try
+        {
+            await endpoint.Close();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Endpoint {Endpoint} did not close cleanly", endpoint.GetType());
+        }
     }
 }
