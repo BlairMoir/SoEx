@@ -28,7 +28,11 @@ namespace SoEx.Transport.SBQueue
             {
                 _sbBinding = sbBinding;
                 client = new ServiceBusClient(_sbBinding.Config.ConnectionString);
-                processor = client.CreateProcessor(_sbBinding.Config.Queue, new ServiceBusProcessorOptions());
+                var options = new ServiceBusProcessorOptions()
+                {
+                    MaxConcurrentCalls = _sbBinding.Config.MaxConcurrentCalls
+                };
+                processor = client.CreateProcessor(_sbBinding.Config.Queue, options);
             }
         }
 

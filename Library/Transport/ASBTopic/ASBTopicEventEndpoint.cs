@@ -44,7 +44,11 @@ namespace SoEx.Transport.ASBTopic
             await ConfigureServiceBus(connectionString, topicName);
 
             client = new ServiceBusClient(connectionString);
-            processor = client.CreateProcessor(topicName, _subscriber, new ServiceBusProcessorOptions());
+            var options = new ServiceBusProcessorOptions()
+            {
+                MaxConcurrentCalls = _binding.Config.MaxConcurrentCalls,
+            };
+            processor = client.CreateProcessor(topicName, _subscriber, options);
 
             processor.ProcessMessageAsync += MessageHandler;
             processor.ProcessErrorAsync += ErrorHandler;
