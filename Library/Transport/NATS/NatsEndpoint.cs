@@ -14,6 +14,7 @@ namespace SoEx.Transport.NATS
         IEndpointPipeline _endpointPipeLine;
         private INatsClient? _natsClient;
         private Task? _subscription;
+        private readonly TimeSpan _retryDelay = TimeSpan.FromSeconds(5);
         CancellationTokenSource source = new CancellationTokenSource();
 
 
@@ -54,17 +55,29 @@ namespace SoEx.Transport.NATS
 
         private async Task Subscribe()
         {
-            try
+            while (!source.IsCancellationRequested)
             {
-                await MessageLoop();
-            }
-            catch (OperationCanceledException) when (source.IsCancellationRequested)
-            {
-                // stopping
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "NATS subscription for {Contract} stopped", typeof(I));
+                try
+                {
+                    await MessageLoop();
+                }
+                catch (OperationCanceledException) when (source.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "NATS subscription for {Contract} failed", typeof(I));
+                }
+
+                try
+                {
+                    await Task.Delay(_retryDelay, source.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
             }
         }
 
