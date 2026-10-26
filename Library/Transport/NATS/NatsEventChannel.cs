@@ -44,9 +44,16 @@ namespace SoEx.Transport.NATS
                 {
                     NatsClient nc = await CreateConnection().ConfigureAwait(false);
                     INatsJSContext js = nc.CreateJetStreamContext();
-                    await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(),
-                        subjects: [NatsSubject.For<I>()])).ConfigureAwait(false);
-                    var ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload).ConfigureAwait(false);
+                    PubAckResponse ack;
+                    try
+                    {
+                        ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload).ConfigureAwait(false);
+                    }
+                    catch (NatsJSPublishNoResponseException)
+                    {
+                        await js.CreateEventStream<I>().ConfigureAwait(false);
+                        ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload).ConfigureAwait(false);
+                    }
                     ack.EnsureSuccess();
                     return [];
                 }

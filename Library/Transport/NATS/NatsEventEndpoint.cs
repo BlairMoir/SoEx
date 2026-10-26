@@ -97,7 +97,7 @@ namespace SoEx.Transport.NATS
                 return;
 
             INatsJSContext js = _natsClient.CreateJetStreamContext();
-            await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(), subjects: [NatsSubject.For<I>()]));
+            await js.CreateEventStream<I>();
             INatsJSConsumer consumer = await js.CreateOrUpdateConsumerAsync(NatsSubject.For<I>(), new ConsumerConfig(_queueGroup){ MaxDeliver =  _maxDeliveryAttempts });
 
             using var consumerLost = CancellationTokenSource.CreateLinkedTokenSource(source.Token);
