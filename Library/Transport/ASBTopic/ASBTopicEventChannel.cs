@@ -10,14 +10,16 @@ namespace SoEx.Transport.ASBTopic
         readonly IMessageSerializer _serializer;
         ASBTopicEventBinding<I>? _binding;
         private readonly SharedConnections<ServiceBusClient> _connections;
+        private readonly SharedConnections<ServiceBusSender> _senders;
 
         public Type Contract => typeof(I);
 
 
-        public ASBTopicEventChannel(IMessageSerializer serializer, SharedConnections<ServiceBusClient> connections)
+        public ASBTopicEventChannel(IMessageSerializer serializer, SharedConnections<ServiceBusClient> connections, SharedConnections<ServiceBusSender> senders)
         {
             _serializer = serializer;
             _connections = connections;
+            _senders = senders;
         }
 
         public void Bind(Binding binding)
@@ -38,11 +40,8 @@ namespace SoEx.Transport.ASBTopic
             {
                 try
                 {
-                    var sender = await CreateSender().ConfigureAwait(false);
-                    await using (sender.ConfigureAwait(false))
-                    {
+                    var sender = await Sender().ConfigureAwait(false);
                         await sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload))).ConfigureAwait(false);
-                    }
                     return [];
                 }
                 catch
@@ -53,15 +52,25 @@ namespace SoEx.Transport.ASBTopic
             }
         }
 
-        private async Task<ServiceBusSender> CreateSender()
+        private async Task<ServiceBusSender> Sender()
         {
             Debug.Assert(_binding != null);
             var connectionString = _binding.Config.ConnectionString;
-            var client = await _connections.Get( connectionString,
-                    () => Task.FromResult(new ServiceBusClient(connectionString)),
+            string entity = ASBTopicSubject.For<I>();
+            var sender = await _senders.Get($"{entity}|{connectionString}",
+                    () => CreateSender(connectionString, entity),
                     c => c.IsClosed ).
                 ConfigureAwait(false);
-            var sender = client.CreateSender(ASBTopicSubject.For<I>());
+            return sender;
+        }
+
+        private async Task<ServiceBusSender> CreateSender(string connectionString, string entity)
+        {
+            ServiceBusClient client = await _connections.Get(connectionString,
+                    () => Task.FromResult(new ServiceBusClient(connectionString)),
+                    c => c.IsClosed)
+                .ConfigureAwait(false) ;
+            var sender = client.CreateSender(entity);
             return sender;
         }
     }

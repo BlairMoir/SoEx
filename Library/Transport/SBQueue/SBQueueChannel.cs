@@ -10,14 +10,16 @@ namespace SoEx.Transport.SBQueue
         SBQueueBinding<I>? _sbBinding;
         readonly IMessageSerializer _serializer;
         private readonly SharedConnections<ServiceBusClient> _connections;
+        private readonly SharedConnections<ServiceBusSender> _senders;
 
 
         public Type Contract => typeof(I);
 
-        public SBQueueChannel(IMessageSerializer serializer, SharedConnections<ServiceBusClient> connections)
+        public SBQueueChannel(IMessageSerializer serializer, SharedConnections<ServiceBusClient> connections, SharedConnections<ServiceBusSender> senders)
         {
             _serializer = serializer;
             _connections = connections;
+            _senders = senders;
         }
 
         public void Bind(Binding binding)
@@ -40,12 +42,9 @@ namespace SoEx.Transport.SBQueue
             {
                 try
                 {
-                    var sender = await CreateSender().ConfigureAwait(false);
-                    await using (sender.ConfigureAwait(false))
-                    {
-                        await sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload)))
-                            .ConfigureAwait(false);
-                    }
+                    var sender = await Sender().ConfigureAwait(false);
+                    await sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload)))
+                        .ConfigureAwait(false);
                     return [];
                 }
                 catch
@@ -56,15 +55,25 @@ namespace SoEx.Transport.SBQueue
             }
         }
 
-        private async Task<ServiceBusSender> CreateSender()
+        private async Task<ServiceBusSender> Sender()
         {
             Debug.Assert(_sbBinding != null);
             var connectionString = _sbBinding.Config.ConnectionString;
-            var client = await _connections.Get( connectionString,
-                    () => Task.FromResult(new ServiceBusClient(connectionString)),
+            string entity = _sbBinding.Config.Queue;
+            var sender = await _senders.Get($"{entity}|{connectionString}",
+                    () => CreateSender(connectionString, entity),
                     c => c.IsClosed ).
                 ConfigureAwait(false);
-            var sender = client.CreateSender(_sbBinding.Config.Queue);
+            return sender;
+        }
+
+        private async Task<ServiceBusSender> CreateSender(string connectionString, string entity)
+        {
+            ServiceBusClient client = await _connections.Get(connectionString,
+                () => Task.FromResult(new ServiceBusClient(connectionString)),
+                c => c.IsClosed)
+                .ConfigureAwait(false) ;
+            var sender = client.CreateSender(entity);
             return sender;
         }
     }
