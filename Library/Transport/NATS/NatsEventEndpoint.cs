@@ -12,6 +12,7 @@ namespace SoEx.Transport.NATS
     public class NatsEventEndpoint<I> : IEndpoint where I : class
     {
         private readonly uint _maxDeliveryAttempts = 5;
+        private readonly TimeSpan _retryDelay = TimeSpan.FromSeconds(5);
         readonly ILogger<NatsEventEndpoint<I>> _logger;
         private NatsEventBinding<I>? _binding;
         IEndpointPipeline _endpointPipeLine;
@@ -59,17 +60,33 @@ namespace SoEx.Transport.NATS
 
         private async Task Subscribe()
         {
-            try
+            while (!source.IsCancellationRequested)
             {
-                await MessageLoop();
-            }
-            catch (OperationCanceledException) when (source.IsCancellationRequested)
-            {
-                // stopping
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "NATS event subscription for {Contract} stopped", typeof(I));
+                try
+                {
+                    await MessageLoop();
+                }
+                catch (OperationCanceledException) when (source.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (OperationCanceledException)
+                {
+                    // stopping
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "NATS event subscription for {Contract} failed", typeof(I));
+                }
+
+                try
+                {
+                    await Task.Delay(_retryDelay, source.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
             }
         }
 
@@ -82,13 +99,22 @@ namespace SoEx.Transport.NATS
             INatsJSContext js = _natsClient.CreateJetStreamContext();
             await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(), subjects: [NatsSubject.For<I>()]));
             INatsJSConsumer consumer = await js.CreateOrUpdateConsumerAsync(NatsSubject.For<I>(), new ConsumerConfig(_queueGroup){ MaxDeliver =  _maxDeliveryAttempts });
+
+            using var consumerLost = CancellationTokenSource.CreateLinkedTokenSource(source.Token);
+            var consumerOption = new NatsJSConsumeOpts()
+            {
+                MaxMsgs = 1000,
+                NotificationHandler = (notification, _) => OnNatsConsumerNotification(notification, consumerLost)
+            };
+
+
             int maxConcurrent = _binding.Config.MaxConcurrentMessages;
             using var slots = new SemaphoreSlim(maxConcurrent);
             try
             {
-                await foreach (NatsJSMsg<byte[]> msg in consumer.ConsumeAsync<byte[]>(cancellationToken: source.Token))
+                await foreach (NatsJSMsg<byte[]> msg in consumer.ConsumeAsync<byte[]>(opts: consumerOption, cancellationToken: consumerLost.Token))
                 {
-                    await slots.WaitAsync(source.Token);
+                    await slots.WaitAsync(consumerLost.Token);
                     _ = HandleMessage(msg, slots);
                 }
             }
@@ -99,6 +125,17 @@ namespace SoEx.Transport.NATS
                     await slots.WaitAsync();
                 }
             }
+        }
+
+        private Task OnNatsConsumerNotification(INatsJSNotification notification, CancellationTokenSource consumerLost)
+        {
+            if (notification is NatsJSNoRespondersNotification)
+            {
+                _logger.LogWarning("Nats consumer {Consumer} for {Contract} is gone, retrying", _queueGroup, typeof(I));
+                consumerLost.Cancel();
+            }
+
+            return Task.CompletedTask;
         }
 
         private async Task HandleMessage(NatsJSMsg<byte[]> msg, SemaphoreSlim slots)
