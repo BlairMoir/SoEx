@@ -3,7 +3,7 @@ using Amazon.SQS;
 using Amazon.SQS.Model;
 using SoEx.Topology;
 
-namespace SoEx.Transport.SQS
+namespace SoEx.Transport.Aws.Sqs
 {
     public class SQSChannel<I> : IChannel where I : class
     {

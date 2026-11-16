@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
-namespace SoEx.Transport.SQS
+namespace SoEx.Transport.Aws.Sqs
 {
     public class SQSEndpoint<I> : IEndpoint where I : class
     {

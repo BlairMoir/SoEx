@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using SoEx.Topology;
 
-namespace SoEx.Transport.SQS
+namespace SoEx.Transport.Aws.Sqs
 {
     public record SQSBinding<I> : Topology.Binding
     {

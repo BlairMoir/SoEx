@@ -3,7 +3,7 @@
   <PropertyGroup>    
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageId>SoEx.Transport.SQS</PackageId>
+    <PackageId>SoEx.Transport.Aws.Sqs</PackageId>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\"/>

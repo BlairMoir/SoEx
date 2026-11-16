@@ -1,4 +1,4 @@
-namespace SoEx.Transport.SQS
+namespace SoEx.Transport.Aws.Sqs
 {
     public class SQSConfig
     {

@@ -53,7 +53,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Method.Conventions", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Transport.Azure.ServiceBus", "Transport\Azure.ServiceBus\SoEx.Transport.Azure.ServiceBus.csproj", "{20FF6B03-1581-404A-9D11-B7739AA1B7D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Transport.SQS", "Transport\SQS\SoEx.Transport.SQS.csproj", "{F68CC8C4-1FFB-4397-92C3-7D44D95B8CEF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoEx.Transport.Aws.Sqs", "Transport\Aws.Sqs\SoEx.Transport.Aws.Sqs.csproj", "{F68CC8C4-1FFB-4397-92C3-7D44D95B8CEF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{99C7B519-AAAF-04B1-B05E-23ECB7A6C3EF}"
 EndProject
