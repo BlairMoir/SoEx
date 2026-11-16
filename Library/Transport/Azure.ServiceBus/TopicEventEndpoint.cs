@@ -5,12 +5,12 @@ using Microsoft.Extensions.Logging;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
-namespace SoEx.Transport.ASBTopic
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    public class ASBTopicEventEndpoint<I> : IEndpoint where I : class
+    public class TopicEventEndpoint<I> : IEndpoint where I : class
     {
-        readonly ILogger<ASBTopicEventEndpoint<I>> _logger;
-        private ASBTopicEventBinding<I>? _binding;
+        readonly ILogger<TopicEventEndpoint<I>> _logger;
+        private TopicEventBinding<I>? _binding;
         IEndpointPipeline _endpointPipeLine;
         private string? _subscriber;
         private CancellationTokenSource source = new CancellationTokenSource();
@@ -19,7 +19,7 @@ namespace SoEx.Transport.ASBTopic
 
 
 
-        public ASBTopicEventEndpoint(ILogger<ASBTopicEventEndpoint<I>> logger, IEndpointPipeline endpointPipeLine)
+        public TopicEventEndpoint(ILogger<TopicEventEndpoint<I>> logger, IEndpointPipeline endpointPipeLine)
         {
             _endpointPipeLine = endpointPipeLine;
             _logger = logger;
@@ -27,7 +27,7 @@ namespace SoEx.Transport.ASBTopic
 
         public void Bind(Binding binding, string componentName)
         {
-            if (binding is ASBTopicEventBinding<I> topicEventBinding)
+            if (binding is TopicEventBinding<I> topicEventBinding)
             {
                 _binding = topicEventBinding;
                 _subscriber = componentName;
@@ -40,7 +40,7 @@ namespace SoEx.Transport.ASBTopic
                 return;
 
             var connectionString = _binding.Config.ConnectionString;
-            var topicName = ASBTopicSubject.For<I>();
+            var topicName = TopicSubject.For<I>();
             await ConfigureServiceBus(connectionString, topicName);
 
             client = new ServiceBusClient(connectionString);
@@ -110,7 +110,7 @@ namespace SoEx.Transport.ASBTopic
 
         private async Task<byte[]> Dispatch(byte[] serializedRequest)
         {
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(ASBTopicEventEndpoint<I>)}", ActivityKind.Server))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(TopicEventEndpoint<I>)}", ActivityKind.Server))
             {
                 try
                 {

@@ -1,4 +1,4 @@
-namespace SoEx.Relay
+namespace SoEx.Transport.Azure.Relay
 {
     public record RelayTransport : Topology.Transport
     {

@@ -1,6 +1,6 @@
-namespace SoEx.Transport.SBQueue
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    public class SBConfig
+    public class Config
     {
         public required string ConnectionString { get; init; }
         public required string SBNamespace { get; init; }

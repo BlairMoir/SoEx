@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SoEx.Transport.ASBTopic
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    public static class ASBTopicSubject
+    public static class TopicSubject
     {
         public static string For<I>()
         {

@@ -4,18 +4,18 @@ using Microsoft.Extensions.Logging;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
-namespace SoEx.Transport.SBQueue
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    public class SBQueueEndpoint<I> : IEndpoint where I : class
+    public class QueueEndpoint<I> : IEndpoint where I : class
     {
-        SBQueueBinding<I>? _sbBinding;
-        ILogger<SBQueueEndpoint<I>> _logger;
+        QueueBinding<I>? _sbBinding;
+        ILogger<QueueEndpoint<I>> _logger;
         ServiceBusClient? client;
         ServiceBusProcessor? processor;
         IEndpointPipeline _endpointPipeLine;
 
 
-        public SBQueueEndpoint(ILogger<SBQueueEndpoint<I>> logger, IEndpointPipeline endpointPipeLine)
+        public QueueEndpoint(ILogger<QueueEndpoint<I>> logger, IEndpointPipeline endpointPipeLine)
         {
             _logger = logger;
             _endpointPipeLine = endpointPipeLine;
@@ -24,7 +24,7 @@ namespace SoEx.Transport.SBQueue
 
         public void Bind(Binding binding, string componentName)
         {
-            if (binding is SBQueueBinding<I> sbBinding)
+            if (binding is QueueBinding<I> sbBinding)
             {
                 _sbBinding = sbBinding;
                 client = new ServiceBusClient(_sbBinding.Config.ConnectionString);
@@ -74,7 +74,7 @@ namespace SoEx.Transport.SBQueue
         }
         private async Task Dispatch(byte[] serializedRequest)
         {
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(SBQueueEndpoint<I>)}", ActivityKind.Server))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(QueueEndpoint<I>)}", ActivityKind.Server))
             {
                 try
                 {

@@ -3,19 +3,19 @@ using Azure.Messaging.ServiceBus;
 using SoEx.Abstractions;
 using SoEx.Topology;
 
-namespace SoEx.Transport.ASBTopic
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    public class ASBTopicEventChannel<I> : IChannel where I : class
+    public class TopicEventChannel<I> : IChannel where I : class
     {
         readonly IMessageSerializer _serializer;
-        ASBTopicEventBinding<I>? _binding;
+        TopicEventBinding<I>? _binding;
         private readonly SharedConnections<ServiceBusClient> _connections;
         private readonly SharedConnections<ServiceBusSender> _senders;
 
         public Type Contract => typeof(I);
 
 
-        public ASBTopicEventChannel(IMessageSerializer serializer, SharedConnections<ServiceBusClient> connections, SharedConnections<ServiceBusSender> senders)
+        public TopicEventChannel(IMessageSerializer serializer, SharedConnections<ServiceBusClient> connections, SharedConnections<ServiceBusSender> senders)
         {
             _serializer = serializer;
             _connections = connections;
@@ -24,7 +24,7 @@ namespace SoEx.Transport.ASBTopic
 
         public void Bind(Binding binding)
         {
-            if (binding is ASBTopicEventBinding<I> topicEventBinding)
+            if (binding is TopicEventBinding<I> topicEventBinding)
             {
                 _binding = topicEventBinding;
             }
@@ -36,7 +36,7 @@ namespace SoEx.Transport.ASBTopic
         {
 
 
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(ASBTopicEventChannel<I>)}"))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(TopicEventChannel<I>)}"))
             {
                 try
                 {
@@ -56,7 +56,7 @@ namespace SoEx.Transport.ASBTopic
         {
             Debug.Assert(_binding != null);
             var connectionString = _binding.Config.ConnectionString;
-            string entity = ASBTopicSubject.For<I>();
+            string entity = TopicSubject.For<I>();
             var sender = await _senders.Get($"{entity}|{connectionString}",
                     () => CreateSender(connectionString, entity),
                     c => c.IsClosed ).

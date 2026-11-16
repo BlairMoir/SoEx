@@ -3,7 +3,7 @@ using System.Diagnostics;
 using SoEx.Abstractions;
 using SoEx.Topology;
 
-namespace SoEx.Relay
+namespace SoEx.Transport.Azure.Relay
 {
     public class RelayChannel<I> : IChannel
     {

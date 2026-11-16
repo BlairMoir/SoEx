@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SoEx.Relay
+namespace SoEx.Transport.Azure.Relay
 {
     public static class RelayExtensions
     {

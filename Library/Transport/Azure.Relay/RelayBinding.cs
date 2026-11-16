@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Azure.Relay;
 using SoEx.Topology;
 
-namespace SoEx.Relay
+namespace SoEx.Transport.Azure.Relay
 {
     public record RelayBinding<I> : Topology.Binding
     {

@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 using Autofac.Core;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SoEx.Transport.ASBTopic
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    public static class ASBTopicExtensions
+    public static class TopicExtensions
     {
         public static IServiceCollection ASBTopicClient(this IServiceCollection collection)
         {
-            collection.AddTransient(typeof(ASBTopicEventChannel<>), typeof(ASBTopicEventChannel<>));
+            collection.AddTransient(typeof(TopicEventChannel<>), typeof(TopicEventChannel<>));
             return collection;
         }
     }

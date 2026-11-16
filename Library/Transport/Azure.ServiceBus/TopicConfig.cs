@@ -1,4 +1,4 @@
-namespace SoEx.Transport.ASBTopic
+namespace SoEx.Transport.Azure.ServiceBus
 {
     public class TopicConfig
     {

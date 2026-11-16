@@ -3,11 +3,11 @@ using Azure.Messaging.ServiceBus;
 using SoEx.Abstractions;
 using SoEx.Topology;
 
-namespace SoEx.Transport.SBQueue
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    public class SBQueueChannel<I> : IChannel where I : class
+    public class QueueChannel<I> : IChannel where I : class
     {
-        SBQueueBinding<I>? _sbBinding;
+        QueueBinding<I>? _sbBinding;
         readonly IMessageSerializer _serializer;
         private readonly SharedConnections<ServiceBusClient> _connections;
         private readonly SharedConnections<ServiceBusSender> _senders;
@@ -15,7 +15,7 @@ namespace SoEx.Transport.SBQueue
 
         public Type Contract => typeof(I);
 
-        public SBQueueChannel(IMessageSerializer serializer, SharedConnections<ServiceBusClient> connections, SharedConnections<ServiceBusSender> senders)
+        public QueueChannel(IMessageSerializer serializer, SharedConnections<ServiceBusClient> connections, SharedConnections<ServiceBusSender> senders)
         {
             _serializer = serializer;
             _connections = connections;
@@ -24,7 +24,7 @@ namespace SoEx.Transport.SBQueue
 
         public void Bind(Binding binding)
         {
-            if (binding is SBQueueBinding<I> sbBinding)
+            if (binding is QueueBinding<I> sbBinding)
             {
                 if (_sbBinding is null)
                 {
@@ -38,7 +38,7 @@ namespace SoEx.Transport.SBQueue
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(SBQueueChannel<I>)}"))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(QueueChannel<I>)}"))
             {
                 try
                 {

@@ -8,7 +8,7 @@ using SoEx.Abstractions;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
-namespace SoEx.Relay
+namespace SoEx.Transport.Azure.Relay
 {
     public class RelayEndpoint<I> : IEndpoint where I : class
     {

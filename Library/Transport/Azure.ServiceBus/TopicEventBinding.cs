@@ -2,15 +2,15 @@
 using System.Text.RegularExpressions;
 using SoEx.Topology;
 
-namespace SoEx.Transport.ASBTopic
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    public record ASBTopicEventBinding<I> : Topology.Binding
+    public record TopicEventBinding<I> : Topology.Binding
     {
         private readonly TopicConfig _topicConfig;
 
-        public ASBTopicEventBinding(string subsystem, TopicConfig config) : base(
+        public TopicEventBinding(string subsystem, TopicConfig config) : base(
             typeof(I),
-            new ASBTopicEventTransport() { Address = AddressFrom(config) },
+            new TopicEventTransport() { Address = AddressFrom(config) },
             subsystem
             )
         {

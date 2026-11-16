@@ -13,7 +13,7 @@
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageId>SoEx.Transport.Relay</PackageId>
+    <PackageId>SoEx.Transport.Azure.Relay</PackageId>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\"/>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SoEx.Relay
+namespace SoEx.Transport.Azure.Relay
 {
     public class RelayConfig
     {
