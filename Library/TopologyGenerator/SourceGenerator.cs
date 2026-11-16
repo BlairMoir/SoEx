@@ -30,9 +30,11 @@ public class SourceGenerator
                     StringBuilder fields = new  StringBuilder();
                     StringBuilder components = new StringBuilder();
                     List<string> proxies = new List<string>();
+                    Dictionary<string, string> names = MemberNames(new[] { o.SubsystemContract ?? "" }
+                        .Concat(o.Components.Select(c => c.Contract)));
                     fields.AppendLine(
                         $$"""
-                              public Microsoft.Extensions.DependencyInjection.ServiceCollection ServiceCollection_{{o.SubsystemContract?.Split('.').Last()}} = new();
+                              public Microsoft.Extensions.DependencyInjection.ServiceCollection ServiceCollection_{{names[o.SubsystemContract?? ""]}} = new();
                           """);
 
                     foreach (var component in o.Components)
@@ -50,7 +52,7 @@ public class SourceGenerator
                         {
                             fields.AppendLine(
                                 $$"""
-                                    public Moq.Mock<{{component.Contract}}> Mock_{{component.Contract.Split('.').Last()}} = new Moq.Mock<{{component.Contract}}>();
+                                    public Moq.Mock<{{component.Contract}}> Mock_{{names[component.Contract]}} = new Moq.Mock<{{component.Contract}}>();
                                 """);
                             components.AppendLine("new SoEx.Topology.HostMock()");
                         }
@@ -58,7 +60,7 @@ public class SourceGenerator
                         {
                             fields.AppendLine(
                                 $$"""
-                                      public Microsoft.Extensions.DependencyInjection.ServiceCollection ServiceCollection_{{component.Contract.Split('.').Last()}} = new();
+                                      public Microsoft.Extensions.DependencyInjection.ServiceCollection ServiceCollection_{{names[component.Contract]}} = new();
                                   """);
                             components.AppendLine("new SoEx.Topology.Host()");
                         }
@@ -66,7 +68,7 @@ public class SourceGenerator
                         components.AppendLine("    {");
                         if (component.Implementation is null)
                         {
-                            components.AppendLine($"        Instance = Mock_{component.Contract.Split('.').Last()}.Object,");
+                            components.AppendLine($"        Instance = Mock_{names[component.Contract]}.Object,");
                             components.AppendLine($"        Implementation = typeof(Moq.Mock),");
                         }
                         else
@@ -97,7 +99,7 @@ public class SourceGenerator
                         if (component.Implementation is not null)
                         {
                             components.AppendLine(
-                                $"        ServiceCollection = ServiceCollection_{component.Contract.Split('.').Last()}");
+                                $"        ServiceCollection = ServiceCollection_{names[component.Contract] ?? ""}");
                         }
                         components.AppendLine("    },");
                     }
@@ -135,7 +137,7 @@ public class SourceGenerator
                                                 Proxies = [
                                                     {{String.Join("\r\n",proxies)}}
                                                 ],
-                                                ServiceCollection = ServiceCollection_{{o.SubsystemContract?.Split('.').Last()}}
+                                                ServiceCollection = ServiceCollection_{{names[o.SubsystemContract ?? ""]}}
                                             },
                                             Components = [
                                                 {{components.ToString()}}
@@ -156,9 +158,55 @@ public class SourceGenerator
                     spc.AddSource($"{o.MethodIdentifier}.g.cs", source);
                 }catch(Exception ex)
                 {
-                    spc.AddSource("error.txt", ex.ToString());
+                    spc.ReportDiagnostic(
+                        Diagnostic.Create(
+                            new DiagnosticDescriptor("SOEXTG001",
+                                "Topology generation failed",
+                                "Could not generate harness for {0}: {1}",
+                            "SoEx.Test", DiagnosticSeverity.Error,true),
+                        Location.None, o.MethodIdentifier, ex.Message
+                        ));
                 }
             });
+        }
+
+        static Dictionary<string, string> MemberNames(IEnumerable<string> contracts)
+        {
+            var names = new Dictionary<string, string>();
+            foreach (var group in contracts.Distinct().GroupBy( c => c.Split('.').Last()))
+            {
+                var collision = group.ToArray();
+                if (collision.Length == 1)
+                {
+                    names[collision[0]] = group.Key;
+                    continue;
+                }
+
+                var longest = collision.Max(c => c.Split('.').Length);
+                for (var take = 2;; take++)
+                {
+                    var qualified = collision.ToDictionary(c => c, c => Qualify(c, take));
+                    if (qualified.Values.Distinct().Count() == collision.Length || take >= longest)
+                    {
+                        foreach (var pair in qualified)
+                        {
+                            names[pair.Key] = pair.Value;
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            return names;
+        }
+
+        static string Qualify(string contract, int segments)
+        {
+            var parts = contract.Split('.');
+            var skip = Math.Max(0, parts.Length - segments);
+            var qualifiedParts = parts.Skip(skip);
+            return string.Join("_", qualifiedParts);
         }
 
         private static bool IsSyntaxTargetForGeneration(SyntaxNode syntaxNode)
