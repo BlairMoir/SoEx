@@ -6,87 +6,44 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.Azure.ServiceBus
 {
-    public class QueueEndpoint<I> : IEndpoint where I : class
+    public class QueueEndpoint<I> : ServiceBusEndpoint<I>, IEndpoint where I : class
     {
         QueueBinding<I>? _sbBinding;
-        ILogger<QueueEndpoint<I>> _logger;
-        ServiceBusClient? client;
-        ServiceBusProcessor? processor;
-        IEndpointPipeline _endpointPipeLine;
 
-
-        public QueueEndpoint(ILogger<QueueEndpoint<I>> logger, IEndpointPipeline endpointPipeLine)
+        public QueueEndpoint(ILogger<QueueEndpoint<I>> logger, IEndpointPipeline endpointPipeLine) :
+            base(logger, endpointPipeLine)
         {
-            _logger = logger;
-            _endpointPipeLine = endpointPipeLine;
-
         }
+
+        protected override IBindingPipeline? BindingPipeline => _sbBinding?.Pipeline;
 
         public void Bind(Binding binding, string componentName)
         {
             if (binding is QueueBinding<I> sbBinding)
             {
                 _sbBinding = sbBinding;
-                client = new ServiceBusClient(_sbBinding.Config.ConnectionString);
-                var options = new ServiceBusProcessorOptions()
-                {
-                    MaxConcurrentCalls = _sbBinding.Config.MaxConcurrentCalls
-                };
-                processor = client.CreateProcessor(_sbBinding.Config.Queue, options);
             }
         }
 
         public async Task Listen()
         {
-            ArgumentNullException.ThrowIfNull(processor, "Binding must be set before listening");
-            processor.ProcessMessageAsync += MessageHandler;
-            processor.ProcessErrorAsync += ErrorHandler;
-            await processor.StartProcessingAsync();
+            if (_sbBinding is null)
+                return;
+
+            var config = _sbBinding.Config;
+            var options = new ServiceBusProcessorOptions()
+            {
+                MaxConcurrentCalls = config.MaxConcurrentCalls,
+            };
+
+            await StartProcessing(config.ConnectionString,
+                client => client.CreateProcessor(config.Queue, options)
+                );
         }
 
         public async Task Close()
         {
-            if (processor is not null)
-            {
-                await processor.StopProcessingAsync();
-                await processor.DisposeAsync().ConfigureAwait(false);
-                processor = null;
-            }
-
-            if (client is not null)
-            {
-                await client.DisposeAsync().ConfigureAwait(false);
-                client = null;
-            }
-        }
-
-        private Task ErrorHandler(ProcessErrorEventArgs args)
-        {
-            _logger.LogError(args.Exception, args.Exception.Message);
-            return Task.CompletedTask;
-        }
-
-
-        private async Task MessageHandler(ProcessMessageEventArgs args)
-        {
-            await Dispatch(args.Message.Body.ToArray());
-            await args.CompleteMessageAsync(args.Message);
-        }
-        private async Task Dispatch(byte[] serializedRequest)
-        {
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(QueueEndpoint<I>)}", ActivityKind.Server))
-            {
-                try
-                {
-                    await _endpointPipeLine.ServicePipeLine<I>(serializedRequest, _sbBinding?.Pipeline, activity);
-                }
-                catch (Exception ex)
-                {
-                    activity?.SetStatus(ActivityStatusCode.Error);
-                    _logger.LogError(ex, "{ExceptionMessage}", ex.Message);
-                    throw;
-                }
-            }
+            await StopProcessing();
         }
     }
 }

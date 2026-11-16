@@ -7,23 +7,17 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.Azure.ServiceBus
 {
-    public class TopicEventEndpoint<I> : IEndpoint where I : class
+    public class TopicEventEndpoint<I> : ServiceBusEndpoint<I> , IEndpoint where I : class
     {
-        readonly ILogger<TopicEventEndpoint<I>> _logger;
         private TopicEventBinding<I>? _binding;
-        IEndpointPipeline _endpointPipeLine;
         private string? _subscriber;
-        private CancellationTokenSource source = new CancellationTokenSource();
-        ServiceBusClient? client;
-        ServiceBusProcessor? processor;
 
-
-
-        public TopicEventEndpoint(ILogger<TopicEventEndpoint<I>> logger, IEndpointPipeline endpointPipeLine)
+        public TopicEventEndpoint(ILogger<TopicEventEndpoint<I>> logger, IEndpointPipeline endpointPipeLine) :
+            base(logger, endpointPipeLine)
         {
-            _endpointPipeLine = endpointPipeLine;
-            _logger = logger;
         }
+
+        protected override IBindingPipeline? BindingPipeline => _binding?.Pipeline;
 
         public void Bind(Binding binding, string componentName)
         {
@@ -39,36 +33,21 @@ namespace SoEx.Transport.Azure.ServiceBus
             if (_binding is null)
                 return;
 
-            var connectionString = _binding.Config.ConnectionString;
+            var config = _binding.Config;
             var topicName = TopicSubject.For<I>();
-            await ConfigureServiceBus(connectionString, topicName);
-
-            client = new ServiceBusClient(connectionString);
             var options = new ServiceBusProcessorOptions()
             {
                 MaxConcurrentCalls = _binding.Config.MaxConcurrentCalls,
             };
-            processor = client.CreateProcessor(topicName, _subscriber, options);
-
-            processor.ProcessMessageAsync += MessageHandler;
-            processor.ProcessErrorAsync += ErrorHandler;
-            await processor.StartProcessingAsync();
+            await ConfigureServiceBus(config.ConnectionString, topicName);
+            await StartProcessing(config.ConnectionString,
+                    clinet => clinet.CreateProcessor(topicName, _subscriber, options)
+                );
         }
 
         public async Task Close()
         {
-            if (processor is not null)
-            {
-                await processor.StopProcessingAsync();
-                await processor.DisposeAsync().ConfigureAwait(false);
-                processor = null;
-            }
-
-            if (client is not null)
-            {
-                await client.DisposeAsync().ConfigureAwait(false);
-                client = null;
-            }
+            await StopProcessing();
         }
 
         private async Task ConfigureServiceBus(string connectionString, string topicName)
@@ -93,34 +72,6 @@ namespace SoEx.Transport.Azure.ServiceBus
             catch (Exception)
             {
                 _logger.LogWarning("Could not check Topic/Subscription exists topic:{Topic} subscriber:{Subscriber}", topicName, _subscriber);
-            }
-        }
-
-        private Task ErrorHandler(ProcessErrorEventArgs args)
-        {
-            _logger.LogError(args.Exception, args.Exception.Message);
-            return Task.CompletedTask;
-        }
-
-        private async Task MessageHandler(ProcessMessageEventArgs args)
-        {
-            await Dispatch(args.Message.Body.ToArray());
-            await args.CompleteMessageAsync(args.Message);
-        }
-
-        private async Task<byte[]> Dispatch(byte[] serializedRequest)
-        {
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(TopicEventEndpoint<I>)}", ActivityKind.Server))
-            {
-                try
-                {
-                    return await _endpointPipeLine.ServicePipeLine<I>(serializedRequest, _binding?.Pipeline, activity);
-                }
-                catch
-                {
-                    activity?.SetStatus(ActivityStatusCode.Error);
-                    throw;
-                }
             }
         }
     }
