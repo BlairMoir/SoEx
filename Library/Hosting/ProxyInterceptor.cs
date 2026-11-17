@@ -13,9 +13,11 @@ namespace SoEx.Hosting
         AmbientContext _ambientContext;
         FrameworkContext _frameworkContext;
         IChannelPipeline _channelPipline;
+        Type _contract;
 
-        public ProxyInterceptor(TransportFactory transportFactory, IAmbientContext ambientContext, IFrameworkContext frameworkContext , IChannelPipeline channelPipline)
+        public ProxyInterceptor(Type contract, TransportFactory transportFactory, IAmbientContext ambientContext, IFrameworkContext frameworkContext , IChannelPipeline channelPipline)
         {
+            _contract = contract;
             _transportFactory = transportFactory;
             _ambientContext = (AmbientContext)ambientContext;
             _frameworkContext = (FrameworkContext)frameworkContext;
@@ -37,12 +39,11 @@ namespace SoEx.Hosting
 
         protected override async Task InterceptAsync(IInvocation invocation, IInvocationProceedInfo proceedInfo, Func<IInvocation, IInvocationProceedInfo, Task> proceed)
         {
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(ProxyInterceptor)} {invocation.Method.DeclaringType} {invocation.Method.Name}"))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(ProxyInterceptor)} {_contract} {invocation.Method.Name}"))
             {
                 try
                 {
-                    Type targetInterface = invocation.Method.DeclaringType ?? throw new ArgumentException("Proxy Interceptor requires an interface");
-                    IChannel channel = _transportFactory.Client(targetInterface) as IChannel ?? throw new NullReferenceException();
+                    IChannel channel = _transportFactory.Client(_contract) as IChannel ?? throw new NullReferenceException();
                     var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, AmbientContext = _ambientContext.Serialize(), FrameworkContext =  _frameworkContext.Serialize() };
                     var invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
                     _ambientContext.Deserialize(invocationResponse.AmbientContext);
@@ -56,12 +57,11 @@ namespace SoEx.Hosting
         }
         protected override async Task<TResult> InterceptAsync<TResult>(IInvocation invocation, IInvocationProceedInfo proceedInfo, Func<IInvocation, IInvocationProceedInfo, Task<TResult>> proceed)
         {
-            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(ProxyInterceptor)} {invocation.Method.DeclaringType} {invocation.Method.Name}"))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(ProxyInterceptor)} {_contract} {invocation.Method.Name}"))
             {
                 try
                 {
-                    Type targetInterface = invocation.Method.DeclaringType ?? throw new ArgumentException("Proxy Interceptor requires an interface");
-                    IChannel channel = _transportFactory.Client(targetInterface) as IChannel ?? throw new NullReferenceException();
+                    IChannel channel = _transportFactory.Client(_contract) as IChannel ?? throw new NullReferenceException();
                     var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, HasResult = true, AmbientContext = _ambientContext.Serialize(), FrameworkContext =  _frameworkContext.Serialize() };
                     var invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
                     _ambientContext.Deserialize(invocationResponse.AmbientContext);
