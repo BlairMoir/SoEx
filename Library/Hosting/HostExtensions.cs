@@ -4,15 +4,12 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.DynamicProxy;
 using Castle.DynamicProxy;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SoEx.Abstractions;
 using SoEx.Channel;
 using SoEx.Context;
 using SoEx.Endpoint;
 using SoEx.Hosting.Default;
-using SoEx.Hosting.Serializers.Common;
 using SoEx.Topology;
 using SoEx.Topology.Pipeline;
 using SoEx.Transport;
@@ -297,7 +294,7 @@ namespace SoEx.Hosting
 
         private static void ValidateEndpointContract(Binding endpoint)
         {
-            var groupedByName = ContractMethod.Operations(endpoint.Contract).GroupBy( g=> g.Name).ToArray();
+            var groupedByName = endpoint.Contract.Operations().GroupBy( g=> g.Name).ToArray();
             if (groupedByName.Any(a => a.Count() != 1))
             {
                 var duplicates =  groupedByName.Where(a => a.Count() > 1);

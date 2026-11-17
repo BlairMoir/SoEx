@@ -4,7 +4,6 @@ using Autofac;
 using Microsoft.Extensions.Logging;
 using SoEx.Abstractions;
 using SoEx.Context;
-using SoEx.Hosting.Serializers.Common;
 using SoEx.Topology;
 
 namespace SoEx.Hosting.Default
@@ -52,7 +51,7 @@ namespace SoEx.Hosting.Default
                             AddScopePropertiesToActivity(activity, scopeProperties);
                             I host = requestLifetime.ResolveNamed<I>("Endpoint");
 
-                            var method = ContractMethod.Find(typeof(I),invocationRequest.MethodName);
+                            var method = typeof(I).Find(invocationRequest.MethodName);
                             if (method is null)
                             {
                                 throw new MissingMethodException(typeof(I).FullName, invocationRequest.MethodName);
