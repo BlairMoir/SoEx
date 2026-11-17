@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using System.Reflection;
+using Microsoft.Extensions.Logging;
 using SoEx.Endpoint;
 using SoEx.Messaging.Chimera;
 using SoEx.Topology;
@@ -14,15 +14,19 @@ public class ChimeraEventEndpoint
 
 public class ChimeraEventEndpoint<I> : ChimeraEventEndpoint, IEndpoint where I : class
 {
+    private static readonly TimeSpan Retry = TimeSpan.FromSeconds(1);
+
     private ChimeraEventBinding<I>? _binding;
+    private readonly ILogger _logger;
     private readonly IEndpointPipeline _pipeline;
     private string? _subscriber;
     private SqliteSubscription? _subscription;
     private Task? _listener;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    public ChimeraEventEndpoint(IEndpointPipeline pipeline)
+    public ChimeraEventEndpoint(ILogger<ChimeraEventEndpoint<I>> logger, IEndpointPipeline pipeline)
     {
+        _logger = logger;
         _pipeline = pipeline;
     }
 
@@ -63,23 +67,43 @@ public class ChimeraEventEndpoint<I> : ChimeraEventEndpoint, IEndpoint where I :
 
     public async Task Process()
     {
-        try
+        CancellationToken token = _cancellationTokenSource.Token;
+        while (!token.IsCancellationRequested)
         {
-            await foreach (EventEnvelope eventEnvelope in _subscription!.ReadAsync(_cancellationTokenSource.Token))
+            try
             {
-                try
+                await foreach (EventEnvelope eventEnvelope in _subscription!.ReadAsync(_cancellationTokenSource.Token))
                 {
-                    await Dispatch(eventEnvelope.Payload.ToArray()).ConfigureAwait(false);
-                    await _subscription.CompleteAsync(eventEnvelope).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await _subscription.FailAsync(eventEnvelope, ex.Message);
+                    try
+                    {
+                        await Dispatch(eventEnvelope.Payload.ToArray()).ConfigureAwait(false);
+                        await _subscription.CompleteAsync(eventEnvelope).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Chimera event for {Contract} failed on attempt {Attempt}",
+                            typeof(I), eventEnvelope.Attempt);
+                        await _subscription.FailAsync(eventEnvelope, ex.Message);
+                    }
                 }
             }
-        }
-        catch (OperationCanceledException)
-        {
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Chimera delivery for {Contract} failed: retrying in {Retry}",
+                    typeof(I), Retry);
+                try
+                {
+                    await Task.Delay(Retry, token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+            }
         }
     }
 
