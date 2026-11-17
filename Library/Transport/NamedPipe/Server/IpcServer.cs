@@ -50,7 +50,9 @@ internal class IpcServer : IDisposable, IIpcServer
     public string Name { get; }
 
     /// <inheritdoc/>
+#pragma warning disable VSTHRD003
     public Task Completion => this.listeningTask;
+#pragma warning restore VSTHRD003
 
     /// <summary>
     /// Gets a trace source used for logging.
