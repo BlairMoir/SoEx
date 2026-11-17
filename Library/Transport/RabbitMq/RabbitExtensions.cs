@@ -20,8 +20,9 @@ public static class RabbitExtensions
         Exception? lastFailure = null;
         for (int first = 0; first < uris.Length; first++)
         {
+            var recovery = new RecoveryConfiguration().BackOffDelayPolicy(new BackOffDelayPolicy(int.MaxValue));
             var settingsBuilder = ConnectionSettingsBuilder.Create().ContainerId(connectionName)
-                .Uris(uris).UriSelector(new RotatingUriSlector(first));
+                .Uris(uris).UriSelector(new RotatingUriSlector(first)).RecoveryConfiguration(recovery);
             var settings = settingsBuilder.Build();
             try
             {

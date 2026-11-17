@@ -27,6 +27,7 @@ public class RabbitEventEndpoint<I> : IEndpoint where I : class
     public async Task Listen()
     {
         _connection = await _binding!.ConnectAsync($"event: {typeof(I).FullName} subscriber:{_subscriber}");
+        _connection.ChangeState += ConnectionStateChanged;
         var exchangeName = typeof(I).FullName!;
         var queueName = $"{typeof(I).FullName!}_{_subscriber}";
         var deadLetterName = $"{queueName}.dead";
@@ -44,6 +45,24 @@ public class RabbitEventEndpoint<I> : IEndpoint where I : class
         await management.Binding().SourceExchange(deadLetterName).DestinationQueue(deadLetterName).Key("").BindAsync();
 
         _consumer = await _connection.ConsumerBuilder().Queue(queueName).MessageHandler(Handle).BuildAndStartAsync();
+    }
+
+    private void ConnectionStateChanged(object sender, State previous, State current, Error? failure)
+    {
+        if (current == State.Reconnecting)
+        {
+            _logger.LogWarning("Connection for {Event} subscriber {Subscriber} lost, reconnecting: {Failure}",
+                typeof(I).FullName, _subscriber, failure);
+        }else if (current == State.Open && previous == State.Reconnecting)
+        {
+            _logger.LogInformation("Connection for {Event} subscriber {Subscriber} recovered",
+                typeof(I).FullName, _subscriber);
+        }
+        else if (current == State.Closed && failure is not null)
+        {
+            _logger.LogError("Connection for {Event} subscriber {Subscriber} failed: {Failure}"
+                ,typeof(I).FullName, _subscriber, failure);
+        }
     }
 
     private async Task Handle(IContext context, IMessage message)
