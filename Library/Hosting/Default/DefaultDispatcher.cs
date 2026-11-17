@@ -4,6 +4,7 @@ using Autofac;
 using Microsoft.Extensions.Logging;
 using SoEx.Abstractions;
 using SoEx.Context;
+using SoEx.Hosting.Serializers.Common;
 using SoEx.Topology;
 
 namespace SoEx.Hosting.Default
@@ -39,22 +40,27 @@ namespace SoEx.Hosting.Default
                 {
 
                     ISubSystemHost subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
-                    using (var requestLifetime = subSystemHost.BeginRequestLifetimeScope())
+                    using (ILifetimeScope requestLifetime = subSystemHost.BeginRequestLifetimeScope())
                     {
                         IncomingFrameworkContext<I>(invocationRequest, requestLifetime);
                         IAmbientContext operationAmbientContext = requestLifetime.Resolve<IAmbientContext>();
                         FlowIncoming(_callerAmbientContext, operationAmbientContext);
 
-                        var scopeProperties = ScopeProperties(operationAmbientContext);
+                        Dictionary<string, object> scopeProperties = ScopeProperties(operationAmbientContext);
                         using (_logger.BeginScope(scopeProperties))
                         {
                             AddScopePropertiesToActivity(activity, scopeProperties);
                             I host = requestLifetime.ResolveNamed<I>("Endpoint");
-                            var method = typeof(I).GetMethod(invocationRequest.MethodName);
-                            Debug.Assert(method is not null);
-                            var parameters = method.GetParameters();
-                            var arguments = ArgumentTypes(parameters, invocationRequest.Arguments);
-                            var returnValue = method.Invoke(host, arguments);
+
+                            var method = ContractMethod.Find(typeof(I),invocationRequest.MethodName);
+                            if (method is null)
+                            {
+                                throw new MissingMethodException(typeof(I).FullName, invocationRequest.MethodName);
+                            }
+
+                            ParameterInfo[] parameters = method.GetParameters();
+                            object?[] arguments = ArgumentTypes(parameters, invocationRequest.Arguments);
+                            object? returnValue = method.Invoke(host, arguments);
                             Debug.Assert(returnValue is not null);
 
                             if (returnValue is not Task)
@@ -69,7 +75,7 @@ namespace SoEx.Hosting.Default
                             }
                             else
                             {
-                                var responseObject = await returnValue.TaskResult();
+                                object? responseObject = await returnValue.TaskResult();
                                 response = responseObject;
                             }
 
@@ -99,7 +105,7 @@ namespace SoEx.Hosting.Default
                 if(value is null)
                     continue;
 
-                var paramType = parameters[arg].ParameterType;
+                Type paramType = parameters[arg].ParameterType;
                 invocationRequestArguments[arg] = value.ToArgumentType(paramType);
             }
 
@@ -109,7 +115,7 @@ namespace SoEx.Hosting.Default
         private void IncomingFrameworkContext<I>(InvocationRequest invocationRequest, ILifetimeScope requestLifetime)
             where I : class
         {
-            var callerFrameworkContext = (FrameworkContext)_callerFrameworkContext;
+            FrameworkContext callerFrameworkContext = (FrameworkContext)_callerFrameworkContext;
             callerFrameworkContext.Deserialize(invocationRequest.FrameworkContext);
             InvocationContext invocationContext = new InvocationContext(typeof(I).FullName ?? typeof(I).Name, invocationRequest.MethodName);
             FrameworkContext operationFrameworkContext = (FrameworkContext)requestLifetime.Resolve<IFrameworkContext>();
@@ -141,7 +147,7 @@ namespace SoEx.Hosting.Default
 
         private static void AddScopePropertiesToActivity(Activity? activity, Dictionary<string, object> scopeProperties)
         {
-            foreach (var property in scopeProperties)
+            foreach (KeyValuePair<string, object> property in scopeProperties)
             {
                 activity?.AddTag(property.Key, property.Value);
             }
@@ -165,8 +171,8 @@ namespace SoEx.Hosting.Default
 
         private Dictionary<string, object> ScopeProperties(IAmbientContext invokedContext)
         {
-            var flattenedProperties = _policies.SelectMany(s => s.ScopeProperties(invokedContext));
-            var protectedProperties = flattenedProperties.ToDictionary( kvp => kvp.Key, kvp => _telemetryConfidentiality.Protect(kvp.Value, kvp.Key));
+            IEnumerable<KeyValuePair<string, object>> flattenedProperties = _policies.SelectMany(s => s.ScopeProperties(invokedContext));
+            Dictionary<string, object> protectedProperties = flattenedProperties.ToDictionary( kvp => kvp.Key, kvp => _telemetryConfidentiality.Protect(kvp.Value, kvp.Key));
             return protectedProperties;
         }
     }

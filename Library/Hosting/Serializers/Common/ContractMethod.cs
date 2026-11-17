@@ -1,15 +1,36 @@
+using System.Reflection;
 using System.Text.Json;
 
 namespace SoEx.Hosting.Serializers.Common;
 
 public static class ContractMethod
 {
+    internal static MethodInfo[] Operations(Type contract)
+    {
+        var operations = new List<MethodInfo>();
+        operations.AddRange(contract.GetMethods());
+
+        foreach (Type inherited in contract.GetInterfaces())
+        {
+            operations.AddRange(inherited.GetMethods());
+        }
+
+        return operations.ToArray();
+    }
+
+    internal static MethodInfo? Find(Type contract, string methodName)
+    {
+        MethodInfo[] operations = Operations(contract);
+        MethodInfo? operation = operations.FirstOrDefault(o => o.Name == methodName);
+        return operation;
+    }
+
     internal static Type[] ParameterTypes(Type contract, string? methodName)
     {
         if (methodName is null)
             return [];
 
-        var method = contract.GetMethod(methodName);
+        var method = Find(contract, methodName);
         if (method is null)
             return [];
 
@@ -56,7 +77,7 @@ public static class ContractMethod
         if (methodName is null)
             return null;
 
-        var method = contract.GetMethod(methodName);
+        var method = Find(contract, methodName);
         if (method is null)
             return null;
 
