@@ -8,8 +8,18 @@ public sealed class KnownTypes
 
     public KnownTypes(params Type[] knownTypes)
     {
-        var clonedTypes = (Type[])knownTypes.Clone();
-        _knownTypes = Array.AsReadOnly(clonedTypes);
+        ArgumentNullException.ThrowIfNull(knownTypes);
+
+        var uniqueTypes = new List<Type>();
+        foreach (var type in knownTypes)
+        {
+            ArgumentNullException.ThrowIfNull(type, nameof(knownTypes));
+            if (!uniqueTypes.Contains(type))
+            {
+                uniqueTypes.Add(type);
+            }
+        }
+        _knownTypes = uniqueTypes.AsReadOnly();
     }
     public IReadOnlyCollection<Type> Types => _knownTypes;
 }
