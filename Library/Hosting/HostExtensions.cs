@@ -12,6 +12,7 @@ using SoEx.Channel;
 using SoEx.Context;
 using SoEx.Endpoint;
 using SoEx.Hosting.Default;
+using SoEx.Hosting.Serializers.Common;
 using SoEx.Topology;
 using SoEx.Topology.Pipeline;
 using SoEx.Transport;
@@ -296,7 +297,7 @@ namespace SoEx.Hosting
 
         private static void ValidateEndpointContract(Binding endpoint)
         {
-            var groupedByName = endpoint.Contract.GetMethods().GroupBy( g=> g.Name).ToArray();
+            var groupedByName = ContractMethod.Operations(endpoint.Contract).GroupBy( g=> g.Name).ToArray();
             if (groupedByName.Any(a => a.Count() != 1))
             {
                 var duplicates =  groupedByName.Where(a => a.Count() > 1);
