@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace SoEx.Hosting;
+namespace SoEx.Hosting.Extensions;
 
 internal static class ContractExtensions
 {

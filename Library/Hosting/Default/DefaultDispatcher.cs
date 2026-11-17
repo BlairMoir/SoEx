@@ -4,6 +4,7 @@ using Autofac;
 using Microsoft.Extensions.Logging;
 using SoEx.Abstractions;
 using SoEx.Context;
+using SoEx.Hosting.Extensions;
 using SoEx.Topology;
 
 namespace SoEx.Hosting.Default

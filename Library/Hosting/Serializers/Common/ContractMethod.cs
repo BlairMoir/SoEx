@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using SoEx.Hosting.Extensions;
 
 namespace SoEx.Hosting.Serializers.Common;
 

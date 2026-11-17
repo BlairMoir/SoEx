@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 
-namespace SoEx.Hosting;
+namespace SoEx.Hosting.Extensions;
 
 internal static class ArgumentTypeExtensions
 {

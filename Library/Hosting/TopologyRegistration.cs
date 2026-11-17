@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -10,63 +10,17 @@ using SoEx.Channel;
 using SoEx.Context;
 using SoEx.Endpoint;
 using SoEx.Hosting.Default;
+using SoEx.Hosting.Extensions;
 using SoEx.Topology;
 using SoEx.Topology.Pipeline;
 using SoEx.Transport;
 
 namespace SoEx.Hosting
 {
-    public static class HostExtensions
+    internal static class TopologyRegistration
     {
         private static readonly ProxyGenerator s_proxyGenerator = new ProxyGenerator();
-        public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.System systemTopology)
-        {
-            return SoEx(hostApplicationBuilder, systemTopology, new KnownTypes());
-        }
-
-        public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.System systemTopology, KnownTypes knownTypes)
-        {
-            hostApplicationBuilder.ConfigureContainer(
-                new AutofacServiceProviderFactory(hostApplicationContainer =>
-                    {
-                        hostApplicationContainer.RegisterSoEx(systemTopology, knownTypes);
-                    }
-                ));
-            return hostApplicationBuilder;
-        }
-
-        public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.Host hostTopology, IPipeline? pipeline = null)
-        {
-            return SoEx(hostApplicationBuilder, hostTopology, new KnownTypes(), pipeline);
-        }
-
-        public static IHostApplicationBuilder SoEx(this IHostApplicationBuilder hostApplicationBuilder, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? pipeline = null)
-        {
-            hostApplicationBuilder.ConfigureContainer(
-                new AutofacServiceProviderFactory(hostApplicationContainer =>
-                    {
-                        hostApplicationContainer.RegisterSoEx(hostTopology, knownTypes, pipeline);
-                    }
-            ));
-            return hostApplicationBuilder;
-        }
-
-        public static ContainerBuilder RegisterSoEx(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, KnownTypes knownTypes)
-        {
-            hostApplicationContainer.RegisterBindings(systemTopology, knownTypes);
-            hostApplicationContainer.RegisterSystem(systemTopology, knownTypes);
-            return hostApplicationContainer;
-        }
-
-        public static ContainerBuilder RegisterSoEx(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? pipeline)
-        {
-            var componentPipeline = pipeline ?? new DefaultPipeline();
-            hostApplicationContainer.RegisterBindings(hostTopology, knownTypes, pipeline);
-            hostApplicationContainer.RegisterComponent(hostTopology, knownTypes, componentPipeline);
-            return hostApplicationContainer;
-        }
-
-        private static void RegisterBindings(this ContainerBuilder hostApplicationContainer,  Topology.System systemTopology, KnownTypes knownTypes)
+        internal static void RegisterBindings(this ContainerBuilder hostApplicationContainer,  Topology.System systemTopology, KnownTypes knownTypes)
         {
             var clientBindings = systemTopology.Clients
                 .Select(client => client.Service.Pipeline);
@@ -93,7 +47,7 @@ namespace SoEx.Hosting
             hostApplicationContainer.RegisterBindings(knownTypes, systemTopology.Defaults, [..clientBindings, ..endpointBindings, ..endpointClientBindings, ..componentBindings, ..componentClientBindings]);
         }
 
-        private static void RegisterBindings(this ContainerBuilder hostApplicationContainer,  Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? defaultPipeline)
+        internal static void RegisterBindings(this ContainerBuilder hostApplicationContainer,  Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? defaultPipeline)
         {
             var clientBindings = hostTopology.Proxies.Select( s=> s.Service.Pipeline);
             var endpointBindings = hostTopology.Endpoints.Select(s => s.Pipeline);
@@ -105,10 +59,10 @@ namespace SoEx.Hosting
         {
             var pipeline = defaultPipeline ?? new DefaultPipeline();
             HashSet<Type?> defaults = new HashSet<Type?>(){
-                    pipeline.Dispatcher.ImplementationType,
-                    pipeline.MessageProtection.ImplementationType,
-                    pipeline.MessageSerializer.ImplementationType
-                };
+                pipeline.Dispatcher.ImplementationType,
+                pipeline.MessageProtection.ImplementationType,
+                pipeline.MessageSerializer.ImplementationType
+            };
 
             var registerablePipelines =
                 bindingPipelines.Where(w => w is not null)
@@ -153,7 +107,7 @@ namespace SoEx.Hosting
             container.RegisterType<FrameworkContext>().As<IFrameworkContext>().InstancePerLifetimeScope();
         }
 
-        private static void RegisterSystem(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, KnownTypes knownTypes)
+        internal static void RegisterSystem(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, KnownTypes knownTypes)
         {
             var pipeline = systemTopology.Defaults ?? new DefaultPipeline();
             hostApplicationContainer.RegisterPipeline(knownTypes, pipeline);
@@ -161,7 +115,7 @@ namespace SoEx.Hosting
             hostApplicationContainer.RegisterSubSystems(systemTopology.SubSystems, pipeline);
         }
 
-        private static void RegisterComponent(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline pipeline)
+        internal static void RegisterComponent(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline pipeline)
         {
             hostApplicationContainer.RegisterPipeline(knownTypes, pipeline);
             RegisterComponentHost(hostApplicationContainer, hostTopology, pipeline);
@@ -252,8 +206,8 @@ namespace SoEx.Hosting
                 foreach (var cepc in componentEndpointContracts)
                 {
                     componentContainer.RegisterType(component.Implementation).Named("Endpoint", cepc)
-                    .EnableInterfaceInterceptors()
-                    .InterceptedBy(pipeline.ServiceInterceptors.Select( s=> s.ImplementationType).ToArray());
+                        .EnableInterfaceInterceptors()
+                        .InterceptedBy(pipeline.ServiceInterceptors.Select( s=> s.ImplementationType).ToArray());
                 }
                 RegisterProxies(componentContainer, component.Proxies);
             }

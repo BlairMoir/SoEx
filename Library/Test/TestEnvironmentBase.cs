@@ -4,6 +4,7 @@ using SoEx.Abstractions;
 using SoEx.Context;
 using SoEx.Exceptions;
 using SoEx.Hosting;
+using SoEx.Hosting.Extensions;
 using SoEx.Messaging.Chimera;
 using SoEx.Topology;
 using SoEx.Transport.Chimera;

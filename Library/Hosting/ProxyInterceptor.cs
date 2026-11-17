@@ -3,6 +3,7 @@ using Castle.DynamicProxy;
 using SoEx.Abstractions;
 using SoEx.Channel;
 using SoEx.Context;
+using SoEx.Hosting.Extensions;
 using SoEx.Topology;
 
 namespace SoEx.Hosting
