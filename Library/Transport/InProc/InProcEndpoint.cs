@@ -54,17 +54,18 @@ namespace SoEx.Transport.InProc
             return Dispatch(serializedRequest);
         }
 
-        private Task<byte[]> Dispatch(byte[] serializedRequest)
+        private async Task<byte[]> Dispatch(byte[] serializedRequest)
         {
             using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(InProcEndpoint<I>)}"))
             {
                 try
                 {
-                    return _endpointPipeLine.ServicePipeLine<I>(serializedRequest, _binding?.Pipeline, activity);
+                    return await _endpointPipeLine.ServicePipeLine<I>(serializedRequest, _binding?.Pipeline, activity)
+                        .ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, ex.Message);
+                    _logger.LogError(ex, "InProc request for {Contract} failed", typeof(I));
                     activity?.SetStatus(ActivityStatusCode.Error);
                     throw;
                 }
