@@ -31,13 +31,9 @@ namespace SoEx.Transport.Azure.ServiceBus
                 return;
 
             var config = _sbBinding.Config;
-            var options = new ServiceBusProcessorOptions()
-            {
-                MaxConcurrentCalls = config.MaxConcurrentCalls,
-            };
 
-            await StartProcessing(config.ConnectionString,
-                client => client.CreateProcessor(config.Queue, options)
+            await StartProcessing(config,
+                (client, options) => client.CreateProcessor(config.Queue, options)
                 );
         }
 

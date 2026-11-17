@@ -35,13 +35,9 @@ namespace SoEx.Transport.Azure.ServiceBus
 
             var config = _binding.Config;
             var topicName = TopicSubject.For<I>();
-            var options = new ServiceBusProcessorOptions()
-            {
-                MaxConcurrentCalls = _binding.Config.MaxConcurrentCalls,
-            };
-            await ConfigureServiceBus(config.ConnectionString, topicName);
-            await StartProcessing(config.ConnectionString,
-                    clinet => clinet.CreateProcessor(topicName, _subscriber, options)
+            await ConfigureServiceBus(config, topicName);
+            await StartProcessing(config,
+                    (client, options) => client.CreateProcessor(topicName, _subscriber, options)
                 );
         }
 
@@ -50,11 +46,14 @@ namespace SoEx.Transport.Azure.ServiceBus
             await StopProcessing();
         }
 
-        private async Task ConfigureServiceBus(string connectionString, string topicName)
+        private async Task ConfigureServiceBus(TopicConfig config, string topicName)
         {
+            if (config.Administration is null)
+                return;
+
             try
             {
-                var adminClient = new ServiceBusAdministrationClient(connectionString);
+                var adminClient = config.Administration();
                 if (!await adminClient.TopicExistsAsync(topicName))
                 {
                     await adminClient.CreateTopicAsync(topicName);

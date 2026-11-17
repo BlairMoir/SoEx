@@ -13,6 +13,7 @@ public abstract class ServiceBusEndpoint<I> where I : class
     protected abstract IBindingPipeline? BindingPipeline { get; }
     private ServiceBusClient? _client;
     private  ServiceBusProcessor? _processor;
+    private Redelivery _redelivery;
 
 
     public ServiceBusEndpoint(ILogger logger, IEndpointPipeline endpointPipeLine)
@@ -23,7 +24,21 @@ public abstract class ServiceBusEndpoint<I> where I : class
 
     private async Task MessageHandler(ProcessMessageEventArgs args)
     {
-        await Dispatch(args.Message.Body.ToArray()).ConfigureAwait(false);
+        try
+        {
+            await Dispatch(args.Message.Body.ToArray()).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Service Bus message for {Contract} failed on delivery {Delivery}",
+                typeof(I), args.Message.DeliveryCount);
+            if (_redelivery == Redelivery.Immediate)
+            {
+                await args.AbandonMessageAsync(args.Message).ConfigureAwait(false);
+            }
+            // Redelivery.AfterLockExpiry: if we don't reply Service bus will wait for lock expiry before resending.
+            return;
+        }
         await args.CompleteMessageAsync(args.Message).ConfigureAwait(false);
     }
 
@@ -33,10 +48,17 @@ public abstract class ServiceBusEndpoint<I> where I : class
         return Task.CompletedTask;
     }
 
-    protected async Task StartProcessing(string connectionString, Func<ServiceBusClient, ServiceBusProcessor> createProcessor)
+    protected async Task StartProcessing(ServiceBusConfig config, Func<ServiceBusClient, ServiceBusProcessorOptions, ServiceBusProcessor> createProcessor)
     {
-        _client = new ServiceBusClient(connectionString);
-        _processor = createProcessor(_client);
+        if (config.Processor.ReceiveMode == ServiceBusReceiveMode.ReceiveAndDelete)
+        {
+            throw new InvalidOperationException("Receive and delete will lose messages, configure as PeekLock");
+        }
+
+        config.Processor.AutoCompleteMessages = false;
+        _redelivery = config.Redelivery;
+        _client = config.Client();
+        _processor = createProcessor(_client, config.Processor);
         _processor.ProcessMessageAsync += MessageHandler;
         _processor.ProcessErrorAsync += ErrorHandler;
         await _processor.StartProcessingAsync().ConfigureAwait(false);

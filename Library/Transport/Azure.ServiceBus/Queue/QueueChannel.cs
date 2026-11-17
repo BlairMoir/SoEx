@@ -58,19 +58,19 @@ namespace SoEx.Transport.Azure.ServiceBus
         private async Task<ServiceBusSender> Sender()
         {
             Debug.Assert(_sbBinding != null);
-            var connectionString = _sbBinding.Config.ConnectionString;
-            string entity = _sbBinding.Config.Queue;
-            var sender = await _senders.Get($"{entity}|{connectionString}",
-                    () => CreateSender(connectionString, entity),
+            var config = _sbBinding.Config;
+            string entity = config.Queue;
+            var sender = await _senders.Get($"{entity}|{config.ClientKey}",
+                    () => CreateSender(config, entity),
                     c => c.IsClosed ).
                 ConfigureAwait(false);
             return sender;
         }
 
-        private async Task<ServiceBusSender> CreateSender(string connectionString, string entity)
+        private async Task<ServiceBusSender> CreateSender(ServiceBusConfig config, string entity)
         {
-            ServiceBusClient client = await _connections.Get(connectionString,
-                () => Task.FromResult(new ServiceBusClient(connectionString)),
+            ServiceBusClient client = await _connections.Get(config.ClientKey,
+                () => Task.FromResult(config.Client()),
                 c => c.IsClosed)
                 .ConfigureAwait(false) ;
             var sender = client.CreateSender(entity);
