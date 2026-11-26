@@ -11,7 +11,7 @@ namespace SoEx.Method.Conventions
 
         internal static string ComponentName(Type implementationType, string suffix, string error)
         {
-            var typeName = implementationType.Name;
+            string typeName = implementationType.Name;
             if (!typeName.EndsWith(suffix))
                 throw new ArgumentException(error);
             return typeName[..^suffix.Length];
@@ -19,18 +19,18 @@ namespace SoEx.Method.Conventions
 
         public MethodSubSystem AddManager(Type implementationType, string? subSystemName = null)
         {
-            var defaultSubSystemName = ComponentName(implementationType, Keywords.Manager,
+            string defaultSubSystemName = ComponentName(implementationType, Keywords.Manager,
                 "Entry point of a subsystem must be a manager");
-            var subSystem = AddSubSystem(subSystemName ?? defaultSubSystemName);
+            MethodSubSystem subSystem = AddSubSystem(subSystemName ?? defaultSubSystemName);
             subSystem.EntryPoint = new Topology.Host() { Implementation = implementationType, Endpoints = [], Proxies = [] };
             return subSystem;
         }
 
         public MethodSubSystem AddUtility(Type implementationType, string? subSystemName = null)
         {
-            var defaultSubSystemName = ComponentName(implementationType, Keywords.Utility,
+            string defaultSubSystemName = ComponentName(implementationType, Keywords.Utility,
                 "A utility name must end in Utility");
-            var subSystem = AddSubSystem(subSystemName ?? defaultSubSystemName);
+            MethodSubSystem subSystem = AddSubSystem(subSystemName ?? defaultSubSystemName);
             subSystem.EntryPoint = new Topology.Host() { Implementation = implementationType, Endpoints = [], Proxies = [] };
             _utilitySubsystems.Add(subSystem.Name);
             return subSystem;
@@ -61,17 +61,17 @@ namespace SoEx.Method.Conventions
         public Topology.System Build(IPipeline? defaultPipeline = null)
         {
             ThrowNullEntryPoints();
-            var managers = _methodSubSystems.Values.Where(m => !IsUtility(m)).ToArray();
-            var subscriptions = Subscriptions(managers);
+            MethodSubSystem[] managers = _methodSubSystems.Values.Where(m => !IsUtility(m)).ToArray();
+            Dictionary<string, Type[]> subscriptions = Subscriptions(managers);
             ThrowUnboundEvents(subscriptions);
 
-            var eventBindings = EventBindings(managers);
+            Dictionary<Type, Binding> eventBindings = EventBindings(managers);
             Client[] eventClients = [.. eventBindings.Values.Select(c => c.ToClient())];
             Client[] sharedUtilities = SharedUtilityClients();
 
             List<Topology.SubSystem> subSystems = new List<Topology.SubSystem>();
 
-            foreach (var subsystem in _methodSubSystems.Values)
+            foreach (MethodSubSystem subsystem in _methodSubSystems.Values)
             {
                 if (IsUtility(subsystem))
                 {
@@ -95,10 +95,10 @@ namespace SoEx.Method.Conventions
 
         private void ThrowNullEntryPoints()
         {
-            var missing = _methodSubSystems.Values.Where(s => s.EntryPoint is null).Select(s => s.Name).ToArray();
+            string[] missing = _methodSubSystems.Values.Where(s => s.EntryPoint is null).Select(s => s.Name).ToArray();
             if (missing.Any())
             {
-                var message = $"Subsystems {string.Join(", ", missing)} have no entry point";
+                string message = $"Subsystems {string.Join(", ", missing)} have no entry point";
                 throw new InvalidOperationException(message);
             }
         }
@@ -125,11 +125,11 @@ namespace SoEx.Method.Conventions
         {
             if (_eventBinding is not null)
                 return;
-            var unboundEvents = subscriptions.Values.SelectMany(e => e).Union(_events).ToArray();
+            Type[] unboundEvents = subscriptions.Values.SelectMany(e => e).Union(_events).ToArray();
             if (unboundEvents.Any())
             {
-                var message = $"Events {string.Join(", ", unboundEvents.Select(e => e.Name))} have no binding";
-                var fix = $"Define binding using {nameof(WithEvents)} before calling {nameof(Build)}";
+                string message = $"Events {string.Join(", ", unboundEvents.Select(e => e.Name))} have no binding";
+                string fix = $"Define binding using {nameof(WithEvents)} before calling {nameof(Build)}";
                 throw new InvalidOperationException($"{message} {fix}");
             }
         }
@@ -174,7 +174,7 @@ namespace SoEx.Method.Conventions
 
         private static Topology.SubSystem ComposeUtility(MethodSubSystem subsystem)
         {
-            var utilitySubsystem = Compose(subsystem, [], [], []);
+            SubSystem utilitySubsystem = Compose(subsystem, [], [], []);
             return utilitySubsystem;
         }
 
@@ -182,7 +182,7 @@ namespace SoEx.Method.Conventions
             Dictionary<Type, Binding> eventBindings, Client[] eventClients, Client[] sharedUtilities)
         {
             Binding[] subscriptions = [.. subscribedEvents.Select(e => eventBindings[e])];
-            var managerSubsystem = Compose(subSystem, subscriptions, eventClients, sharedUtilities);
+            SubSystem managerSubsystem = Compose(subSystem, subscriptions, eventClients, sharedUtilities);
             return managerSubsystem;
         }
 

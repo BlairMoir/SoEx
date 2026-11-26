@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using SoEx.Messaging.Chimera;
 using SoEx.Topology;
 
 namespace SoEx.Transport.Chimera
@@ -32,7 +33,7 @@ namespace SoEx.Transport.Chimera
                 try
                 {
                     ArgumentNullException.ThrowIfNull(_binding);
-                    var topic = _topics.For(_binding.Options, _binding.Topic);
+                    SqliteTopicLog topic = _topics.For(_binding.Options, _binding.Topic);
                     await topic.AppendAsync(invocationRequest).ConfigureAwait(false);
                     return [];
                 }

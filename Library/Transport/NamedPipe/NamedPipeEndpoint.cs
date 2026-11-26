@@ -53,8 +53,8 @@ namespace SoEx.Transport.NamedPipe
             await using (stream)
             {
                 var ss = new StreamBytes(stream);
-                var request = ss.ReadBytes();
-                var response = await DispatchAsync(request);
+                byte[] request = ss.ReadBytes();
+                byte[] response = await DispatchAsync(request);
                 ss.WriteBytes(response);
             }
         }

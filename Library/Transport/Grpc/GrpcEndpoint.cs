@@ -52,7 +52,7 @@ namespace SoEx.Transport.Grpc
 
         private async Task<byte[]> DispatchAsync(byte[] serializedRequest)
         {
-            using (var activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(GrpcEndpoint<I>)}", ActivityKind.Server))
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(GrpcEndpoint<I>)}", ActivityKind.Server))
             {
                 try
                 {

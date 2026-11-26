@@ -11,8 +11,8 @@ namespace SoEx.Transport
         {
             ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) == 1, this);
 
-            var entry = _connections.GetOrAdd(key, _ => new Lazy<Task<TConnection>>(() => Open(open)));
-            var task = entry.Value;
+            Lazy<Task<TConnection>> entry = _connections.GetOrAdd(key, _ => new Lazy<Task<TConnection>>(() => Open(open)));
+            Task<TConnection> task = entry.Value;
 
             if (Interlocked.CompareExchange(ref _disposed, 0, 0) == 1)
             {
@@ -31,7 +31,7 @@ namespace SoEx.Transport
                 return task;
 
             _ = DisposeQuietly(task.Result);
-            var replacement = _connections.GetOrAdd(key, _ => new Lazy<Task<TConnection>>(() => Open(open)));
+            Lazy<Task<TConnection>> replacement = _connections.GetOrAdd(key, _ => new Lazy<Task<TConnection>>(() => Open(open)));
             return replacement.Value;
         }
 
@@ -74,9 +74,9 @@ namespace SoEx.Transport
             if (Interlocked.Exchange(ref _disposed, 1) == 1)
                 return;
 
-            foreach (var key in _connections.Keys)
+            foreach (string key in _connections.Keys)
             {
-                if (_connections.TryRemove(key, out var entry) && entry.IsValueCreated)
+                if (_connections.TryRemove(key, out Lazy<Task<TConnection>>? entry) && entry.IsValueCreated)
                     await DisposeWhenOpen(entry.Value).ConfigureAwait(false);
             }
         }

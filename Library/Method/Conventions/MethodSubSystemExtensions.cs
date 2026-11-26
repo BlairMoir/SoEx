@@ -25,7 +25,7 @@ namespace SoEx.Method.Conventions
 
         public static MethodSubSystem AddInProcEndpoint(this MethodSubSystem subSystem, Type contract, IPipeline? customPipeline = null)
         {
-            var genericType = typeof(InProcBinding<>).MakeGenericType(contract);
+            Type genericType = typeof(InProcBinding<>).MakeGenericType(contract);
             var binding = (Binding)Activator.CreateInstance(genericType, subSystem.Name)!;
             if (customPipeline != null)
             {

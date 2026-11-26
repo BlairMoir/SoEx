@@ -40,34 +40,34 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
             if (declared.Length == 0 && returnType is null)
                 return jsonSerializerSettings;
 
-            var options = _settingsCache.GetOrAdd((contract, methodName), _ => Build(_knownTypes, declared, returnType));
+            JsonSerializerSettings options = _settingsCache.GetOrAdd((contract, methodName), _ => Build(_knownTypes, declared, returnType));
             return options;
         }
 
         public T? Deserialize<T>(byte[] payload)
         {
-            var utf8String = Encoding.UTF8.GetString(payload);
+            string utf8String = Encoding.UTF8.GetString(payload);
             return JsonConvert.DeserializeObject<T>(utf8String, jsonSerializerSettings);
         }
 
         public T? Deserialize<T>(byte[] payload, Type contractType, string? methodName)
         {
-            var resolvedMethodName = methodName ?? ContractMethod.PeekMethodName(payload);
-            var settings = SettingsFor(contractType, resolvedMethodName);
-            var utf8String = Encoding.UTF8.GetString(payload);
+            string? resolvedMethodName = methodName ?? ContractMethod.PeekMethodName(payload);
+            JsonSerializerSettings settings = SettingsFor(contractType, resolvedMethodName);
+            string utf8String = Encoding.UTF8.GetString(payload);
             return JsonConvert.DeserializeObject<T>(utf8String, settings);
         }
 
         public byte[] Serialize<T>(T? @object)
         {
-            var utf8String = JsonConvert.SerializeObject(@object, typeof(T), jsonSerializerSettings);
+            string utf8String = JsonConvert.SerializeObject(@object, typeof(T), jsonSerializerSettings);
             return Encoding.UTF8.GetBytes(utf8String);
         }
 
         public byte[] Serialize<T>(T? @object, Type contractType, string methodName)
         {
-            var settings = SettingsFor(contractType, methodName);
-            var utf8String = JsonConvert.SerializeObject(@object, typeof(T), settings);
+            JsonSerializerSettings settings = SettingsFor(contractType, methodName);
+            string utf8String = JsonConvert.SerializeObject(@object, typeof(T), settings);
             return Encoding.UTF8.GetBytes(utf8String);
         }
     }

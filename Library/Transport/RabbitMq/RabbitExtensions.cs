@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.AMQP.Client;
 using RabbitMQ.AMQP.Client.Impl;
@@ -14,16 +15,16 @@ namespace SoEx.Transport.RabbitMq
 
         public static async Task<IConnection> ConnectAsync<I>(this RabbitEventBinding<I> binding, string connectionName)
         {
-            var addresses = binding.Transport.Address.Uris;
+            ImmutableArray<Uri> addresses = binding.Transport.Address.Uris;
             Uri[] uris = [.. addresses.Select((address, node) => WithCredentials(address, binding.RabbitConfig[node])).ToArray()];
 
             Exception? lastFailure = null;
             for (int first = 0; first < uris.Length; first++)
             {
-                var recovery = new RecoveryConfiguration().BackOffDelayPolicy(new BackOffDelayPolicy(int.MaxValue));
-                var settingsBuilder = ConnectionSettingsBuilder.Create().ContainerId(connectionName)
+                IRecoveryConfiguration recovery = new RecoveryConfiguration().BackOffDelayPolicy(new BackOffDelayPolicy(int.MaxValue));
+                ConnectionSettingsBuilder settingsBuilder = ConnectionSettingsBuilder.Create().ContainerId(connectionName)
                     .Uris(uris).UriSelector(new RotatingUriSlector(first)).RecoveryConfiguration(recovery);
-                var settings = settingsBuilder.Build();
+                ConnectionSettings settings = settingsBuilder.Build();
                 try
                 {
                     return await AmqpConnection.CreateAsync(settings);
@@ -49,7 +50,7 @@ namespace SoEx.Transport.RabbitMq
             private int _next = first;
             public Uri Select(ICollection<Uri> uris)
             {
-                var index = (Interlocked.Increment(ref _next) - 1) % uris.Count;
+                int index = (Interlocked.Increment(ref _next) - 1) % uris.Count;
                 return uris.ElementAt(index);
             }
         }

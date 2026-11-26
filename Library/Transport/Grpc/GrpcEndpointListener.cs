@@ -40,7 +40,7 @@ namespace SoEx.Transport.Grpc
 
         internal void Bind(ImmutableArray<GrpcConfig> configs)
         {
-            foreach (var config in configs)
+            foreach (GrpcConfig config in configs)
             {
                 Bind(config);
             }
@@ -49,7 +49,7 @@ namespace SoEx.Transport.Grpc
         private void Bind(GrpcConfig config)
         {
             var listenAddress = ListenAddress.From(config);
-            if (_listenEndpoints.TryGetValue(listenAddress, out var protection))
+            if (_listenEndpoints.TryGetValue(listenAddress, out GrpcProtection? protection))
             {
                 if (!protection.Equals(config.Protection))
                     throw new InvalidOperationException($"Protection {config.Protection} does not match protection {protection} for {listenAddress}");
@@ -57,7 +57,7 @@ namespace SoEx.Transport.Grpc
                 return;
             }
 
-            var existing = _listenEndpoints.Keys.FirstOrDefault(k => k.ConflictsWith(listenAddress));
+            ListenAddress? existing = _listenEndpoints.Keys.FirstOrDefault(k => k.ConflictsWith(listenAddress));
             if (existing is not null)
             {
                 throw new InvalidOperationException($"Listen address {listenAddress} conflicts with {existing}");
@@ -74,11 +74,11 @@ namespace SoEx.Transport.Grpc
         {
             if (_listener is null)
             {
-                var builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions());
+                WebApplicationBuilder builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions());
                 builder.WebHost.UseKestrelCore();
                 builder.WebHost.ConfigureKestrel(ConfigureKestrel);
                 builder.Services.AddGrpc();
-                foreach (var provider in _dispatchProviders)
+                foreach (IServiceMethodProvider<GrpcEndpointService> provider in _dispatchProviders)
                 {
                     builder.Services.AddSingleton<IServiceMethodProvider<GrpcEndpointService>>(provider);
                 }
@@ -99,7 +99,7 @@ namespace SoEx.Transport.Grpc
 
         private void ConfigureKestrel(KestrelServerOptions k)
         {
-            foreach (var (address, protection) in _listenEndpoints)
+            foreach ((ListenAddress? address, GrpcProtection? protection) in _listenEndpoints)
             {
                 if (address is ListenAddress.Any any)
                 {

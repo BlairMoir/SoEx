@@ -36,7 +36,7 @@ namespace SoEx.Hosting
         {
             List<Task> startupTasks = new List<Task>();
             _logger.LogDebug("The host has started, attempting to start listeners");
-            foreach (var endpoint in _registeredEndpoints.Endpoints)
+            foreach (IEndpoint endpoint in _registeredEndpoints.Endpoints)
             {
                 startupTasks.Add(Listen(endpoint));
             }
@@ -48,7 +48,7 @@ namespace SoEx.Hosting
         {
             List<Task> shutdownTasks = new List<Task>();
             _logger.LogDebug("The host has requested shutdown, attempting to close listeners");
-            foreach (var endpoint in _registeredEndpoints.Endpoints)
+            foreach (IEndpoint endpoint in _registeredEndpoints.Endpoints)
             {
                 try
                 {

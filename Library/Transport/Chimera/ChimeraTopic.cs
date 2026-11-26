@@ -11,13 +11,13 @@ namespace SoEx.Transport.Chimera
         {
             string path = Path.GetFullPath(options.RootDirectory);
             string identifier = $"{path}|{topic}";
-            var logTopic = topics.GetOrAdd(identifier, _ => SqliteTopicLog.Open(topic, options));
+            SqliteTopicLog logTopic = topics.GetOrAdd(identifier, _ => SqliteTopicLog.Open(topic, options));
             return logTopic;
         }
 
         public async ValueTask DisposeAsync()
         {
-            foreach (var topic in topics)
+            foreach (KeyValuePair<string, SqliteTopicLog> topic in topics)
             {
                 topics.TryRemove(topic.Key, out _);
                 await topic.Value.DisposeAsync();

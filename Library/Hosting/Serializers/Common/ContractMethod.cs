@@ -11,11 +11,11 @@ namespace SoEx.Hosting.Serializers.Common
             if (methodName is null)
                 return [];
 
-            var method = contract.Find(methodName);
+            MethodInfo? method = contract.Find(methodName);
             if (method is null)
                 return [];
 
-            var parameterTypes = method.GetParameters().Select(s => s.ParameterType).ToArray();
+            Type[] parameterTypes = method.GetParameters().Select(s => s.ParameterType).ToArray();
             return parameterTypes;
         }
 
@@ -58,7 +58,7 @@ namespace SoEx.Hosting.Serializers.Common
             if (methodName is null)
                 return null;
 
-            var method = contract.Find(methodName);
+            MethodInfo? method = contract.Find(methodName);
             if (method is null)
                 return null;
 

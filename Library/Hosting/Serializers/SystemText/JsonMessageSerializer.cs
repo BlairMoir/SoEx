@@ -68,7 +68,7 @@ namespace SoEx.Hosting.Serializers.SystemText
             if (info.Kind != JsonTypeInfoKind.Object)
                 return;
 
-            var derived = knownTypes.Where(t => t != info.Type && info.Type.IsAssignableFrom(t)).ToArray();
+            Type[] derived = knownTypes.Where(t => t != info.Type && info.Type.IsAssignableFrom(t)).ToArray();
 
             if (derived.Length == 0)
                 return;
@@ -80,7 +80,7 @@ namespace SoEx.Hosting.Serializers.SystemText
                 UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization
             };
 
-            foreach (var type in derived)
+            foreach (Type? type in derived)
             {
                 info.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(type, type.FullName!));
             }
@@ -97,7 +97,7 @@ namespace SoEx.Hosting.Serializers.SystemText
             if (declared.Length == 0 && returnType is null)
                 return _options;
 
-            var options = _optionCache.GetOrAdd((contract, methodName), _ => Build(_knownTypes, declared, returnType));
+            JsonSerializerOptions options = _optionCache.GetOrAdd((contract, methodName), _ => Build(_knownTypes, declared, returnType));
             return options;
         }
 
@@ -108,8 +108,8 @@ namespace SoEx.Hosting.Serializers.SystemText
 
         public T? Deserialize<T>(byte[] payload, Type contractType, string? methodName)
         {
-            var resolvedMethodName = methodName ?? ContractMethod.PeekMethodName(payload);
-            var options = OptionsFor(contractType, resolvedMethodName);
+            string? resolvedMethodName = methodName ?? ContractMethod.PeekMethodName(payload);
+            JsonSerializerOptions options = OptionsFor(contractType, resolvedMethodName);
             return JsonSerializer.Deserialize<T>(payload, options);
         }
 
@@ -120,7 +120,7 @@ namespace SoEx.Hosting.Serializers.SystemText
 
         public byte[] Serialize<T>(T? @object, Type contractType, string methodName)
         {
-            var options = OptionsFor(contractType, methodName);
+            JsonSerializerOptions options = OptionsFor(contractType, methodName);
             return JsonSerializer.SerializeToUtf8Bytes(@object, options);
         }
     }

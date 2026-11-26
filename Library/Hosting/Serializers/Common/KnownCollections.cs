@@ -6,13 +6,13 @@ namespace SoEx.Hosting.Serializers.Common
 
         public static IEnumerable<Type> For(IReadOnlyCollection<Type> types)
         {
-            foreach (var type in types)
+            foreach (Type type in types)
             {
                 if (type.FullName is null)
                     continue;
 
-                var collectionTypes = For(type);
-                foreach (var collectionType in collectionTypes)
+                IEnumerable<Type> collectionTypes = For(type);
+                foreach (Type collectionType in collectionTypes)
                 {
                     yield return collectionType;
                 }
@@ -24,7 +24,7 @@ namespace SoEx.Hosting.Serializers.Common
             yield return type.MakeArrayType();
             yield return typeof(List<>).MakeGenericType(type);
             yield return typeof(HashSet<>).MakeGenericType(type);
-            foreach (var keyType in KeyTypes)
+            foreach (Type keyType in KeyTypes)
             {
                 yield return typeof(Dictionary<,>).MakeGenericType(keyType, type);
             }

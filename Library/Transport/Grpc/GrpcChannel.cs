@@ -39,7 +39,7 @@ namespace SoEx.Transport.Grpc
                     long now = Environment.TickCount64;
                     Uri[] uris = _grpcBinding.Transport.Address.Uris
                         .OrderBy(u => HasFailures(u, now)).ToArray();
-                    foreach (var uri in uris[..^1])
+                    foreach (Uri uri in uris[..^1])
                     {
                         try
                         {
@@ -62,7 +62,7 @@ namespace SoEx.Transport.Grpc
 
         static bool HasFailures(Uri uri, long now)
         {
-            if (!s_lastFailure.TryGetValue(uri, out var failedAt))
+            if (!s_lastFailure.TryGetValue(uri, out long failedAt))
                 return false;
 
             if (now - failedAt < FailureMemoryMillis)
@@ -76,9 +76,9 @@ namespace SoEx.Transport.Grpc
             activity?.SetTag("server.address", uri.ToString());
             try
             {
-                using (var call = InvokeGrpcCall(uri, payload))
+                using (AsyncUnaryCall<byte[]> call = InvokeGrpcCall(uri, payload))
                 {
-                    var result = await call.ResponseAsync.ConfigureAwait(false);
+                    byte[] result = await call.ResponseAsync.ConfigureAwait(false);
                     ClearFailure(uri);
                     return result;
                 }
@@ -103,9 +103,9 @@ namespace SoEx.Transport.Grpc
 
         private AsyncUnaryCall<byte[]> InvokeGrpcCall(Uri uri, byte[] payload)
         {
-            var grpcChannel = GrpcClientChannel(uri);
-            var callInvoker = grpcChannel.CreateCallInvoker();
-            var call = callInvoker.AsyncUnaryCall(GrpcInvoke<I>.Descriptor, host: null, new CallOptions(), payload);
+            GrpcClient grpcChannel = GrpcClientChannel(uri);
+            CallInvoker callInvoker = grpcChannel.CreateCallInvoker();
+            AsyncUnaryCall<byte[]> call = callInvoker.AsyncUnaryCall(GrpcInvoke<I>.Descriptor, host: null, new CallOptions(), payload);
             return call;
         }
 

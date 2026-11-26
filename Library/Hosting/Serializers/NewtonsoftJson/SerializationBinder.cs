@@ -16,7 +16,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
         public void BindToName(Type serializedType, out string? assemblyName, out string? typeName)
         {
             assemblyName = null;
-            if (_registry.TryGetDiscriminator(serializedType, out var discriminator))
+            if (_registry.TryGetDiscriminator(serializedType, out string? discriminator))
             {
                 typeName = discriminator;
                 return;
@@ -28,7 +28,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 
         public Type BindToType(string? assemblyName, string typeName)
         {
-            if (_registry.TryGetType(typeName, out var type))
+            if (_registry.TryGetType(typeName, out Type? type))
                 return type;
 
             throw new JsonSerializationException(

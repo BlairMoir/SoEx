@@ -20,9 +20,9 @@ namespace SoEx.Transport.RabbitMq
             {
                 try
                 {
-                    var publisher = await CurrentPublisher();
+                    Publisher publisher = await CurrentPublisher();
                     await WhileReconnectiong(publisher.Sender);
-                    var result = await publisher.Sender.PublishAsync(new AmqpMessage(invocationRequest).Durable(true));
+                    PublishResult result = await publisher.Sender.PublishAsync(new AmqpMessage(invocationRequest).Durable(true));
 
                     if (result.Outcome.State == OutcomeState.Accepted)
                         return [];
@@ -44,9 +44,9 @@ namespace SoEx.Transport.RabbitMq
 
         private async Task<Publisher> CurrentPublisher()
         {
-            var shared = _shared!;
-            var lazyPublisher = shared.Publisher;
-            var currentPublisher = lazyPublisher?.Value;
+            SharedPublisher shared = _shared!;
+            Lazy<Task<Publisher>>? lazyPublisher = shared.Publisher;
+            Task<Publisher>? currentPublisher = lazyPublisher?.Value;
             if (currentPublisher is not null && currentPublisher.IsCompletedSuccessfully && currentPublisher.Result.Sender.State != State.Closed)
                 return currentPublisher.Result;
 
@@ -68,7 +68,7 @@ namespace SoEx.Transport.RabbitMq
 
         private static async Task WhileReconnectiong(IPublisher sender)
         {
-            var deadline = DateTime.UtcNow + s_reconectWait;
+            DateTime deadline = DateTime.UtcNow + s_reconectWait;
             while (sender.State == State.Reconnecting && DateTime.UtcNow < deadline)
             {
                 await Task.Delay(100);
@@ -77,10 +77,10 @@ namespace SoEx.Transport.RabbitMq
 
         private async Task<Publisher> Open()
         {
-            var connection = await _binding!.ConnectAsync($"event:{typeof(I).FullName} publisher");
+            IConnection connection = await _binding!.ConnectAsync($"event:{typeof(I).FullName} publisher");
             try
             {
-                var sender = await connection.PublisherBuilder().Exchange(typeof(I).FullName!).Key("").BuildAsync();
+                IPublisher sender = await connection.PublisherBuilder().Exchange(typeof(I).FullName!).Key("").BuildAsync();
                 return new Publisher(connection, sender);
             }
             catch
@@ -102,7 +102,7 @@ namespace SoEx.Transport.RabbitMq
 
         private static string Key(RabbitEventBinding<I> binding)
         {
-            var credentials = binding.RabbitConfig.Select(config => $"{config.UserName}|{config.Password}");
+            IEnumerable<string> credentials = binding.RabbitConfig.Select(config => $"{config.UserName}|{config.Password}");
             return $"{string.Join(",", binding.Transport.Address.Uris)}|{string.Join(", ", credentials)}";
         }
 

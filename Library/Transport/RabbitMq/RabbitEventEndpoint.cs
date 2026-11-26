@@ -28,11 +28,11 @@ namespace SoEx.Transport.RabbitMq
         {
             _connection = await _binding!.ConnectAsync($"event: {typeof(I).FullName} subscriber:{_subscriber}");
             _connection.ChangeState += ConnectionStateChanged;
-            var exchangeName = typeof(I).FullName!;
-            var queueName = $"{typeof(I).FullName!}_{_subscriber}";
-            var deadLetterName = $"{queueName}.dead";
+            string exchangeName = typeof(I).FullName!;
+            string queueName = $"{typeof(I).FullName!}_{_subscriber}";
+            string deadLetterName = $"{queueName}.dead";
 
-            var management = _connection.Management();
+            IManagement management = _connection.Management();
             await management.Exchange(exchangeName).Type(ExchangeType.FANOUT).DeclareAsync();
             await management.Exchange(deadLetterName).Type(ExchangeType.FANOUT).DeclareAsync();
             await management.Queue(deadLetterName).Type(QueueType.QUORUM).DeclareAsync();
@@ -75,7 +75,7 @@ namespace SoEx.Transport.RabbitMq
             }
             catch (Exception ex)
             {
-                var attempt = message.DeliveryCount() + 1;
+                uint attempt = message.DeliveryCount() + 1;
                 if (attempt < _maxDeliveryAttempts)
                 {
                     _logger.LogWarning(ex, "Handler for {Event} failed attempt {Attempt} of {MaxDeliveryAttempts}",

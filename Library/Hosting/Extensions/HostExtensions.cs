@@ -50,7 +50,7 @@ namespace SoEx.Hosting
 
         public static ContainerBuilder RegisterSoEx(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? pipeline)
         {
-            var componentPipeline = pipeline ?? new DefaultPipeline();
+            IPipeline componentPipeline = pipeline ?? new DefaultPipeline();
             hostApplicationContainer.RegisterBindings(hostTopology, knownTypes, pipeline);
             hostApplicationContainer.RegisterComponent(hostTopology, knownTypes, componentPipeline);
             return hostApplicationContainer;

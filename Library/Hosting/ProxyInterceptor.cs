@@ -27,7 +27,7 @@ namespace SoEx.Hosting
 
         public void Intercept(IInvocation invocation)
         {
-            var returnType = invocation.Method.ReturnType;
+            Type returnType = invocation.Method.ReturnType;
             if (
                 returnType != typeof(Task) &&
                 !(returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>)))
@@ -46,7 +46,7 @@ namespace SoEx.Hosting
                 {
                     IChannel channel = _transportFactory.Client(_contract) as IChannel ?? throw new NullReferenceException();
                     var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, AmbientContext = _ambientContext.Serialize(), FrameworkContext = _frameworkContext.Serialize() };
-                    var invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
+                    InvocationResponse invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
                     _ambientContext.Deserialize(invocationResponse.AmbientContext);
                 }
                 catch
@@ -64,7 +64,7 @@ namespace SoEx.Hosting
                 {
                     IChannel channel = _transportFactory.Client(_contract) as IChannel ?? throw new NullReferenceException();
                     var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, HasResult = true, AmbientContext = _ambientContext.Serialize(), FrameworkContext = _frameworkContext.Serialize() };
-                    var invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
+                    InvocationResponse invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
                     _ambientContext.Deserialize(invocationResponse.AmbientContext);
                     return invocationResponse.Response.ToResponseType<TResult>()!;
                 }

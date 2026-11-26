@@ -70,7 +70,7 @@ namespace SoEx.Hosting.Serializers.InProcReference
 
         private static void Sweep(long now)
         {
-            foreach (var (id, entry) in References)
+            foreach ((Guid id, (object? Value, long Timestamp) entry) in References)
             {
                 if (now - entry.Timestamp > s_ttl)
                 {
@@ -81,7 +81,7 @@ namespace SoEx.Hosting.Serializers.InProcReference
 
         public T? Take<T>(byte[] bytes)
         {
-            if (bytes.Length != 16 || !References.TryRemove(new Guid(@bytes), out var reference))
+            if (bytes.Length != 16 || !References.TryRemove(new Guid(@bytes), out (object? Value, long Timestamp) reference))
                 throw new InvalidOperationException("Reference payload not found");
             return (T?)reference.Value;
         }

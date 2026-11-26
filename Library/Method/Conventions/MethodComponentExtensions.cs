@@ -25,7 +25,7 @@ namespace SoEx.Method.Conventions
 
         public static MethodComponent AddInProcEndpoint(this MethodComponent component, Type contract)
         {
-            var genericType = typeof(InProcBinding<>).MakeGenericType(contract);
+            Type genericType = typeof(InProcBinding<>).MakeGenericType(contract);
             var binding = (Binding)Activator.CreateInstance(genericType, component.SubSystem)!;
             component.AddEndpoints([binding]);
             return component;

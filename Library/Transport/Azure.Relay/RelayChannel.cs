@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using Microsoft.Azure.Relay;
 using SoEx.Abstractions;
 using SoEx.Topology;
 
@@ -35,9 +36,9 @@ namespace SoEx.Transport.Azure.Relay
                 try
                 {
                     Debug.Assert(_relayBinding is not null);
-                    var tokenProvider = _relayBinding.CreateTokenProvider();
+                    TokenProvider tokenProvider = _relayBinding.CreateTokenProvider();
                     var uri = new Uri(_relayBinding.Transport.Address.Uri.OriginalString.Replace("sb://", "https://"));
-                    var token = tokenProvider.GetTokenAsync(uri.AbsoluteUri, TimeSpan.FromHours(1)).Result.TokenString;
+                    string token = tokenProvider.GetTokenAsync(uri.AbsoluteUri, TimeSpan.FromHours(1)).Result.TokenString;
 
                     var httpRequest = new HttpRequestMessage()
                     {
@@ -46,9 +47,9 @@ namespace SoEx.Transport.Azure.Relay
                         Content = new ByteArrayContent(payload)
                     };
                     httpRequest.Headers.Add("ServiceBusAuthorization", token);
-                    var response = await _httpClient.SendAsync(httpRequest).ConfigureAwait(false);
+                    HttpResponseMessage response = await _httpClient.SendAsync(httpRequest).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
-                    var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                    byte[] responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                     return responseBytes;
                 }
                 catch

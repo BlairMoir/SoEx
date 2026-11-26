@@ -29,7 +29,7 @@ namespace SoEx.Transport.Grpc
             }
 
             List<Uri> uriList = new List<Uri>();
-            foreach (var configItem in config)
+            foreach (GrpcConfig configItem in config)
             {
                 string addressScheme = configItem.Protection switch
                 {

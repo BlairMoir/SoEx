@@ -30,7 +30,7 @@ namespace SoEx.Transport.Azure.ServiceBus
             if (_sbBinding is null)
                 return;
 
-            var config = _sbBinding.Config;
+            QueueConfig config = _sbBinding.Config;
 
             await StartProcessing(config,
                 (client, options) => client.CreateProcessor(config.Queue, options)

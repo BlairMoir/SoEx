@@ -17,7 +17,7 @@ namespace SoEx.Test
 
         public async Task Proxy<I>(Func<I, Task> callerFunc) where I : notnull
         {
-            using (var scope = _container.BeginLifetimeScopeAsyncLocal())
+            using (ILifetimeScope scope = _container.BeginLifetimeScopeAsyncLocal())
             {
                 await callerFunc.Invoke(scope.Resolve<I>());
             }
@@ -25,7 +25,7 @@ namespace SoEx.Test
 
         public async Task<TResult> Proxy<I, TResult>(Func<I, Task<TResult>> callerFunc) where I : notnull
         {
-            using (var scope = _container.BeginLifetimeScopeAsyncLocal())
+            using (ILifetimeScope scope = _container.BeginLifetimeScopeAsyncLocal())
             {
                 return await callerFunc.Invoke(scope.Resolve<I>());
             }
@@ -37,13 +37,13 @@ namespace SoEx.Test
                 return;
 
             timeout ??= TimeSpan.FromSeconds(10);
-            var deadline = DateTime.UtcNow + timeout;
+            DateTime? deadline = DateTime.UtcNow + timeout;
             int quietReads = 0;
 
 
             while (true)
             {
-                var chimeraOverview = ChimeraInspector.Overview(_chimeraOptions);
+                ChimeraOverview chimeraOverview = ChimeraInspector.Overview(_chimeraOptions);
                 quietReads = chimeraOverview.Settled ? quietReads + 1 : 0;
                 if (quietReads == 2)
                 {
@@ -69,7 +69,7 @@ namespace SoEx.Test
 
         private static string Describe(string message, IEnumerable<SubscriberActivity> activities, Func<SubscriberActivity, bool> filter)
         {
-            var failures = activities.Where(filter).Select(a =>
+            IEnumerable<string> failures = activities.Where(filter).Select(a =>
                 $"{a.Subscriber} on {a.Topic}: behind {a.Behind}, in flight {a.InFlight}, " +
                 $"awaiting retry {a.AwaitingRetry}, dead lettered {a.DeadLettered}");
 

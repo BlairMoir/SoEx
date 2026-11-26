@@ -113,7 +113,7 @@ namespace SoEx.Transport.NATS
             try
             {
                 Debug.Assert(msg.Data is not null);
-                var dispatchResult = await Dispatch(msg.Data);
+                byte[] dispatchResult = await Dispatch(msg.Data);
                 await msg.ReplyAsync(dispatchResult);
             }
             catch (Exception ex)

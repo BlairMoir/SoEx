@@ -23,7 +23,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            var values = (object?[]?)value;
+            object?[]? values = (object?[]?)value;
             if (values == null)
             {
                 writer.WriteNull();
@@ -52,7 +52,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
                 return null;
 
             JArray array = JArray.Load(reader);
-            var arguments = new object?[array.Count];
+            object?[] arguments = new object?[array.Count];
             for (int argument = 0; argument < array.Count; argument++)
             {
                 arguments[argument] = array[argument].ToObject(TargetOf(argument), serializer);

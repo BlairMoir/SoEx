@@ -29,7 +29,7 @@ namespace SoEx.Transport.InProc
         private static void SharedInProcListeners(IServiceCollection[] serviceCollections)
         {
             var inProcListeners = new InProcListeners();
-            foreach (var sc in serviceCollections)
+            foreach (IServiceCollection sc in serviceCollections)
             {
                 sc.AddTransient(typeof(InProcChannel<>), typeof(InProcChannel<>));
                 sc.AddSingleton(typeof(InProcListeners), inProcListeners);

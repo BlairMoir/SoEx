@@ -79,7 +79,7 @@ namespace SoEx.Transport.NamedPipe
             await using (stream)
             {
                 var ss = new StreamBytes(stream);
-                var request = ss.ReadBytes();
+                byte[] request = ss.ReadBytes();
                 await _channel.Writer.WriteAsync(request);
             }
         }

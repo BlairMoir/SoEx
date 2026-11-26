@@ -33,7 +33,7 @@ namespace SoEx.Endpoint
                 Type protectorType = pipeline?.MessageProtection.ImplementationType ?? typeof(IMessageProtection);
 
                 Parameter[] protectionOptionsParameter = [];
-                var protectionOptions = pipeline?.MessageProtection.Options;
+                object? protectionOptions = pipeline?.MessageProtection.Options;
                 if (protectionOptions is not null)
                 {
                     protectionOptionsParameter = [new TypedParameter(protectionOptions.GetType(), protectionOptions)];
@@ -41,7 +41,7 @@ namespace SoEx.Endpoint
 
                 Abstractions.Protection.MessageContext
                     protectionContext = new MessageContext() { Contract = typeof(I) };
-                var subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
+                ISubSystemHost subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
                 using (Autofac.ILifetimeScope requestScope = subSystemHost.BeginRequestLifetimeScope())
                 {
                     var dispatcher = (IDispatcher)requestScope.Resolve(dispatcherType);
@@ -53,7 +53,7 @@ namespace SoEx.Endpoint
                     using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(EndpointPipeline)}", ActivityKind.Server, request?.ActivityId))
                     {
                         Debug.Assert(request is not null);
-                        var response = await dispatcher.Dispatch<I>(request);
+                        InvocationResponse response = await dispatcher.Dispatch<I>(request);
                         byte[] serializedResponse = serializer.Serialize(response, typeof(I), request.MethodName);
                         byte[] protectedResponse = await protector.Protect(serializedResponse, protectionContext);
                         return protectedResponse;

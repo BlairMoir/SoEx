@@ -52,7 +52,7 @@ namespace SoEx.Hosting.Default
                             AddScopePropertiesToActivity(activity, scopeProperties);
                             I host = requestLifetime.ResolveNamed<I>("Endpoint");
 
-                            var method = typeof(I).Find(invocationRequest.MethodName);
+                            MethodInfo? method = typeof(I).Find(invocationRequest.MethodName);
                             if (method is null)
                             {
                                 throw new MissingMethodException(typeof(I).FullName, invocationRequest.MethodName);
@@ -129,7 +129,7 @@ namespace SoEx.Hosting.Default
             {
                 if (callerFrameworkContext.Contains<EntryContext>())
                 {
-                    var previousEntryInvocationContext = callerFrameworkContext.Get<EntryContext>().Entry;
+                    InvocationContext previousEntryInvocationContext = callerFrameworkContext.Get<EntryContext>().Entry;
                     operationFrameworkContext.SetOrReplace(new PreviousEntryContext(previousEntryInvocationContext));
                 }
                 operationFrameworkContext.SetOrReplace(new EntryContext(invocationContext));
@@ -139,7 +139,7 @@ namespace SoEx.Hosting.Default
         private static async Task<object> Convert(Task task)
         {
             await task;
-            var property = task.GetType().GetProperty("Result", BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo? property = task.GetType().GetProperty("Result", BindingFlags.Public | BindingFlags.Instance);
             if (property == null)
                 throw new InvalidOperationException("Task does not have a return value (" + task.GetType().ToString() + ")");
             return property.GetValue(task) ?? throw new InvalidOperationException("Result property is null");

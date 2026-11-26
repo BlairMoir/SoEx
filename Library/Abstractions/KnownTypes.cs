@@ -11,7 +11,7 @@ namespace SoEx.Abstractions
             ArgumentNullException.ThrowIfNull(knownTypes);
 
             var uniqueTypes = new List<Type>();
-            foreach (var type in knownTypes)
+            foreach (Type type in knownTypes)
             {
                 ArgumentNullException.ThrowIfNull(type, nameof(knownTypes));
                 if (!uniqueTypes.Contains(type))

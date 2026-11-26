@@ -16,7 +16,7 @@ namespace SoEx.Protection.Jose
 
         public static string Text(ReadOnlySpan<byte> envelope)
         {
-            foreach (var b in envelope)
+            foreach (byte b in envelope)
             {
                 if (b > 0x7F)
                 {

@@ -17,10 +17,10 @@ namespace SoEx.Hosting.Serializers.DataContract
             Register(typeof(EntryContext), DtoName(typeof(EntryContext)));
             Register(typeof(PreviousEntryContext), DtoName(typeof(PreviousEntryContext)));
 
-            foreach (var type in knownTypes)
+            foreach (Type type in knownTypes)
                 Register(type, DtoName(type));
 
-            foreach (var type in KnownCollections.For(knownTypes))
+            foreach (Type type in KnownCollections.For(knownTypes))
                 Register(type, CollectionName(type));
         }
 
@@ -29,7 +29,7 @@ namespace SoEx.Hosting.Serializers.DataContract
             if (name is null || !_fromType.TryAdd(type, name))
                 return;
 
-            if (!_toType.TryGetValue(name.Namespace, out var inner))
+            if (!_toType.TryGetValue(name.Namespace, out Dictionary<string, Type>? inner))
                 _toType[name.Namespace] = inner = new();
 
             inner.TryAdd(name.Name, type);
@@ -45,16 +45,16 @@ namespace SoEx.Hosting.Serializers.DataContract
             if (!type.IsGenericType)
                 return type.Name;
 
-            var definition = type.Name[..type.Name.IndexOf('`')];
+            string definition = type.Name[..type.Name.IndexOf('`')];
             return definition + "Of" + string.Concat(type.GetGenericArguments().Select(XmlName));
         }
 
         private static NameAndNamespace CollectionName(Type type)
         {
-            var args = type.IsArray ? new[] { type.GetElementType()! } : type.GetGenericArguments();
-            var element = string.Join("__", args.Select(a => a.FullName));
+            Type[] args = type.IsArray ? new[] { type.GetElementType()! } : type.GetGenericArguments();
+            string element = string.Join("__", args.Select(a => a.FullName));
 
-            var prefix = type.IsArray ? "Array"
+            string prefix = type.IsArray ? "Array"
                        : type.GetGenericTypeDefinition() == typeof(List<>) ? "List"
                        : type.GetGenericTypeDefinition() == typeof(HashSet<>) ? "HashSet"
                        : "Dictionary";
@@ -62,7 +62,7 @@ namespace SoEx.Hosting.Serializers.DataContract
             return new NameAndNamespace { Name = $"{prefix}__{element}", Namespace = CollectionNamespace };
         }
 
-        public bool Contains(string name, string ns) => _toType.TryGetValue(ns, out var inner) && inner.ContainsKey(name);
+        public bool Contains(string name, string ns) => _toType.TryGetValue(ns, out Dictionary<string, Type>? inner) && inner.ContainsKey(name);
         public bool Contains(Type type) => _fromType.ContainsKey(type);
         public Type Convert(string name, string ns) => _toType[ns][name];
         public NameAndNamespace Convert(Type type) => _fromType[type];

@@ -59,8 +59,8 @@ namespace SoEx.Test
 
         public async Task TestComponent<I>(Func<I, Task> callerFunc, SoEx.Topology.System? system = null, KnownTypes? knownTypes = null) where I : class
         {
-            var orginalTopo = system ?? _topology;
-            var subsystemName = orginalTopo.SubSystems.First().Name;
+            Topology.System orginalTopo = system ?? _topology;
+            string subsystemName = orginalTopo.SubSystems.First().Name;
             var newTopo = new SoEx.Topology.System()
             {
                 SubSystems = orginalTopo.SubSystems,
@@ -77,8 +77,8 @@ namespace SoEx.Test
                 Path.Combine(Path.GetTempPath(), "soex-test-events", Guid.NewGuid().ToString("N"));
             try
             {
-                var topology = UniqueEventsDirectory(system ?? _topology, eventDirectory);
-                using (var container = BuildContainer(topology, knownTypes))
+                Topology.System topology = UniqueEventsDirectory(system ?? _topology, eventDirectory);
+                using (ILifetimeScope container = BuildContainer(topology, knownTypes))
                 {
                     await Invoke(systemFunc, container);
                 }
@@ -94,10 +94,10 @@ namespace SoEx.Test
 
         private async Task Invoke(Func<SystemHarness, Task> systemFunc, ILifetimeScope container)
         {
-            var endpointRegister = container.Resolve<RegisteredEndpoints>();
-            var topics = container.Resolve<ChimeraTopic>();
+            RegisteredEndpoints endpointRegister = container.Resolve<RegisteredEndpoints>();
+            ChimeraTopic topics = container.Resolve<ChimeraTopic>();
             ChimeraOptions? options = null;
-            foreach (var endpoint in endpointRegister.Endpoints)
+            foreach (IEndpoint endpoint in endpointRegister.Endpoints)
             {
                 if (endpoint is ChimeraEventEndpoint chimeraEventEndpoint
                     && chimeraEventEndpoint.ChimeraOptions is not null
@@ -119,7 +119,7 @@ namespace SoEx.Test
             }
             finally
             {
-                foreach (var endpoint in endpointRegister.Endpoints)
+                foreach (IEndpoint endpoint in endpointRegister.Endpoints)
                 {
                     await endpoint.Close();
                 }
@@ -149,13 +149,13 @@ namespace SoEx.Test
 
             if (_generics is not null)
             {
-                foreach (var type in _generics)
+                foreach (Type type in _generics)
                 {
                     builder.RegisterGeneric(type).As(type);
                 }
             }
 
-            var scope = builder.Build();
+            IContainer scope = builder.Build();
             return scope;
         }
 

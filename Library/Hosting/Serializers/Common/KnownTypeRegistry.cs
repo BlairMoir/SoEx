@@ -14,10 +14,10 @@ namespace SoEx.Hosting.Serializers.Common
             Register(typeof(EntryContext));
             Register(typeof(PreviousEntryContext));
 
-            foreach (var type in knownTypes)
+            foreach (Type type in knownTypes)
                 Register(type);
 
-            foreach (var type in KnownCollections.For(knownTypes))
+            foreach (Type type in KnownCollections.For(knownTypes))
                 RegisterCollection(type);
         }
 
@@ -49,8 +49,8 @@ namespace SoEx.Hosting.Serializers.Common
 
             if (type.IsGenericType && !type.ContainsGenericParameters)
             {
-                var definition = type.GetGenericTypeDefinition();
-                var args = type.GetGenericArguments();
+                Type definition = type.GetGenericTypeDefinition();
+                Type[] args = type.GetGenericArguments();
 
                 if (definition == typeof(List<>)) return $"List<{args[0].FullName}>";
                 if (definition == typeof(HashSet<>)) return $"HashSet<{args[0].FullName}>";

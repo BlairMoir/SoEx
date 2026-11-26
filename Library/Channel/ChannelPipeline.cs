@@ -34,7 +34,7 @@ namespace SoEx.Channel
                 Type serializerType = channel.Pipeline?.MessageSerializer.ImplementationType ?? typeof(IMessageSerializer);
                 Type protectorType = channel.Pipeline?.MessageProtection.ImplementationType ?? typeof(IMessageProtection);
                 Parameter[] protectionOptionsParameter = [];
-                var protectionOptions = channel.Pipeline?.MessageProtection.Options;
+                object? protectionOptions = channel.Pipeline?.MessageProtection.Options;
                 if (protectionOptions is not null)
                 {
                     protectionOptionsParameter = [new TypedParameter(protectionOptions.GetType(), protectionOptions)];
@@ -52,7 +52,7 @@ namespace SoEx.Channel
                     return new InvocationResponse();
                 }
 
-                var deserializedResponse = serializer.Deserialize<InvocationResponse>(serializedResponse, channel.Contract, request.MethodName);
+                InvocationResponse? deserializedResponse = serializer.Deserialize<InvocationResponse>(serializedResponse, channel.Contract, request.MethodName);
                 Debug.Assert(deserializedResponse is not null);
                 return deserializedResponse;
             }

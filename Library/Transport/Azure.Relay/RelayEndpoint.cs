@@ -66,7 +66,7 @@ namespace SoEx.Transport.Azure.Relay
                     {
                         context.Response.StatusCode = HttpStatusCode.OK;
                         context.Response.StatusDescription = "OK";
-                        var serialisedResponse = _endpointPipeLine.ServicePipeLine<I>(seralizedRequest, _relayBinding?.Pipeline, activity).Result;
+                        byte[] serialisedResponse = _endpointPipeLine.ServicePipeLine<I>(seralizedRequest, _relayBinding?.Pipeline, activity).Result;
                         using (var responseMemoryStream = new MemoryStream(serialisedResponse))
                         {
                             responseMemoryStream.CopyTo(context.Response.OutputStream);

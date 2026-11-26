@@ -54,7 +54,7 @@ namespace SoEx.Context
         public byte[] Serialize()
         {
             var outgoingBytes = new ConcurrentDictionary<string, byte[]>();
-            foreach (var pair in _contexts)
+            foreach (KeyValuePair<string, object> pair in _contexts)
             {
                 outgoingBytes[pair.Key] = _messageSerializer.Serialize(pair.Value);
             }
@@ -72,7 +72,7 @@ namespace SoEx.Context
             if (incomingBytes is null)
                 return;
 
-            foreach (var pair in incomingBytes)
+            foreach (KeyValuePair<string, byte[]> pair in incomingBytes)
             {
                 object? value;
                 try

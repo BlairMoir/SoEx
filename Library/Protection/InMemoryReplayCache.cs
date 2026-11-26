@@ -55,7 +55,7 @@ namespace SoEx.Protection
                 return;
             }
 
-            foreach (var entry in _seen)
+            foreach (KeyValuePair<string, DateTimeOffset> entry in _seen)
             {
                 if (entry.Value <= now)
                 {

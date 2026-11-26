@@ -59,7 +59,7 @@ namespace SoEx.Context
             if (replacementContexts is null)
                 return;
 
-            foreach (var replacement in replacementContexts)
+            foreach (KeyValuePair<string, object> replacement in replacementContexts)
             {
                 _contexts[replacement.Key] = replacement.Value;
             }

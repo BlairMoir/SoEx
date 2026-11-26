@@ -22,7 +22,7 @@ namespace SoEx.Hosting.Serializers.DataContract
 
         public T? Deserialize<T>(byte[] @bytes)
         {
-            var utf8String = Encoding.UTF8.GetString(bytes);
+            string utf8String = Encoding.UTF8.GetString(bytes);
             using (XmlReader reader = XmlReader.Create(new StringReader(utf8String)))
             {
                 DataContractSerializer formatter0 =
@@ -45,7 +45,7 @@ namespace SoEx.Hosting.Serializers.DataContract
                     new DataContractSerializer(typeof(T), _serializerSettings);
                 formatter0.WriteObject(xmlWriter, @object);
             }
-            var writtenString = stringWriter.ToString();
+            string writtenString = stringWriter.ToString();
             return Encoding.UTF8.GetBytes(writtenString);
         }
 

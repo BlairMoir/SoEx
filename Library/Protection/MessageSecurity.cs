@@ -42,7 +42,7 @@ namespace SoEx.Protection
         {
             var bySigningKeyId = new Dictionary<string, Peer>();
 
-            foreach (var trusted in peers)
+            foreach (TrustedPeer trusted in peers)
             {
                 var peer = Peer.From(trusted);
                 if (!bySigningKeyId.TryAdd(peer.SigningKeyId, peer))

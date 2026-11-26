@@ -68,8 +68,8 @@ namespace SoEx.Transport.NATS
         private async Task<NatsClient> CreateConnection()
         {
             Debug.Assert(_natsEventBinding is not null);
-            var url = _natsEventBinding.Config.Url;
-            var client = await _connections.Get(url,
+            string url = _natsEventBinding.Config.Url;
+            NatsClient client = await _connections.Get(url,
                 () => Connect(url),
                 c => c.Connection.ConnectionState == NatsConnectionState.Closed
             ).ConfigureAwait(false);

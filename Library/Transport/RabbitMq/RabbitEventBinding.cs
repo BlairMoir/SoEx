@@ -24,9 +24,9 @@ namespace SoEx.Transport.RabbitMq
             }
 
             List<Uri> uriList = new List<Uri>();
-            foreach (var host in config)
+            foreach (RabbitConfig host in config)
             {
-                var virtualHost = Uri.EscapeDataString(host.VirtualHost ?? "/");
+                string virtualHost = Uri.EscapeDataString(host.VirtualHost ?? "/");
                 var uri = new Uri($"amqp://{host.Host}:{host.Port}/{virtualHost}");
                 uriList.Add(uri);
             }

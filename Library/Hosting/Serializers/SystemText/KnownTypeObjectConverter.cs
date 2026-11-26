@@ -18,17 +18,17 @@ namespace SoEx.Hosting.Serializers.SystemText
         public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             using var doc = JsonDocument.ParseValue(ref reader);
-            var root = doc.RootElement;
+            JsonElement root = doc.RootElement;
 
-            if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("_$type", out var typeProperty))
+            if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("_$type", out JsonElement typeProperty))
             {
-                var discriminator = typeProperty.GetString();
-                if (discriminator is not null && _registry.TryGetType(discriminator, out var type))
+                string? discriminator = typeProperty.GetString();
+                if (discriminator is not null && _registry.TryGetType(discriminator, out Type? type))
                 {
                     if (_registry.IsCollection(type))
                         return JsonSerializer.Deserialize(root.GetProperty("$values").GetRawText(), type, options);
 
-                    if (root.TryGetProperty("$value", out var wrappedValue))
+                    if (root.TryGetProperty("$value", out JsonElement wrappedValue))
                         return JsonSerializer.Deserialize(wrappedValue.GetRawText(), type, options);
 
                     return JsonSerializer.Deserialize(root.GetRawText(), type, options);
@@ -38,7 +38,7 @@ namespace SoEx.Hosting.Serializers.SystemText
             }
             return root.ValueKind switch
             {
-                JsonValueKind.Number => root.TryGetInt64(out var l) ? (object)l : root.GetDouble(),
+                JsonValueKind.Number => root.TryGetInt64(out long l) ? (object)l : root.GetDouble(),
                 JsonValueKind.String => root.GetString(),
                 JsonValueKind.True or JsonValueKind.False => root.GetBoolean(),
                 JsonValueKind.Null => null,
@@ -48,7 +48,7 @@ namespace SoEx.Hosting.Serializers.SystemText
 
         public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
         {
-            var runtimeType = value.GetType();
+            Type runtimeType = value.GetType();
 
             if (runtimeType == typeof(object))
             {
@@ -63,7 +63,7 @@ namespace SoEx.Hosting.Serializers.SystemText
                 return;
             }
 
-            if (!_registry.TryGetDiscriminator(runtimeType, out var discriminator))
+            if (!_registry.TryGetDiscriminator(runtimeType, out string? discriminator))
                 throw new JsonException($"Type '{runtimeType.FullName}' is not in KnownTypes.");
 
             writer.WriteStartObject();
@@ -76,10 +76,10 @@ namespace SoEx.Hosting.Serializers.SystemText
             }
             else
             {
-                using var inner = JsonSerializer.SerializeToDocument(value, runtimeType, options);
+                using JsonDocument inner = JsonSerializer.SerializeToDocument(value, runtimeType, options);
                 if (inner.RootElement.ValueKind == JsonValueKind.Object)
                 {
-                    foreach (var property in inner.RootElement.EnumerateObject())
+                    foreach (JsonProperty property in inner.RootElement.EnumerateObject())
                         property.WriteTo(writer);
                 }
                 else

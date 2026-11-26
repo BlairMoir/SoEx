@@ -33,8 +33,8 @@ namespace SoEx.Transport.Azure.ServiceBus
             if (_binding is null)
                 return;
 
-            var config = _binding.Config;
-            var topicName = TopicSubject.For<I>();
+            TopicConfig config = _binding.Config;
+            string topicName = TopicSubject.For<I>();
             await ConfigureServiceBus(config, topicName);
             await StartProcessing(config,
                     (client, options) => client.CreateProcessor(topicName, _subscriber, options)
@@ -53,7 +53,7 @@ namespace SoEx.Transport.Azure.ServiceBus
 
             try
             {
-                var adminClient = config.Administration();
+                ServiceBusAdministrationClient adminClient = config.Administration();
                 if (!await adminClient.TopicExistsAsync(topicName))
                 {
                     await adminClient.CreateTopicAsync(topicName);

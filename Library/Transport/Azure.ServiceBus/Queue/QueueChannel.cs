@@ -42,7 +42,7 @@ namespace SoEx.Transport.Azure.ServiceBus
             {
                 try
                 {
-                    var sender = await Sender().ConfigureAwait(false);
+                    ServiceBusSender sender = await Sender().ConfigureAwait(false);
                     await sender.SendMessageAsync(new ServiceBusMessage(new BinaryData(payload)))
                         .ConfigureAwait(false);
                     return [];
@@ -58,9 +58,9 @@ namespace SoEx.Transport.Azure.ServiceBus
         private async Task<ServiceBusSender> Sender()
         {
             Debug.Assert(_sbBinding != null);
-            var config = _sbBinding.Config;
+            QueueConfig config = _sbBinding.Config;
             string entity = config.Queue;
-            var sender = await _senders.Get($"{entity}|{config.ClientKey}",
+            ServiceBusSender sender = await _senders.Get($"{entity}|{config.ClientKey}",
                     () => CreateSender(config, entity),
                     c => c.IsClosed).
                 ConfigureAwait(false);
@@ -73,7 +73,7 @@ namespace SoEx.Transport.Azure.ServiceBus
                 () => Task.FromResult(config.Client()),
                 c => c.IsClosed)
                 .ConfigureAwait(false);
-            var sender = client.CreateSender(entity);
+            ServiceBusSender sender = client.CreateSender(entity);
             return sender;
         }
     }

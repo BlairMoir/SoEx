@@ -16,7 +16,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 
         public T? Deserialize<T>(byte[] payload)
         {
-            var utf8String = Encoding.UTF8.GetString(payload);
+            string utf8String = Encoding.UTF8.GetString(payload);
             return JsonConvert.DeserializeObject<T>(utf8String, jsonSerializerSettings);
         }
 
@@ -27,7 +27,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 
         public byte[] Serialize<T>(T? @object)
         {
-            var utf8String = JsonConvert.SerializeObject(@object, jsonSerializerSettings);
+            string utf8String = JsonConvert.SerializeObject(@object, jsonSerializerSettings);
             return Encoding.UTF8.GetBytes(utf8String);
         }
 
