@@ -113,12 +113,24 @@ namespace SoEx.Transport.NATS
             try
             {
                 Debug.Assert(msg.Data is not null);
-                byte[] dispatchResult = await Dispatch(msg.Data);
+                byte[] dispatchResult;
+                try
+                {
+                    dispatchResult = await Dispatch(msg.Data);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "NATS request for {Contract} failed", typeof(I));
+                    await msg.ReplyAsync<byte[]>([], headers: NatsServiceError.Headers());
+                    return;
+                }
+
+
                 await msg.ReplyAsync(dispatchResult);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex,"NATS reply for {Contract} failed", typeof(I));
             }
             finally
             {

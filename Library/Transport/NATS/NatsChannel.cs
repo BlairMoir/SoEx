@@ -1,13 +1,8 @@
 using System.Diagnostics;
-using System.IO.Pipes;
-using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Principal;
-using Autofac;
 using NATS.Client.Core;
 using NATS.Net;
 using SoEx.Abstractions;
+using SoEx.Exceptions;
 using SoEx.Topology;
 
 namespace SoEx.Transport.NATS
@@ -46,6 +41,11 @@ namespace SoEx.Transport.NATS
                     NatsClient nc = await CreateConnection().ConfigureAwait(false);
                     string natsSubject = $"{_natsBinding.SubSystem}-{typeof(I)}";
                     NatsMsg<byte[]> reply = await nc.RequestAsync<byte[], byte[]>(natsSubject, payload).ConfigureAwait(false);
+                    if (NatsServiceError.IsIn(reply))
+                    {
+                        throw new ServiceException("Error executing service pipeline",
+                            new InvalidOperationException("The service reported an error"));
+                    }
                     return reply.Data ?? [];
                 }
                 catch (Exception)
