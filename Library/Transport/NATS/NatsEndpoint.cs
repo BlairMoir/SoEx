@@ -130,7 +130,7 @@ namespace SoEx.Transport.NATS
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"NATS reply for {Contract} failed", typeof(I));
+                _logger.LogError(ex, "NATS reply for {Contract} failed", typeof(I));
             }
             finally
             {
