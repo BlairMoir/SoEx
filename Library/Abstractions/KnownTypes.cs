@@ -1,25 +1,26 @@
 using System.Collections.ObjectModel;
 
-namespace SoEx.Abstractions;
-
-public sealed class KnownTypes
+namespace SoEx.Abstractions
 {
-    private readonly ReadOnlyCollection<Type> _knownTypes;
-
-    public KnownTypes(params Type[] knownTypes)
+    public sealed class KnownTypes
     {
-        ArgumentNullException.ThrowIfNull(knownTypes);
+        private readonly ReadOnlyCollection<Type> _knownTypes;
 
-        var uniqueTypes = new List<Type>();
-        foreach (var type in knownTypes)
+        public KnownTypes(params Type[] knownTypes)
         {
-            ArgumentNullException.ThrowIfNull(type, nameof(knownTypes));
-            if (!uniqueTypes.Contains(type))
+            ArgumentNullException.ThrowIfNull(knownTypes);
+
+            var uniqueTypes = new List<Type>();
+            foreach (var type in knownTypes)
             {
-                uniqueTypes.Add(type);
+                ArgumentNullException.ThrowIfNull(type, nameof(knownTypes));
+                if (!uniqueTypes.Contains(type))
+                {
+                    uniqueTypes.Add(type);
+                }
             }
+            _knownTypes = uniqueTypes.AsReadOnly();
         }
-        _knownTypes = uniqueTypes.AsReadOnly();
+        public IReadOnlyCollection<Type> Types => _knownTypes;
     }
-    public IReadOnlyCollection<Type> Types => _knownTypes;
 }

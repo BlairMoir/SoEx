@@ -1,7 +1,8 @@
-namespace SoEx.Transport.Azure.ServiceBus;
-
-public enum Redelivery
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    AfterLockExpiry,
-    Immediate
+    public enum Redelivery
+    {
+        AfterLockExpiry,
+        Immediate
+    }
 }

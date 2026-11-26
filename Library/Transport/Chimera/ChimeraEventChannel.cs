@@ -1,45 +1,46 @@
 using System.Diagnostics;
 using SoEx.Topology;
 
-namespace SoEx.Transport.Chimera;
-
-public class ChimeraEventChannel<I> : IChannel
+namespace SoEx.Transport.Chimera
 {
-    public Type Contract => typeof(I);
-    private ChimeraEventBinding<I>? _binding;
-    private ChimeraTopic _topics;
-    public IBindingPipeline? Pipeline => _binding?.Pipeline;
-
-    public ChimeraEventChannel(ChimeraTopic topics)
+    public class ChimeraEventChannel<I> : IChannel
     {
-        _topics = topics;
-    }
+        public Type Contract => typeof(I);
+        private ChimeraEventBinding<I>? _binding;
+        private ChimeraTopic _topics;
+        public IBindingPipeline? Pipeline => _binding?.Pipeline;
 
-
-    public void Bind(Binding binding)
-    {
-        if (binding is ChimeraEventBinding<I> chimeraEventBinding)
+        public ChimeraEventChannel(ChimeraTopic topics)
         {
-            _binding = chimeraEventBinding;
+            _topics = topics;
         }
-    }
 
 
-    public async Task<byte[]> InvokeResult(byte[] invocationRequest)
-    {
-        using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(ChimeraEventChannel<I>)}"))
+        public void Bind(Binding binding)
         {
-            try
+            if (binding is ChimeraEventBinding<I> chimeraEventBinding)
             {
-                ArgumentNullException.ThrowIfNull(_binding);
-                var topic = _topics.For(_binding.Options, _binding.Topic);
-                await topic.AppendAsync(invocationRequest).ConfigureAwait(false);
-                return [];
+                _binding = chimeraEventBinding;
             }
-            catch
+        }
+
+
+        public async Task<byte[]> InvokeResult(byte[] invocationRequest)
+        {
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Client.StartActivity($"{nameof(ChimeraEventChannel<I>)}"))
             {
-                activity?.SetStatus(ActivityStatusCode.Error);
-                throw;
+                try
+                {
+                    ArgumentNullException.ThrowIfNull(_binding);
+                    var topic = _topics.For(_binding.Options, _binding.Topic);
+                    await topic.AppendAsync(invocationRequest).ConfigureAwait(false);
+                    return [];
+                }
+                catch
+                {
+                    activity?.SetStatus(ActivityStatusCode.Error);
+                    throw;
+                }
             }
         }
     }

@@ -1,46 +1,48 @@
 
 using System.Buffers.Binary;
 
-namespace SoEx.Transport.NamedPipe;
-public class StreamBytes
+namespace SoEx.Transport.NamedPipe
 {
-    private Stream ioStream;
-    private const int MaxBytesPerMessage = 16 * 1024 * 1024;
-
-    public StreamBytes(Stream ioStream)
+    public class StreamBytes
     {
-        this.ioStream = ioStream;
-    }
+        private Stream ioStream;
+        private const int MaxBytesPerMessage = 16 * 1024 * 1024;
 
-    public byte[] ReadBytes()
-    {
-        Span<byte> header = stackalloc byte[4];
-        ioStream.ReadExactly(header);
-        int length = BinaryPrimitives.ReadInt32BigEndian(header);
-
-        if ((uint)length > MaxBytesPerMessage)
+        public StreamBytes(Stream ioStream)
         {
-            throw new InvalidDataException("Named pipe payload too large");
+            this.ioStream = ioStream;
         }
 
-        byte[] inBuffer = new byte[length];
-        ioStream.ReadExactly(inBuffer, 0, length);
-
-        return inBuffer;
-    }
-
-    public int WriteBytes(byte[] bytes)
-    {
-        if (bytes.Length > MaxBytesPerMessage)
+        public byte[] ReadBytes()
         {
-            throw new InvalidDataException("Named pipe payload too large");
-        }
-        Span<byte> header = stackalloc byte[4];
-        BinaryPrimitives.WriteInt32BigEndian(header, bytes.Length);
-        ioStream.Write(header);
-        ioStream.Write(bytes, 0, bytes.Length);
-        ioStream.Flush();
+            Span<byte> header = stackalloc byte[4];
+            ioStream.ReadExactly(header);
+            int length = BinaryPrimitives.ReadInt32BigEndian(header);
 
-        return bytes.Length + 4;
+            if ((uint)length > MaxBytesPerMessage)
+            {
+                throw new InvalidDataException("Named pipe payload too large");
+            }
+
+            byte[] inBuffer = new byte[length];
+            ioStream.ReadExactly(inBuffer, 0, length);
+
+            return inBuffer;
+        }
+
+        public int WriteBytes(byte[] bytes)
+        {
+            if (bytes.Length > MaxBytesPerMessage)
+            {
+                throw new InvalidDataException("Named pipe payload too large");
+            }
+            Span<byte> header = stackalloc byte[4];
+            BinaryPrimitives.WriteInt32BigEndian(header, bytes.Length);
+            ioStream.Write(header);
+            ioStream.Write(bytes, 0, bytes.Length);
+            ioStream.Flush();
+
+            return bytes.Length + 4;
+        }
     }
 }

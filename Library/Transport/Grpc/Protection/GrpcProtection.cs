@@ -1,6 +1,7 @@
-namespace SoEx.Transport.Grpc.Protection;
-
-public abstract record GrpcProtection
+namespace SoEx.Transport.Grpc.Protection
 {
+    public abstract record GrpcProtection
+    {
 
+    }
 }

@@ -1,26 +1,27 @@
 using System.Reflection;
 
-namespace SoEx.Hosting.Extensions;
-
-internal static class ContractExtensions
+namespace SoEx.Hosting.Extensions
 {
-    internal static MethodInfo[] Operations(this Type contract)
+    internal static class ContractExtensions
     {
-        var operations = new List<MethodInfo>();
-        operations.AddRange(contract.GetMethods());
-
-        foreach (Type inherited in contract.GetInterfaces())
+        internal static MethodInfo[] Operations(this Type contract)
         {
-            operations.AddRange(inherited.GetMethods());
+            var operations = new List<MethodInfo>();
+            operations.AddRange(contract.GetMethods());
+
+            foreach (Type inherited in contract.GetInterfaces())
+            {
+                operations.AddRange(inherited.GetMethods());
+            }
+
+            return operations.ToArray();
         }
 
-        return operations.ToArray();
-    }
-
-    internal static MethodInfo? Find(this Type contract, string methodName)
-    {
-        MethodInfo[] operations = Operations(contract);
-        MethodInfo? operation = operations.FirstOrDefault(o => o.Name == methodName);
-        return operation;
+        internal static MethodInfo? Find(this Type contract, string methodName)
+        {
+            MethodInfo[] operations = Operations(contract);
+            MethodInfo? operation = operations.FirstOrDefault(o => o.Name == methodName);
+            return operation;
+        }
     }
 }

@@ -1,6 +1,7 @@
-namespace SoEx.Topology.Pipeline;
-
-public interface IPipelineServiceInterceptor : IPipelineType
+namespace SoEx.Topology.Pipeline
 {
+    public interface IPipelineServiceInterceptor : IPipelineType
+    {
 
+    }
 }

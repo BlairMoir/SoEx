@@ -1,7 +1,8 @@
-namespace SoEx.Transport.Grpc.Protection;
-
-public record GrpcCertificateFromPath : GrpcProtection
+namespace SoEx.Transport.Grpc.Protection
 {
-    public required string CertPath { get; init; }
-    public required string CertPassword { get; init; }
+    public record GrpcCertificateFromPath : GrpcProtection
+    {
+        public required string CertPath { get; init; }
+        public required string CertPassword { get; init; }
+    }
 }

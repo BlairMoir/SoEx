@@ -3,44 +3,44 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace SoEx.Test.TopologyGenerator;
-
-public class SourceGenerator
+namespace SoEx.Test.TopologyGenerator
 {
-    [Generator]
-    public class TopologyGenerator :IIncrementalGenerator
+    public class SourceGenerator
     {
-        public void Initialize(IncrementalGeneratorInitializationContext context)
+        [Generator]
+        public class TopologyGenerator :IIncrementalGenerator
         {
-            context.RegisterPostInitializationOutput(ctx => ctx.AddSource(
-                "TopologyAttribute.g.cs",
-                SourceText.From(Attribute, Encoding.UTF8)));
-
-            var stuff = context.SyntaxProvider
-                .ForAttributeWithMetadataName(
-                    "SoEx.Test.HarnessGenerators.TopologyAttribute",
-                    predicate:  static (_,_) => true,
-                    transform: (ctx, _) => GetSemanticTargetForGeneration(ctx)
-                    );
-
-            context.RegisterSourceOutput(stuff, (spc, o) =>
+            public void Initialize(IncrementalGeneratorInitializationContext context)
             {
-                try
+                context.RegisterPostInitializationOutput(ctx => ctx.AddSource(
+                    "TopologyAttribute.g.cs",
+                    SourceText.From(Attribute, Encoding.UTF8)));
+
+                var stuff = context.SyntaxProvider
+                    .ForAttributeWithMetadataName(
+                        "SoEx.Test.HarnessGenerators.TopologyAttribute",
+                        predicate:  static (_,_) => true,
+                        transform: (ctx, _) => GetSemanticTargetForGeneration(ctx)
+                        );
+
+                context.RegisterSourceOutput(stuff, (spc, o) =>
                 {
-                    StringBuilder fields = new  StringBuilder();
-                    StringBuilder components = new StringBuilder();
-                    List<string> proxies = new List<string>();
-                    Dictionary<string, string> names = MemberNames(new[] { o.SubsystemContract ?? "" }
-                        .Concat(o.Components.Select(c => c.Contract)));
-                    fields.AppendLine(
-                        $$"""
+                    try
+                    {
+                        StringBuilder fields = new  StringBuilder();
+                        StringBuilder components = new StringBuilder();
+                        List<string> proxies = new List<string>();
+                        Dictionary<string, string> names = MemberNames(new[] { o.SubsystemContract ?? "" }
+                            .Concat(o.Components.Select(c => c.Contract)));
+                        fields.AppendLine(
+                            $$"""
                               public Microsoft.Extensions.DependencyInjection.ServiceCollection ServiceCollection_{{names[o.SubsystemContract?? ""]}} = new();
                           """);
 
-                    foreach (var component in o.Components)
-                    {
-                        proxies.Add(
-                            $$"""
+                        foreach (var component in o.Components)
+                        {
+                            proxies.Add(
+                                $$"""
                             new SoEx.Topology.Client<{{component.Contract}}>()
                             {
                                 Service = new SoEx.Transport.InProc.InProcBinding<{{component.Contract}}>("Test"),
@@ -48,64 +48,64 @@ public class SourceGenerator
                             },
                             """);
 
-                        if (component.Implementation is null)
-                        {
-                            fields.AppendLine(
-                                $$"""
+                            if (component.Implementation is null)
+                            {
+                                fields.AppendLine(
+                                    $$"""
                                     public Moq.Mock<{{component.Contract}}> Mock_{{names[component.Contract]}} = new Moq.Mock<{{component.Contract}}>();
                                 """);
-                            components.AppendLine("new SoEx.Topology.HostMock()");
-                        }
-                        else
-                        {
-                            fields.AppendLine(
-                                $$"""
+                                components.AppendLine("new SoEx.Topology.HostMock()");
+                            }
+                            else
+                            {
+                                fields.AppendLine(
+                                    $$"""
                                       public Microsoft.Extensions.DependencyInjection.ServiceCollection ServiceCollection_{{names[component.Contract]}} = new();
                                   """);
-                            components.AppendLine("new SoEx.Topology.Host()");
-                        }
+                                components.AppendLine("new SoEx.Topology.Host()");
+                            }
 
-                        components.AppendLine("    {");
-                        if (component.Implementation is null)
-                        {
-                            components.AppendLine($"        Instance = Mock_{names[component.Contract]}.Object,");
-                            components.AppendLine($"        Implementation = typeof(Moq.Mock),");
-                        }
-                        else
-                        {
-                            components.AppendLine($"        Implementation = typeof({component.Implementation}),");
-                        }
-                        components.AppendLine($"        Endpoints = [new SoEx.Transport.InProc.InProcBinding<{component.Contract}>(\"Test\")],");
-                        components.AppendLine($"        Proxies = [");
-                        foreach (var proxy in proxies)
-                        {
-                            if (!proxy.Contains(component.Contract) )
+                            components.AppendLine("    {");
+                            if (component.Implementation is null)
                             {
-                                if (component.Contract.EndsWith("Access") && !proxy.Contains("Manager>") && !proxy.Contains("Engine>") && !proxy.Contains("Event>")  )
+                                components.AppendLine($"        Instance = Mock_{names[component.Contract]}.Object,");
+                                components.AppendLine($"        Implementation = typeof(Moq.Mock),");
+                            }
+                            else
+                            {
+                                components.AppendLine($"        Implementation = typeof({component.Implementation}),");
+                            }
+                            components.AppendLine($"        Endpoints = [new SoEx.Transport.InProc.InProcBinding<{component.Contract}>(\"Test\")],");
+                            components.AppendLine($"        Proxies = [");
+                            foreach (var proxy in proxies)
+                            {
+                                if (!proxy.Contains(component.Contract) )
                                 {
-                                    components.AppendLine(proxy);
-                                }
-                                else if (component.Contract.EndsWith("Engine") && !proxy.Contains("Manager>") && !proxy.Contains("Event>")  )
-                                {
-                                    components.AppendLine(proxy);
-                                }
-                                else
-                                {
-                                    components.AppendLine(proxy);
+                                    if (component.Contract.EndsWith("Access") && !proxy.Contains("Manager>") && !proxy.Contains("Engine>") && !proxy.Contains("Event>")  )
+                                    {
+                                        components.AppendLine(proxy);
+                                    }
+                                    else if (component.Contract.EndsWith("Engine") && !proxy.Contains("Manager>") && !proxy.Contains("Event>")  )
+                                    {
+                                        components.AppendLine(proxy);
+                                    }
+                                    else
+                                    {
+                                        components.AppendLine(proxy);
+                                    }
                                 }
                             }
+                            components.AppendLine($"        ],");
+                            if (component.Implementation is not null)
+                            {
+                                components.AppendLine(
+                                    $"        ServiceCollection = ServiceCollection_{names[component.Contract] ?? ""}");
+                            }
+                            components.AppendLine("    },");
                         }
-                        components.AppendLine($"        ],");
-                        if (component.Implementation is not null)
-                        {
-                            components.AppendLine(
-                                $"        ServiceCollection = ServiceCollection_{names[component.Contract] ?? ""}");
-                        }
-                        components.AppendLine("    },");
-                    }
 
-                    var source =
-                        $$"""
+                        var source =
+                            $$"""
                         //------------------------------------------------------------------------------
                         // <auto-generated>
                         //     This code was generated by a tool.
@@ -155,149 +155,149 @@ public class SourceGenerator
                         }
                         """;
 
-                    spc.AddSource($"{o.MethodIdentifier}.g.cs", source);
-                }catch(Exception ex)
-                {
-                    spc.ReportDiagnostic(
-                        Diagnostic.Create(
-                            new DiagnosticDescriptor("SOEXTG001",
-                                "Topology generation failed",
-                                "Could not generate harness for {0}: {1}",
-                            "SoEx.Test", DiagnosticSeverity.Error,true),
-                        Location.None, o.MethodIdentifier, ex.Message
-                        ));
-                }
-            });
-        }
-
-        static Dictionary<string, string> MemberNames(IEnumerable<string> contracts)
-        {
-            var names = new Dictionary<string, string>();
-            foreach (var group in contracts.Distinct().GroupBy( c => c.Split('.').Last()))
-            {
-                var collision = group.ToArray();
-                if (collision.Length == 1)
-                {
-                    names[collision[0]] = group.Key;
-                    continue;
-                }
-
-                var longest = collision.Max(c => c.Split('.').Length);
-                for (var take = 2;; take++)
-                {
-                    var qualified = collision.ToDictionary(c => c, c => Qualify(c, take));
-                    if (qualified.Values.Distinct().Count() == collision.Length || take >= longest)
+                        spc.AddSource($"{o.MethodIdentifier}.g.cs", source);
+                    }catch(Exception ex)
                     {
-                        foreach (var pair in qualified)
+                        spc.ReportDiagnostic(
+                            Diagnostic.Create(
+                                new DiagnosticDescriptor("SOEXTG001",
+                                    "Topology generation failed",
+                                    "Could not generate harness for {0}: {1}",
+                                "SoEx.Test", DiagnosticSeverity.Error,true),
+                            Location.None, o.MethodIdentifier, ex.Message
+                            ));
+                    }
+                });
+            }
+
+            static Dictionary<string, string> MemberNames(IEnumerable<string> contracts)
+            {
+                var names = new Dictionary<string, string>();
+                foreach (var group in contracts.Distinct().GroupBy( c => c.Split('.').Last()))
+                {
+                    var collision = group.ToArray();
+                    if (collision.Length == 1)
+                    {
+                        names[collision[0]] = group.Key;
+                        continue;
+                    }
+
+                    var longest = collision.Max(c => c.Split('.').Length);
+                    for (var take = 2;; take++)
+                    {
+                        var qualified = collision.ToDictionary(c => c, c => Qualify(c, take));
+                        if (qualified.Values.Distinct().Count() == collision.Length || take >= longest)
                         {
-                            names[pair.Key] = pair.Value;
+                            foreach (var pair in qualified)
+                            {
+                                names[pair.Key] = pair.Value;
+                            }
+
+                            break;
                         }
-
-                        break;
                     }
                 }
+
+                return names;
             }
 
-            return names;
-        }
-
-        static string Qualify(string contract, int segments)
-        {
-            var parts = contract.Split('.');
-            var skip = Math.Max(0, parts.Length - segments);
-            var qualifiedParts = parts.Skip(skip);
-            return string.Join("_", qualifiedParts);
-        }
-
-        private static bool IsSyntaxTargetForGeneration(SyntaxNode syntaxNode)
-            => syntaxNode is MethodDeclarationSyntax methodSyntax &&  methodSyntax.AttributeLists.Count >0 ;
-
-        static TopologyToGenerate GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
-        {
-            var methodIdentifier = $"{context.TargetSymbol.ContainingSymbol.Name}_{context.TargetSymbol.Name}";
-
-            var methodSymbol = context.TargetSymbol as IMethodSymbol;
-            var attributes = methodSymbol?.GetAttributes().Where( w=> w.AttributeClass?.Name == "TopologyAttribute").ToList();
-
-            var topologyAttribute = attributes?.FirstOrDefault();
-
-            var constructorArguments = topologyAttribute?.ConstructorArguments.ToArray();
-            if (constructorArguments is not null)
+            static string Qualify(string contract, int segments)
             {
-                var entrypoint = constructorArguments[0].Value as INamedTypeSymbol;
-                var componentsSymbols =  constructorArguments[1].Values.Select( s=> s.Value as INamedTypeSymbol).ToArray() ;
+                var parts = contract.Split('.');
+                var skip = Math.Max(0, parts.Length - segments);
+                var qualifiedParts = parts.Skip(skip);
+                return string.Join("_", qualifiedParts);
+            }
 
-                var entryPointContract = entrypoint?.TypeArguments[0];
-                var entryPointImplementation = entrypoint?.TypeArguments[1];
+            private static bool IsSyntaxTargetForGeneration(SyntaxNode syntaxNode)
+                => syntaxNode is MethodDeclarationSyntax methodSyntax &&  methodSyntax.AttributeLists.Count >0 ;
 
-                List<Component> components = [];
-                foreach (var componentsSymbol in componentsSymbols)
+            static TopologyToGenerate GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
+            {
+                var methodIdentifier = $"{context.TargetSymbol.ContainingSymbol.Name}_{context.TargetSymbol.Name}";
+
+                var methodSymbol = context.TargetSymbol as IMethodSymbol;
+                var attributes = methodSymbol?.GetAttributes().Where( w=> w.AttributeClass?.Name == "TopologyAttribute").ToList();
+
+                var topologyAttribute = attributes?.FirstOrDefault();
+
+                var constructorArguments = topologyAttribute?.ConstructorArguments.ToArray();
+                if (constructorArguments is not null)
                 {
-                    if (componentsSymbol?.TypeArguments.Length == 2)
+                    var entrypoint = constructorArguments[0].Value as INamedTypeSymbol;
+                    var componentsSymbols =  constructorArguments[1].Values.Select( s=> s.Value as INamedTypeSymbol).ToArray() ;
+
+                    var entryPointContract = entrypoint?.TypeArguments[0];
+                    var entryPointImplementation = entrypoint?.TypeArguments[1];
+
+                    List<Component> components = [];
+                    foreach (var componentsSymbol in componentsSymbols)
                     {
-                        components.Add(new Component(
-                            $"{componentsSymbol.TypeArguments[0].ContainingNamespace}.{componentsSymbol.TypeArguments[0].Name}",
-                            $"{componentsSymbol.TypeArguments[1].ContainingNamespace}.{componentsSymbol.TypeArguments[1].Name}"
-                            ));
+                        if (componentsSymbol?.TypeArguments.Length == 2)
+                        {
+                            components.Add(new Component(
+                                $"{componentsSymbol.TypeArguments[0].ContainingNamespace}.{componentsSymbol.TypeArguments[0].Name}",
+                                $"{componentsSymbol.TypeArguments[1].ContainingNamespace}.{componentsSymbol.TypeArguments[1].Name}"
+                                ));
+                        }
+                        if (componentsSymbol?.TypeArguments.Length == 1)
+                        {
+                            components.Add(new Component(
+                                $"{componentsSymbol.TypeArguments[0].ContainingNamespace}.{componentsSymbol.TypeArguments[0].Name}",
+                                null
+                                ));
+                        }
                     }
-                    if (componentsSymbol?.TypeArguments.Length == 1)
-                    {
-                        components.Add(new Component(
-                            $"{componentsSymbol.TypeArguments[0].ContainingNamespace}.{componentsSymbol.TypeArguments[0].Name}",
-                            null
-                            ));
-                    }
+
+                    var topologyToGenerate = new TopologyToGenerate(
+                        methodIdentifier ,
+                        $"{entryPointContract?.ContainingNamespace}.{entryPointContract?.Name}",
+                        $"{entryPointImplementation?.ContainingNamespace}.{entryPointImplementation?.Name}",
+                        components.ToArray()
+                        );
+
+                    return topologyToGenerate;
                 }
 
-                var topologyToGenerate = new TopologyToGenerate(
+                var failedGenerate = new TopologyToGenerate(
                     methodIdentifier ,
-                    $"{entryPointContract?.ContainingNamespace}.{entryPointContract?.Name}",
-                    $"{entryPointImplementation?.ContainingNamespace}.{entryPointImplementation?.Name}",
-                    components.ToArray()
+                    null,
+                    null,
+                    []
                     );
-
-                return topologyToGenerate;
+                return failedGenerate;
             }
 
-            var failedGenerate = new TopologyToGenerate(
-                methodIdentifier ,
-                null,
-                null,
-                []
-                );
-            return failedGenerate;
-        }
-
-        public readonly record struct TopologyToGenerate
-        {
-            public readonly string MethodIdentifier;
-            public readonly string? SubsystemContract;
-            public readonly string? SubsystemImplementation;
-            public readonly Component[] Components;
-
-            public TopologyToGenerate(string methodIdentifier, string? subsystemContract, string? subsystemImplementation,  Component[] components)
+            public readonly record struct TopologyToGenerate
             {
-                MethodIdentifier = methodIdentifier;
-                SubsystemContract = subsystemContract;
-                SubsystemImplementation = subsystemImplementation;
-                Components = components;
+                public readonly string MethodIdentifier;
+                public readonly string? SubsystemContract;
+                public readonly string? SubsystemImplementation;
+                public readonly Component[] Components;
+
+                public TopologyToGenerate(string methodIdentifier, string? subsystemContract, string? subsystemImplementation,  Component[] components)
+                {
+                    MethodIdentifier = methodIdentifier;
+                    SubsystemContract = subsystemContract;
+                    SubsystemImplementation = subsystemImplementation;
+                    Components = components;
+                }
             }
-        }
 
-        public readonly record struct Component
-        {
-            public readonly string Contract;
-            public readonly string? Implementation;
-
-            public Component(string contract, string? implementation)
+            public readonly record struct Component
             {
-                Contract = contract;
-                Implementation = implementation;
+                public readonly string Contract;
+                public readonly string? Implementation;
+
+                public Component(string contract, string? implementation)
+                {
+                    Contract = contract;
+                    Implementation = implementation;
+                }
             }
-        }
 
 
-        public const string Attribute = @"
+            public const string Attribute = @"
 namespace SoEx.Test.HarnessGenerators
 {
     [AttributeUsage(AttributeTargets.Method)]
@@ -323,5 +323,6 @@ namespace SoEx.Test.HarnessGenerators
 
     }
 }";
+        }
     }
 }

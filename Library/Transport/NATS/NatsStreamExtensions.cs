@@ -3,26 +3,27 @@ using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.JetStream.Models;
 
-namespace SoEx.Transport.NATS;
-
-public static class NatsStreamExtensions
+namespace SoEx.Transport.NATS
 {
-    private const int StreamNameInUse = 10058;
-
-    public static async Task CreateEventStream<I>(this INatsJSContext jetStream)
+    public static class NatsStreamExtensions
     {
-        try
+        private const int StreamNameInUse = 10058;
+
+        public static async Task CreateEventStream<I>(this INatsJSContext jetStream)
         {
-            var streamConfig = new StreamConfig()
+            try
             {
-                Name = NatsSubject.For<I>(),
-                Subjects = [NatsSubject.For<I>()],
-            };
-            await jetStream.CreateStreamAsync(streamConfig).ConfigureAwait(false);
-        }
-        catch (NatsJSApiException ex) when (ex.Error.ErrCode == StreamNameInUse)
-        {
-            // stream exists with differnt settings, use it anyway
+                var streamConfig = new StreamConfig()
+                {
+                    Name = NatsSubject.For<I>(),
+                    Subjects = [NatsSubject.For<I>()],
+                };
+                await jetStream.CreateStreamAsync(streamConfig).ConfigureAwait(false);
+            }
+            catch (NatsJSApiException ex) when (ex.Error.ErrCode == StreamNameInUse)
+            {
+                // stream exists with differnt settings, use it anyway
+            }
         }
     }
 }

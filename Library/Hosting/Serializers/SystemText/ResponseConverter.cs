@@ -2,33 +2,34 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SoEx.Hosting.Serializers.SystemText;
-
-public class ResponseConverter : JsonConverter<object?>
+namespace SoEx.Hosting.Serializers.SystemText
 {
-    private readonly Type _returnType;
-
-    public ResponseConverter(Type returnType)
+    public class ResponseConverter : JsonConverter<object?>
     {
-        _returnType = returnType;
-    }
+        private readonly Type _returnType;
 
-    public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        if (reader.TokenType == JsonTokenType.Null)
-            return null;
-
-        return JsonSerializer.Deserialize(ref reader, _returnType, options);
-    }
-
-    public override void Write(Utf8JsonWriter writer, object? value, JsonSerializerOptions options)
-    {
-        if (value == null)
+        public ResponseConverter(Type returnType)
         {
-            writer.WriteNullValue();
-            return;
+            _returnType = returnType;
         }
 
-        JsonSerializer.Serialize(writer, value, _returnType, options);
+        public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Null)
+                return null;
+
+            return JsonSerializer.Deserialize(ref reader, _returnType, options);
+        }
+
+        public override void Write(Utf8JsonWriter writer, object? value, JsonSerializerOptions options)
+        {
+            if (value == null)
+            {
+                writer.WriteNullValue();
+                return;
+            }
+
+            JsonSerializer.Serialize(writer, value, _returnType, options);
+        }
     }
 }

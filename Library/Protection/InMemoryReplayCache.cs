@@ -1,65 +1,66 @@
 using System.Collections.Concurrent;
 
-namespace SoEx.Protection;
-
-public class InMemoryReplayCache : IMessageReplayCache
+namespace SoEx.Protection
 {
-    private readonly ConcurrentDictionary<string, DateTimeOffset> _seen = new();
-    private long _nextSweep;
-    TimeProvider _timeProvider;
-
-    public InMemoryReplayCache(TimeProvider timeProvider)
+    public class InMemoryReplayCache : IMessageReplayCache
     {
-        _timeProvider = timeProvider;
-    }
+        private readonly ConcurrentDictionary<string, DateTimeOffset> _seen = new();
+        private long _nextSweep;
+        TimeProvider _timeProvider;
 
-    public bool TryAdd(string key, DateTimeOffset expires)
-    {
-        DateTimeOffset now = _timeProvider.GetUtcNow();
-        Sweep(now);
-        while (true)
+        public InMemoryReplayCache(TimeProvider timeProvider)
         {
-            if (_seen.TryAdd(key, expires))
-            {
-                return true;
-            }
-
-            if (_seen.TryGetValue(key, out DateTimeOffset existing) && existing > now)
-            {
-                return false;
-            }
-
-            if (_seen.TryUpdate(key, expires, existing))
-            {
-                return true;
-            }
-        }
-    }
-
-    public bool Seen(string key)
-    {
-        return _seen.TryGetValue(key, out DateTimeOffset expires) && expires > _timeProvider.GetUtcNow() ;
-    }
-
-    private void Sweep(DateTimeOffset now)
-    {
-        long ticks = now.UtcTicks;
-        long next = Interlocked.Read(ref _nextSweep);
-        if (ticks < next)
-        {
-            return;
+            _timeProvider = timeProvider;
         }
 
-        if (Interlocked.CompareExchange(ref _nextSweep, ticks + TimeSpan.TicksPerSecond, next) != next)
+        public bool TryAdd(string key, DateTimeOffset expires)
         {
-            return;
+            DateTimeOffset now = _timeProvider.GetUtcNow();
+            Sweep(now);
+            while (true)
+            {
+                if (_seen.TryAdd(key, expires))
+                {
+                    return true;
+                }
+
+                if (_seen.TryGetValue(key, out DateTimeOffset existing) && existing > now)
+                {
+                    return false;
+                }
+
+                if (_seen.TryUpdate(key, expires, existing))
+                {
+                    return true;
+                }
+            }
         }
 
-        foreach (var entry in _seen)
+        public bool Seen(string key)
         {
-            if (entry.Value <= now)
+            return _seen.TryGetValue(key, out DateTimeOffset expires) && expires > _timeProvider.GetUtcNow() ;
+        }
+
+        private void Sweep(DateTimeOffset now)
+        {
+            long ticks = now.UtcTicks;
+            long next = Interlocked.Read(ref _nextSweep);
+            if (ticks < next)
             {
-                _seen.TryRemove(entry);
+                return;
+            }
+
+            if (Interlocked.CompareExchange(ref _nextSweep, ticks + TimeSpan.TicksPerSecond, next) != next)
+            {
+                return;
+            }
+
+            foreach (var entry in _seen)
+            {
+                if (entry.Value <= now)
+                {
+                    _seen.TryRemove(entry);
+                }
             }
         }
     }

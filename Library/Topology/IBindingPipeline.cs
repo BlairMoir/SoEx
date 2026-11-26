@@ -1,10 +1,11 @@
 using SoEx.Topology.Pipeline;
 
-namespace SoEx.Topology;
-
-public interface IBindingPipeline
+namespace SoEx.Topology
 {
-    public IPipelineSerializer MessageSerializer { get; }
-    public IPipelineProtection MessageProtection { get; }
-    public IPipelineDispatcher Dispatcher { get; }
+    public interface IBindingPipeline
+    {
+        public IPipelineSerializer MessageSerializer { get; }
+        public IPipelineProtection MessageProtection { get; }
+        public IPipelineDispatcher Dispatcher { get; }
+    }
 }

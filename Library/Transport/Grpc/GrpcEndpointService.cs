@@ -1,5 +1,6 @@
-namespace SoEx.Transport.Grpc;
-
-public sealed class GrpcEndpointService
+namespace SoEx.Transport.Grpc
 {
+    public sealed class GrpcEndpointService
+    {
+    }
 }

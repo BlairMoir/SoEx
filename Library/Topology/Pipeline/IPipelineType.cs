@@ -1,6 +1,7 @@
-namespace SoEx.Topology.Pipeline;
-
-public interface IPipelineType
+namespace SoEx.Topology.Pipeline
 {
-    public Type ImplementationType { get; }
+    public interface IPipelineType
+    {
+        public Type ImplementationType { get; }
+    }
 }

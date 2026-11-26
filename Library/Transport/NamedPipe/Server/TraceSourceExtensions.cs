@@ -3,33 +3,34 @@
 
 using System.Diagnostics;
 
-namespace SoEx.Transport.NamedPipe;
-
-/// <summary>
-/// A class containing extension methods for <see cref="TraceSource"/>.
-/// </summary>
-internal static class TraceSourceExtensions
+namespace SoEx.Transport.NamedPipe
 {
     /// <summary>
-    /// Traces an exception to the trace source as an error level message.
+    /// A class containing extension methods for <see cref="TraceSource"/>.
     /// </summary>
-    /// <param name="logger">A trace source.</param>
-    /// <param name="exception">An exception.</param>
-    internal static void TraceException(this TraceSource logger, Exception exception)
+    internal static class TraceSourceExtensions
     {
-        //Requires.NotNull(exception, nameof(exception));
-        logger.TraceEvent(TraceEventType.Error, 0, exception.ToStringWithInnerExceptions());
-    }
+        /// <summary>
+        /// Traces an exception to the trace source as an error level message.
+        /// </summary>
+        /// <param name="logger">A trace source.</param>
+        /// <param name="exception">An exception.</param>
+        internal static void TraceException(this TraceSource logger, Exception exception)
+        {
+            //Requires.NotNull(exception, nameof(exception));
+            logger.TraceEvent(TraceEventType.Error, 0, exception.ToStringWithInnerExceptions());
+        }
 
-    /// <summary>
-    /// Traces an exception to the trace source as an error level message.
-    /// </summary>
-    /// <param name="logger">A trace source.</param>
-    /// <param name="exception">An exception.</param>
-    /// <param name="format">Additional string to write out.</param>
-    /// <param name="args">Arguments to be used in the format string.</param>
-    internal static void TraceException(this TraceSource logger, Exception exception, string format, params object?[]? args)
-    {
-        logger.TraceEvent(TraceEventType.Error, 0, ExceptionFormatter.FormatException(exception, format, args));
+        /// <summary>
+        /// Traces an exception to the trace source as an error level message.
+        /// </summary>
+        /// <param name="logger">A trace source.</param>
+        /// <param name="exception">An exception.</param>
+        /// <param name="format">Additional string to write out.</param>
+        /// <param name="args">Arguments to be used in the format string.</param>
+        internal static void TraceException(this TraceSource logger, Exception exception, string format, params object?[]? args)
+        {
+            logger.TraceEvent(TraceEventType.Error, 0, ExceptionFormatter.FormatException(exception, format, args));
+        }
     }
 }

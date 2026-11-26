@@ -1,13 +1,14 @@
-namespace SoEx.Topology.Pipeline;
-
-public static class PipelineExtensions
+namespace SoEx.Topology.Pipeline
 {
-    public static Topology.System WithPipeline(this Topology.System system, IPipeline pipeline)
+    public static class PipelineExtensions
     {
-        var replacementSystem = new Topology.System()
+        public static Topology.System WithPipeline(this Topology.System system, IPipeline pipeline)
         {
-            Clients = system.Clients, SubSystems = system.SubSystems, Defaults = pipeline
-        };
-        return replacementSystem;
+            var replacementSystem = new Topology.System()
+            {
+                Clients = system.Clients, SubSystems = system.SubSystems, Defaults = pipeline
+            };
+            return replacementSystem;
+        }
     }
 }

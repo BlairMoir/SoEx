@@ -1,7 +1,8 @@
-namespace SoEx.Abstractions.Protection;
-
-public enum ProtectionRole
+namespace SoEx.Abstractions.Protection
 {
-    Server,
-    Client
+    public enum ProtectionRole
+    {
+        Server,
+        Client
+    }
 }

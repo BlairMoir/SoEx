@@ -2,43 +2,43 @@ using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
-namespace SoEx.Method.Generators.AspNetCore;
-
-[Generator]
-public class SoExMethodGeneratorAspNetCore : IIncrementalGenerator
+namespace SoEx.Method.Generators.AspNetCore
 {
-public void Initialize(IncrementalGeneratorInitializationContext context)
-        {
-            var analyzerAndCompilationProviders =
-                context.AnalyzerConfigOptionsProvider
-                    .Combine(context.CompilationProvider);
-
-            var referencedSymbols = analyzerAndCompilationProviders.Select( (combined,_) =>
+    [Generator]
+    public class SoExMethodGeneratorAspNetCore : IIncrementalGenerator
+    {
+    public void Initialize(IncrementalGeneratorInitializationContext context)
             {
-                var config = combined.Left;
-                var compilation = combined.Right;
-                config.GlobalOptions
-                    .TryGetValue($"build_property.MethodGeneratorNamespace", out var @namespace);
-                var myAssemblySymbols = compilation.SourceModule.ReferencedAssemblySymbols
-                    .Where(w => w.Name.Contains($"{@namespace}.Manager.") && w.Name.EndsWith(".Interface") ).ToList();
-                var stuff = new StuffToGenerate(
-                    @namespace ?? "Company",
-                    myAssemblySymbols.SelectMany(s => InterfacesFromNamespace(s.GlobalNamespace.GetMembers())),
-                    myAssemblySymbols.Select(s => KnownTypesFromNamespace(s.GlobalNamespace.GetMembers())).ToList()
-                );
-                return stuff;
-            });
+                var analyzerAndCompilationProviders =
+                    context.AnalyzerConfigOptionsProvider
+                        .Combine(context.CompilationProvider);
 
-            context.RegisterSourceOutput(referencedSymbols, static (spc, opts) =>
-            {
-                try
+                var referencedSymbols = analyzerAndCompilationProviders.Select( (combined,_) =>
                 {
-                     var symbols = opts;
-                     var interfaceSymbols = symbols.Interfaces.ToArray();
-                     var knownTypes = symbols.KnownTypes;
+                    var config = combined.Left;
+                    var compilation = combined.Right;
+                    config.GlobalOptions
+                        .TryGetValue($"build_property.MethodGeneratorNamespace", out var @namespace);
+                    var myAssemblySymbols = compilation.SourceModule.ReferencedAssemblySymbols
+                        .Where(w => w.Name.Contains($"{@namespace}.Manager.") && w.Name.EndsWith(".Interface") ).ToList();
+                    var stuff = new StuffToGenerate(
+                        @namespace ?? "Company",
+                        myAssemblySymbols.SelectMany(s => InterfacesFromNamespace(s.GlobalNamespace.GetMembers())),
+                        myAssemblySymbols.Select(s => KnownTypesFromNamespace(s.GlobalNamespace.GetMembers())).ToList()
+                    );
+                    return stuff;
+                });
 
-                     StringBuilder sb = new StringBuilder();
-                     sb.AppendLine($$"""
+                context.RegisterSourceOutput(referencedSymbols, static (spc, opts) =>
+                {
+                    try
+                    {
+                         var symbols = opts;
+                         var interfaceSymbols = symbols.Interfaces.ToArray();
+                         var knownTypes = symbols.KnownTypes;
+
+                         StringBuilder sb = new StringBuilder();
+                         sb.AppendLine($$"""
                                     namespace {{symbols.MethodNamespace}}.Generated;
                                     public static class SoExKnownTypes
                                     {
@@ -46,38 +46,38 @@ public void Initialize(IncrementalGeneratorInitializationContext context)
                                         {
                                             derivedTypes = baseType.FullName switch {
                                     """);
-                     foreach (var set in knownTypes)
-                     {
-                         foreach (var pair in set)
+                         foreach (var set in knownTypes)
                          {
-                             sb.Append(
-                                 $$"""
+                             foreach (var pair in set)
+                             {
+                                 sb.Append(
+                                     $$"""
                                                "{{pair.Key}}" => [
                                    """);
-                             foreach (var item in pair.Value)
-                             {
-                                 sb.Append($@" typeof({item}), ");
+                                 foreach (var item in pair.Value)
+                                 {
+                                     sb.Append($@" typeof({item}), ");
+                                 }
+                                 sb.AppendLine("],");
                              }
-                             sb.AppendLine("],");
                          }
-                     }
 
-                     sb.AppendLine("""
+                         sb.AppendLine("""
                                                 _ => []
                                            };
                                            return derivedTypes.Length > 0;
                                        }
                                    }
                                    """);
-                     spc.AddSource($"SoExKnownTypes.cs", sb.ToString());
+                         spc.AddSource($"SoExKnownTypes.cs", sb.ToString());
 
-                     foreach (var interfaceSymbol in interfaceSymbols)
-                     {
-                         StringBuilder operationSource = new StringBuilder();
-                         foreach(var operation in  interfaceSymbol.Operations)
+                         foreach (var interfaceSymbol in interfaceSymbols)
                          {
-                             var operationText =
-                                    $$"""
+                             StringBuilder operationSource = new StringBuilder();
+                             foreach(var operation in  interfaceSymbol.Operations)
+                             {
+                                 var operationText =
+                                        $$"""
 
 
                                             [HttpPost]
@@ -88,11 +88,11 @@ public void Initialize(IncrementalGeneratorInitializationContext context)
                                                 return {{ (operation.ReturnType is null ? "Ok()" : "result")}};
                                             }
                                     """;
-                             operationSource.Append(operationText);
-                         }
+                                 operationSource.Append(operationText);
+                             }
 
-                         var source =
-                                $$"""
+                             var source =
+                                    $$"""
                                     //------------------------------------------------------------------------------
                                     // <auto-generated>
                                     //     This code was generated by a tool.
@@ -114,159 +114,160 @@ public void Initialize(IncrementalGeneratorInitializationContext context)
                                     { {{ operationSource}}
                                     }
                                 """;
-                         spc.AddSource($"{interfaceSymbol.Name}Controller.g.cs", source);
-                     }
-                }
-                catch(Exception ex)
-                {
-                    spc.AddSource($"error.txt", ex.ToString());
-                }
-            });
-        }
-
-        static IEnumerable<InterfaceToGenerate> InterfacesFromNamespace(IEnumerable<INamespaceOrTypeSymbol> symbols)
-        {
-            List<InterfaceToGenerate> typeSymbols = new List<InterfaceToGenerate>();
-            foreach (var symbol in symbols)
-            {
-                if (symbol is INamespaceSymbol namespaceSymbol)
-                {
-                    var namespaceMembers = namespaceSymbol.GetMembers();
-                    typeSymbols.AddRange(InterfacesFromNamespace(namespaceMembers));
-                }
-                else if (symbol is ITypeSymbol { TypeKind: TypeKind.Interface } typeSymbol)
-                {
-                     var methodMembers =  typeSymbol.GetMembers().OfType<IMethodSymbol>();
-                    typeSymbols.Add(new InterfaceToGenerate(
-                        typeSymbol.Name,
-                        typeSymbol.ContainingNamespace.ToString(),
-                        methodMembers.Select( s=>
-                            new Operation(
-                                PrepareReturnType(s.ReturnType),
-                                s.Name,
-                                s.Parameters.Select(s => $"{s.Type.ContainingNamespace}.{s.Type.Name} {s.Name}").ToList()
-                                )).ToList()
-                        )
-                    );
-                }
-            }
-            return typeSymbols;
-        }
-
-        static ImmutableDictionary<string,List<string>> KnownTypesFromNamespace(IEnumerable<INamespaceOrTypeSymbol> symbols)
-        {
-            Dictionary<string,List<string>>  knownTypes = new Dictionary<string, List<string>>();
-            foreach (var symbol in symbols)
-            {
-                if (symbol is INamespaceSymbol namespaceSymbol)
-                {
-                    var namespaceMembers = namespaceSymbol.GetMembers();
-
-                    var returned = KnownTypesFromNamespace(namespaceMembers);
-                    foreach (var set in returned)
+                             spc.AddSource($"{interfaceSymbol.Name}Controller.g.cs", source);
+                         }
+                    }
+                    catch(Exception ex)
                     {
-                        if (!knownTypes.ContainsKey(set.Key))
-                            knownTypes.Add(set.Key, new List<string>());
+                        spc.AddSource($"error.txt", ex.ToString());
+                    }
+                });
+            }
 
-                        foreach (var val in set.Value)
+            static IEnumerable<InterfaceToGenerate> InterfacesFromNamespace(IEnumerable<INamespaceOrTypeSymbol> symbols)
+            {
+                List<InterfaceToGenerate> typeSymbols = new List<InterfaceToGenerate>();
+                foreach (var symbol in symbols)
+                {
+                    if (symbol is INamespaceSymbol namespaceSymbol)
+                    {
+                        var namespaceMembers = namespaceSymbol.GetMembers();
+                        typeSymbols.AddRange(InterfacesFromNamespace(namespaceMembers));
+                    }
+                    else if (symbol is ITypeSymbol { TypeKind: TypeKind.Interface } typeSymbol)
+                    {
+                         var methodMembers =  typeSymbol.GetMembers().OfType<IMethodSymbol>();
+                        typeSymbols.Add(new InterfaceToGenerate(
+                            typeSymbol.Name,
+                            typeSymbol.ContainingNamespace.ToString(),
+                            methodMembers.Select( s=>
+                                new Operation(
+                                    PrepareReturnType(s.ReturnType),
+                                    s.Name,
+                                    s.Parameters.Select(s => $"{s.Type.ContainingNamespace}.{s.Type.Name} {s.Name}").ToList()
+                                    )).ToList()
+                            )
+                        );
+                    }
+                }
+                return typeSymbols;
+            }
+
+            static ImmutableDictionary<string,List<string>> KnownTypesFromNamespace(IEnumerable<INamespaceOrTypeSymbol> symbols)
+            {
+                Dictionary<string,List<string>>  knownTypes = new Dictionary<string, List<string>>();
+                foreach (var symbol in symbols)
+                {
+                    if (symbol is INamespaceSymbol namespaceSymbol)
+                    {
+                        var namespaceMembers = namespaceSymbol.GetMembers();
+
+                        var returned = KnownTypesFromNamespace(namespaceMembers);
+                        foreach (var set in returned)
                         {
-                            knownTypes[set.Key].Add(val);
+                            if (!knownTypes.ContainsKey(set.Key))
+                                knownTypes.Add(set.Key, new List<string>());
+
+                            foreach (var val in set.Value)
+                            {
+                                knownTypes[set.Key].Add(val);
+                            }
+                        }
+                    }
+                    else if (symbol is ITypeSymbol { TypeKind: TypeKind.Class } typeSymbol)
+                    {
+                        if (typeSymbol.BaseType?.SpecialType == SpecialType.None)
+                        {
+                            var baseType = typeSymbol.BaseType;
+                            while (baseType?.BaseType != null && baseType.BaseType.SpecialType != SpecialType.System_Object)
+                            {
+                                baseType = baseType.BaseType;
+                            }
+
+                            if (baseType is not null)
+                            {
+                                var baseTypeFullName = $"{baseType.ContainingNamespace}.{baseType.Name}";
+                                if (!knownTypes.ContainsKey(baseTypeFullName))
+                                    knownTypes.Add(baseTypeFullName, new List<string>());
+
+                                var typeFullName = $"{symbol.ContainingNamespace}.{symbol.Name}";
+                                knownTypes[baseTypeFullName].Add(typeFullName);
+                            }
                         }
                     }
                 }
-                else if (symbol is ITypeSymbol { TypeKind: TypeKind.Class } typeSymbol)
-                {
-                    if (typeSymbol.BaseType?.SpecialType == SpecialType.None)
+                return knownTypes.ToImmutableDictionary();
+            }
+
+            private static string? PrepareReturnType(ITypeSymbol argReturnType)
+            {
+                if (argReturnType is INamedTypeSymbol
                     {
-                        var baseType = typeSymbol.BaseType;
-                        while (baseType?.BaseType != null && baseType.BaseType.SpecialType != SpecialType.System_Object)
-                        {
-                            baseType = baseType.BaseType;
-                        }
+                        IsGenericType: true,
+                        Name: "Task",
+                        TypeArguments.Length: 1
+                    } namedTypeSymbol)
+                {
+                    return namedTypeSymbol.TypeArguments[0].ToString();
+                }
 
-                        if (baseType is not null)
-                        {
-                            var baseTypeFullName = $"{baseType.ContainingNamespace}.{baseType.Name}";
-                            if (!knownTypes.ContainsKey(baseTypeFullName))
-                                knownTypes.Add(baseTypeFullName, new List<string>());
+                if (argReturnType is INamedTypeSymbol
+                    {
+                        IsGenericType: false,
+                        Name: "Task",
+                    })
+                {
+                    return null;
+                }
 
-                            var typeFullName = $"{symbol.ContainingNamespace}.{symbol.Name}";
-                            knownTypes[baseTypeFullName].Add(typeFullName);
-                        }
-                    }
+                if (argReturnType.SpecialType == SpecialType.System_Void)
+                {
+                    return null;
+                }
+
+                return argReturnType.ToString();
+            }
+
+            public readonly record struct StuffToGenerate
+            {
+                public readonly string MethodNamespace;
+                public readonly EquatableArray<InterfaceToGenerate> Interfaces;
+                public readonly List<ImmutableDictionary<string,List<string>>> KnownTypes;
+
+                public StuffToGenerate(string methodNamespace,
+                    IEnumerable<InterfaceToGenerate> interfaces,  List<ImmutableDictionary<string,List<string>>> knownTypes)
+                {
+                    MethodNamespace = methodNamespace;
+                    Interfaces = new EquatableArray<InterfaceToGenerate>([..interfaces]);
+                    KnownTypes = knownTypes;
+                }
+
+            }
+
+            public readonly record struct InterfaceToGenerate
+            {
+                public readonly string Name;
+                public readonly string Namespace;
+                public readonly EquatableArray<Operation> Operations;
+                public InterfaceToGenerate(string name, string @namespace, List<Operation> operations)
+                {
+                    this.Name = name;
+                    Namespace = @namespace;
+                    Operations = new EquatableArray<Operation>([..operations]);
                 }
             }
-            return knownTypes.ToImmutableDictionary();
-        }
 
-        private static string? PrepareReturnType(ITypeSymbol argReturnType)
-        {
-            if (argReturnType is INamedTypeSymbol
+            public readonly record struct Operation
+            {
+                public readonly string? ReturnType;
+                public readonly string Name;
+                public readonly EquatableArray<string> Parameters;
+                public Operation(string? returnType, string name, List<string> parameters)
                 {
-                    IsGenericType: true,
-                    Name: "Task",
-                    TypeArguments.Length: 1
-                } namedTypeSymbol)
-            {
-                return namedTypeSymbol.TypeArguments[0].ToString();
+                    ReturnType = returnType;
+                    Name = name;
+                    Parameters = new EquatableArray<string>([..parameters]);
+                }
             }
-
-            if (argReturnType is INamedTypeSymbol
-                {
-                    IsGenericType: false,
-                    Name: "Task",
-                })
-            {
-                return null;
-            }
-
-            if (argReturnType.SpecialType == SpecialType.System_Void)
-            {
-                return null;
-            }
-
-            return argReturnType.ToString();
-        }
-
-        public readonly record struct StuffToGenerate
-        {
-            public readonly string MethodNamespace;
-            public readonly EquatableArray<InterfaceToGenerate> Interfaces;
-            public readonly List<ImmutableDictionary<string,List<string>>> KnownTypes;
-
-            public StuffToGenerate(string methodNamespace,
-                IEnumerable<InterfaceToGenerate> interfaces,  List<ImmutableDictionary<string,List<string>>> knownTypes)
-            {
-                MethodNamespace = methodNamespace;
-                Interfaces = new EquatableArray<InterfaceToGenerate>([..interfaces]);
-                KnownTypes = knownTypes;
-            }
-
-        }
-
-        public readonly record struct InterfaceToGenerate
-        {
-            public readonly string Name;
-            public readonly string Namespace;
-            public readonly EquatableArray<Operation> Operations;
-            public InterfaceToGenerate(string name, string @namespace, List<Operation> operations)
-            {
-                this.Name = name;
-                Namespace = @namespace;
-                Operations = new EquatableArray<Operation>([..operations]);
-            }
-        }
-
-        public readonly record struct Operation
-        {
-            public readonly string? ReturnType;
-            public readonly string Name;
-            public readonly EquatableArray<string> Parameters;
-            public Operation(string? returnType, string name, List<string> parameters)
-            {
-                ReturnType = returnType;
-                Name = name;
-                Parameters = new EquatableArray<string>([..parameters]);
-            }
-        }
+    }
 }

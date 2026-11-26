@@ -1,10 +1,11 @@
-namespace SoEx.Transport.RabbitMq;
-
-public record RabbitEventTransport : Topology.Transport
+namespace SoEx.Transport.RabbitMq
 {
-    public RabbitEventTransport()
+    public record RabbitEventTransport : Topology.Transport
     {
-        ClientChannel = typeof(RabbitEventChannel<>);
-        HostChannel = typeof(RabbitEventEndpoint<>);
+        public RabbitEventTransport()
+        {
+            ClientChannel = typeof(RabbitEventChannel<>);
+            HostChannel = typeof(RabbitEventEndpoint<>);
+        }
     }
 }

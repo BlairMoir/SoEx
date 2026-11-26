@@ -3,34 +3,35 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SoEx.Abstractions;
 
-namespace SoEx.Hosting.Serializers.NewtonsoftJson;
-
-public class OperationContractResolver : DefaultContractResolver
+namespace SoEx.Hosting.Serializers.NewtonsoftJson
 {
-    Type[] _declaredTypes;
-    Type? _returnType;
-
-    public OperationContractResolver(Type[] declaredTypes, Type? returnType)
+    public class OperationContractResolver : DefaultContractResolver
     {
-        _declaredTypes = declaredTypes;
-        _returnType = returnType;
-        NamingStrategy = new CamelCaseNamingStrategy();
-    }
+        Type[] _declaredTypes;
+        Type? _returnType;
 
-    protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
-    {
-        JsonProperty property = base.CreateProperty(member, memberSerialization);
-        if (member.DeclaringType == typeof(InvocationRequest) && member.Name == nameof(InvocationRequest.Arguments))
+        public OperationContractResolver(Type[] declaredTypes, Type? returnType)
         {
-            property.Converter = new ArgumentsConverter(_declaredTypes);
+            _declaredTypes = declaredTypes;
+            _returnType = returnType;
+            NamingStrategy = new CamelCaseNamingStrategy();
         }
 
-        if ( _returnType != null && member.DeclaringType == typeof(InvocationResponse) &&
-            member.Name == nameof(InvocationResponse.Response))
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
-            property.Converter = new ResponseConverter(_returnType);
-        }
+            JsonProperty property = base.CreateProperty(member, memberSerialization);
+            if (member.DeclaringType == typeof(InvocationRequest) && member.Name == nameof(InvocationRequest.Arguments))
+            {
+                property.Converter = new ArgumentsConverter(_declaredTypes);
+            }
 
-        return property;
+            if ( _returnType != null && member.DeclaringType == typeof(InvocationResponse) &&
+                member.Name == nameof(InvocationResponse.Response))
+            {
+                property.Converter = new ResponseConverter(_returnType);
+            }
+
+            return property;
+        }
     }
 }

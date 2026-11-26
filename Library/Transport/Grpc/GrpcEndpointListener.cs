@@ -7,130 +7,131 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using SoEx.Transport.Grpc.Protection;
 
-namespace SoEx.Transport.Grpc;
-
-public class GrpcEndpointListener
+namespace SoEx.Transport.Grpc
 {
-    public abstract record ListenAddress(int Port)
+    public class GrpcEndpointListener
     {
-        public record Any(int Port) : ListenAddress(Port);
-        public record IP(IPAddress Address, int Port): ListenAddress(Port);
-
-        public static ListenAddress From(GrpcConfig config)
+        public abstract record ListenAddress(int Port)
         {
-            if (string.IsNullOrEmpty(config.BindAddress))
-                return new Any(config.Port);
+            public record Any(int Port) : ListenAddress(Port);
+            public record IP(IPAddress Address, int Port): ListenAddress(Port);
 
-            if (config.BindAddress is "*" or "+" or "0.0.0.0")
-                return new Any(config.Port);
-
-            return new IP(IPAddress.Parse(config.BindAddress), config.Port);
-        }
-
-        public bool ConflictsWith(ListenAddress other)
-        {
-            return other.Port == Port && !Equals(other);
-        }
-    }
-
-    private readonly Dictionary<ListenAddress, GrpcProtection> _listenEndpoints = new();
-
-    private WebApplication? _listener;
-    private List<IServiceMethodProvider<GrpcEndpointService>> _dispatchProviders = new();
-
-    internal void Bind(ImmutableArray<GrpcConfig> configs)
-    {
-        foreach (var config in configs)
-        {
-            Bind(config);
-        }
-    }
-
-    private void Bind(GrpcConfig config)
-    {
-        var listenAddress = ListenAddress.From(config);
-        if (_listenEndpoints.TryGetValue(listenAddress, out var protection))
-        {
-            if(!protection.Equals(config.Protection))
-                throw new InvalidOperationException($"Protection {config.Protection} does not match protection {protection} for {listenAddress}");
-
-            return;
-        }
-
-        var existing = _listenEndpoints.Keys.FirstOrDefault(k => k.ConflictsWith(listenAddress));
-        if (existing is not null)
-        {
-            throw new InvalidOperationException($"Listen address {listenAddress} conflicts with {existing}");
-        }
-        _listenEndpoints.Add(listenAddress, config.Protection);
-    }
-
-    internal void RegisterDispatch(IServiceMethodProvider<GrpcEndpointService> provider)
-    {
-        _dispatchProviders.Add(provider);
-    }
-
-    internal async Task Listen()
-    {
-        if (_listener is null)
-        {
-            var builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions());
-            builder.WebHost.UseKestrelCore();
-            builder.WebHost.ConfigureKestrel(ConfigureKestrel);
-            builder.Services.AddGrpc();
-            foreach (var provider in _dispatchProviders)
+            public static ListenAddress From(GrpcConfig config)
             {
-                builder.Services.AddSingleton<IServiceMethodProvider<GrpcEndpointService>>(provider);
-            }
-            _listener = builder.Build();
-            _listener.MapGrpcService<GrpcEndpointService>();
-            await _listener.StartAsync();
-        }
-    }
+                if (string.IsNullOrEmpty(config.BindAddress))
+                    return new Any(config.Port);
 
-    internal async Task Close()
-    {
-        if (_listener is not null)
-        {
-            await _listener.StopAsync();
-            await _listener.DisposeAsync();
-        }
-    }
+                if (config.BindAddress is "*" or "+" or "0.0.0.0")
+                    return new Any(config.Port);
 
-    private void ConfigureKestrel(KestrelServerOptions k)
-    {
-        foreach (var (address, protection) in _listenEndpoints)
-        {
-            if (address is ListenAddress.Any any)
-            {
-                k.ListenAnyIP(any.Port, o=> ConfigureOptions(o, protection));
+                return new IP(IPAddress.Parse(config.BindAddress), config.Port);
             }
 
-            if (address is ListenAddress.IP ip)
+            public bool ConflictsWith(ListenAddress other)
             {
-                k.Listen( ip.Address, ip.Port, o=> ConfigureOptions(o, protection));
+                return other.Port == Port && !Equals(other);
             }
         }
-    }
 
-    private void ConfigureOptions(ListenOptions o, GrpcProtection protection)
-    {
-        o.Protocols = HttpProtocols.Http2;
-        if (protection is ClearTextGrpc)
-            return;
+        private readonly Dictionary<ListenAddress, GrpcProtection> _listenEndpoints = new();
 
-        if (protection is GrpcCertificate certificate)
+        private WebApplication? _listener;
+        private List<IServiceMethodProvider<GrpcEndpointService>> _dispatchProviders = new();
+
+        internal void Bind(ImmutableArray<GrpcConfig> configs)
         {
-            o.UseHttps(certificate.Certificate);
-            return;
+            foreach (var config in configs)
+            {
+                Bind(config);
+            }
         }
 
-        if (protection is GrpcCertificateFromPath certificateFromPath)
+        private void Bind(GrpcConfig config)
         {
-            o.UseHttps(certificateFromPath.CertPath, certificateFromPath.CertPassword);
-            return;
+            var listenAddress = ListenAddress.From(config);
+            if (_listenEndpoints.TryGetValue(listenAddress, out var protection))
+            {
+                if(!protection.Equals(config.Protection))
+                    throw new InvalidOperationException($"Protection {config.Protection} does not match protection {protection} for {listenAddress}");
+
+                return;
+            }
+
+            var existing = _listenEndpoints.Keys.FirstOrDefault(k => k.ConflictsWith(listenAddress));
+            if (existing is not null)
+            {
+                throw new InvalidOperationException($"Listen address {listenAddress} conflicts with {existing}");
+            }
+            _listenEndpoints.Add(listenAddress, config.Protection);
         }
 
-        throw new NotSupportedException($"Unsupported protection {protection}");
+        internal void RegisterDispatch(IServiceMethodProvider<GrpcEndpointService> provider)
+        {
+            _dispatchProviders.Add(provider);
+        }
+
+        internal async Task Listen()
+        {
+            if (_listener is null)
+            {
+                var builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions());
+                builder.WebHost.UseKestrelCore();
+                builder.WebHost.ConfigureKestrel(ConfigureKestrel);
+                builder.Services.AddGrpc();
+                foreach (var provider in _dispatchProviders)
+                {
+                    builder.Services.AddSingleton<IServiceMethodProvider<GrpcEndpointService>>(provider);
+                }
+                _listener = builder.Build();
+                _listener.MapGrpcService<GrpcEndpointService>();
+                await _listener.StartAsync();
+            }
+        }
+
+        internal async Task Close()
+        {
+            if (_listener is not null)
+            {
+                await _listener.StopAsync();
+                await _listener.DisposeAsync();
+            }
+        }
+
+        private void ConfigureKestrel(KestrelServerOptions k)
+        {
+            foreach (var (address, protection) in _listenEndpoints)
+            {
+                if (address is ListenAddress.Any any)
+                {
+                    k.ListenAnyIP(any.Port, o=> ConfigureOptions(o, protection));
+                }
+
+                if (address is ListenAddress.IP ip)
+                {
+                    k.Listen( ip.Address, ip.Port, o=> ConfigureOptions(o, protection));
+                }
+            }
+        }
+
+        private void ConfigureOptions(ListenOptions o, GrpcProtection protection)
+        {
+            o.Protocols = HttpProtocols.Http2;
+            if (protection is ClearTextGrpc)
+                return;
+
+            if (protection is GrpcCertificate certificate)
+            {
+                o.UseHttps(certificate.Certificate);
+                return;
+            }
+
+            if (protection is GrpcCertificateFromPath certificateFromPath)
+            {
+                o.UseHttps(certificateFromPath.CertPath, certificateFromPath.CertPassword);
+                return;
+            }
+
+            throw new NotSupportedException($"Unsupported protection {protection}");
+        }
     }
 }

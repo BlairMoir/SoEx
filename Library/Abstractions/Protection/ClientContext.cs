@@ -1,10 +1,11 @@
-namespace SoEx.Abstractions.Protection;
-
-public class ClientContext : MessageContext
+namespace SoEx.Abstractions.Protection
 {
-    public ClientContext()
+    public class ClientContext : MessageContext
     {
-        Role = ProtectionRole.Client;
+        public ClientContext()
+        {
+            Role = ProtectionRole.Client;
+        }
+        public required string MethodName { get; init; }
     }
-    public required string MethodName { get; init; }
 }

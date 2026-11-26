@@ -1,14 +1,15 @@
-namespace SoEx.Exceptions;
-
-public class TestExceptionMode
+namespace SoEx.Exceptions
 {
-    public ExceptionMode Mode { get; init; }
-}
+    public class TestExceptionMode
+    {
+        public ExceptionMode Mode { get; init; }
+    }
 
-public enum ExceptionMode
-{
-    Production,
-    Wrapped,
-    Bare
-}
+    public enum ExceptionMode
+    {
+        Production,
+        Wrapped,
+        Bare
+    }
 
+}

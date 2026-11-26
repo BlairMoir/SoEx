@@ -1,7 +1,8 @@
-namespace SoEx.Abstractions.Protection;
-
-public class MessageContext
+namespace SoEx.Abstractions.Protection
 {
-    public required Type Contract { get; init; }
-    public ProtectionRole Role { get; init; } = ProtectionRole.Server;
+    public class MessageContext
+    {
+        public required Type Contract { get; init; }
+        public ProtectionRole Role { get; init; } = ProtectionRole.Server;
+    }
 }

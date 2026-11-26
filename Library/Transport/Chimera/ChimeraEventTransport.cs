@@ -1,10 +1,11 @@
-namespace SoEx.Transport.Chimera;
-
-public record ChimeraEventTransport : Topology.Transport
+namespace SoEx.Transport.Chimera
 {
-    public ChimeraEventTransport()
+    public record ChimeraEventTransport : Topology.Transport
     {
-        ClientChannel = typeof(ChimeraEventChannel<>);
-        HostChannel = typeof(ChimeraEventEndpoint<>);
+        public ChimeraEventTransport()
+        {
+            ClientChannel = typeof(ChimeraEventChannel<>);
+            HostChannel = typeof(ChimeraEventEndpoint<>);
+        }
     }
 }

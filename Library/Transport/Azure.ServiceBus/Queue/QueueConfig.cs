@@ -1,6 +1,7 @@
-namespace SoEx.Transport.Azure.ServiceBus;
-
-public class QueueConfig : ServiceBusConfig
+namespace SoEx.Transport.Azure.ServiceBus
 {
-    public required string Queue { get; init; }
+    public class QueueConfig : ServiceBusConfig
+    {
+        public required string Queue { get; init; }
+    }
 }

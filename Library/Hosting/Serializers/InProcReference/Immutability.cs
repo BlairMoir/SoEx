@@ -1,20 +1,21 @@
-namespace SoEx.Hosting.Serializers.InProcReference;
-
-public static class Immutability
+namespace SoEx.Hosting.Serializers.InProcReference
 {
-    public static object? Require(object? obj)
+    public static class Immutability
     {
-        //TODO: Check immutability
-        return obj;
-    }
-    public static object?[] Require(object?[] obj)
-    {
-        //TODO: Check immutability
-        return obj;
-    }
+        public static object? Require(object? obj)
+        {
+            //TODO: Check immutability
+            return obj;
+        }
+        public static object?[] Require(object?[] obj)
+        {
+            //TODO: Check immutability
+            return obj;
+        }
 
-    public static object?[] Clone(object?[] obj)
-    {
-        return (object?[])obj.Clone();
+        public static object?[] Clone(object?[] obj)
+        {
+            return (object?[])obj.Clone();
+        }
     }
 }

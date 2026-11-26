@@ -1,8 +1,9 @@
-namespace SoEx.Protection;
-
-public interface IMessageReplayCache
+namespace SoEx.Protection
 {
-    bool TryAdd(string key, DateTimeOffset expires);
+    public interface IMessageReplayCache
+    {
+        bool TryAdd(string key, DateTimeOffset expires);
 
-    bool Seen(string key);
+        bool Seen(string key);
+    }
 }
