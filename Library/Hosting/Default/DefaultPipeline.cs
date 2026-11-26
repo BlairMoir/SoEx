@@ -15,6 +15,6 @@ namespace SoEx.Hosting.Default
 
         public IPipelineSerializer MessageSerializer { get; init; } =
             new PipelineSerializer<SoEx.Hosting.Serializers.SystemText.JsonMessageSerializer>();
-        public ImmutableArray<IPipelineServiceInterceptor> ServiceInterceptors =>  [ new PipelineServiceInterceptor<ErrorInterceptor>()] ;
+        public ImmutableArray<IPipelineServiceInterceptor> ServiceInterceptors => [new PipelineServiceInterceptor<ErrorInterceptor>()];
     }
 }

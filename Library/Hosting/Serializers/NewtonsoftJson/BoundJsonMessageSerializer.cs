@@ -10,12 +10,12 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
     {
         private readonly Type[] _knownTypes;
         private readonly JsonSerializerSettings jsonSerializerSettings;
-        private readonly ConcurrentDictionary<(Type contract, string method),JsonSerializerSettings> _settingsCache = new();
+        private readonly ConcurrentDictionary<(Type contract, string method), JsonSerializerSettings> _settingsCache = new();
 
         public BoundJsonMessageSerializer(KnownTypes knownTypes)
         {
             _knownTypes = knownTypes.Types.ToArray();
-            jsonSerializerSettings = Build(_knownTypes,[], null);
+            jsonSerializerSettings = Build(_knownTypes, [], null);
         }
 
         private JsonSerializerSettings Build(Type[] knownTypes, Type[] declaredTypes, Type? returnType)
@@ -31,7 +31,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 
         private JsonSerializerSettings SettingsFor(Type contract, string? methodName)
         {
-            if(methodName is null)
+            if (methodName is null)
                 return jsonSerializerSettings;
 
             Type[] declared = ContractMethod.ParameterTypes(contract, methodName);
@@ -52,7 +52,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 
         public T? Deserialize<T>(byte[] payload, Type contractType, string? methodName)
         {
-            var resolvedMethodName =  methodName ?? ContractMethod.PeekMethodName(payload);
+            var resolvedMethodName = methodName ?? ContractMethod.PeekMethodName(payload);
             var settings = SettingsFor(contractType, resolvedMethodName);
             var utf8String = Encoding.UTF8.GetString(payload);
             return JsonConvert.DeserializeObject<T>(utf8String, settings);

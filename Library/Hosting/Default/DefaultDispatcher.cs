@@ -19,7 +19,7 @@ namespace SoEx.Hosting.Default
         readonly ITelemetryConfidentiality _telemetryConfidentiality;
         private readonly Topology.Role _role;
 
-        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, ISubSystemScope subsystemlifeTimeScope, IAmbientContext callerAmbientContext,IFrameworkContext callerFrameworkContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies, Topology.Role role)
+        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, ISubSystemScope subsystemlifeTimeScope, IAmbientContext callerAmbientContext, IFrameworkContext callerFrameworkContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies, Topology.Role role)
         {
             _subsystemlifeTimeScope = subsystemlifeTimeScope;
             _callerAmbientContext = callerAmbientContext;
@@ -102,7 +102,7 @@ namespace SoEx.Hosting.Default
             for (int arg = 0; arg < invocationRequestArguments.Length; arg++)
             {
                 object? value = invocationRequestArguments[arg];
-                if(value is null)
+                if (value is null)
                     continue;
 
                 Type paramType = parameters[arg].ParameterType;
@@ -121,13 +121,13 @@ namespace SoEx.Hosting.Default
             FrameworkContext operationFrameworkContext = (FrameworkContext)requestLifetime.Resolve<IFrameworkContext>();
             operationFrameworkContext.SetOrReplace(invocationContext);
 
-            if (callerFrameworkContext.Contains<EntryContext>() && _role.HostRole == HostRole.Component )
+            if (callerFrameworkContext.Contains<EntryContext>() && _role.HostRole == HostRole.Component)
             {
                 operationFrameworkContext.SetOrReplace(callerFrameworkContext.Get<EntryContext>());
             }
-            if(_role.HostRole == HostRole.EntryPoint)
+            if (_role.HostRole == HostRole.EntryPoint)
             {
-                if (callerFrameworkContext.Contains<EntryContext>() )
+                if (callerFrameworkContext.Contains<EntryContext>())
                 {
                     var previousEntryInvocationContext = callerFrameworkContext.Get<EntryContext>().Entry;
                     operationFrameworkContext.SetOrReplace(new PreviousEntryContext(previousEntryInvocationContext));
@@ -172,7 +172,7 @@ namespace SoEx.Hosting.Default
         private Dictionary<string, object> ScopeProperties(IAmbientContext invokedContext)
         {
             IEnumerable<KeyValuePair<string, object>> flattenedProperties = _policies.SelectMany(s => s.ScopeProperties(invokedContext));
-            Dictionary<string, object> protectedProperties = flattenedProperties.ToDictionary( kvp => kvp.Key, kvp => _telemetryConfidentiality.Protect(kvp.Value, kvp.Key));
+            Dictionary<string, object> protectedProperties = flattenedProperties.ToDictionary(kvp => kvp.Key, kvp => _telemetryConfidentiality.Protect(kvp.Value, kvp.Key));
             return protectedProperties;
         }
     }

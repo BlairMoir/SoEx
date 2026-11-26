@@ -6,7 +6,7 @@ namespace SoEx.Transport.Grpc
     {
         private readonly Func<byte[], Task<byte[]>> _dispatchHandler;
 
-        public GrpcDispatchProvider(Func<byte[],Task<byte[]>> dispatchHandler)
+        public GrpcDispatchProvider(Func<byte[], Task<byte[]>> dispatchHandler)
         {
             _dispatchHandler = dispatchHandler;
         }

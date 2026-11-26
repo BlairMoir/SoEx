@@ -19,7 +19,7 @@ namespace SoEx.Method.Conventions
 
         public static MethodSubSystem AddInProcEndpoint<I>(this MethodSubSystem subSystem, IPipeline? customPipeline = null)
         {
-            AddInProcEndpoint(subSystem, typeof(I),customPipeline);
+            AddInProcEndpoint(subSystem, typeof(I), customPipeline);
             return subSystem;
         }
 
@@ -42,7 +42,7 @@ namespace SoEx.Method.Conventions
                 throw new ArgumentNullException(nameof(subSystem.EntryPoint));
             }
 
-            subSystem.EntryPoint = subSystem.EntryPoint with { Proxies =  [.. subSystem.EntryPoint.Proxies, .. clients] };
+            subSystem.EntryPoint = subSystem.EntryPoint with { Proxies = [.. subSystem.EntryPoint.Proxies, .. clients] };
             return subSystem;
         }
 
@@ -104,7 +104,7 @@ namespace SoEx.Method.Conventions
                 throw new ArgumentNullException(nameof(component.Host));
             }
 
-            component.Host = component.Host with { Proxies =  [.. component.Host.Proxies, .. clients]};
+            component.Host = component.Host with { Proxies = [.. component.Host.Proxies, .. clients] };
             return component;
         }
 
@@ -113,7 +113,7 @@ namespace SoEx.Method.Conventions
             SystemBuilder.ComponentName(implementationType, Keywords.Utility, "A utility must end with Utility");
             var host = new Topology.Host() { Implementation = implementationType, Endpoints = [], Proxies = [], };
             MethodComponent methodComponent = new MethodComponent() { Host = host, SubSystem = methodSubSystem.Name };
-            methodSubSystem.Utilities = [..methodSubSystem.Utilities, methodComponent];
+            methodSubSystem.Utilities = [.. methodSubSystem.Utilities, methodComponent];
             return methodComponent;
         }
     }

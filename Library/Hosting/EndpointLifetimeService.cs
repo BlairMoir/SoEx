@@ -75,7 +75,7 @@ namespace SoEx.Hosting
             {
                 await endpoint.Listen();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Endpoint {Endpoint} did not start listening", endpoint.GetType());
             }

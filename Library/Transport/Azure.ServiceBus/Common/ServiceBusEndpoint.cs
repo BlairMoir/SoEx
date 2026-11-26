@@ -12,7 +12,7 @@ namespace SoEx.Transport.Azure.ServiceBus
         readonly IEndpointPipeline _endpointPipeLine;
         protected abstract IBindingPipeline? BindingPipeline { get; }
         private ServiceBusClient? _client;
-        private  ServiceBusProcessor? _processor;
+        private ServiceBusProcessor? _processor;
         private Redelivery _redelivery;
 
 

@@ -10,6 +10,6 @@ namespace SoEx.Transport.NamedPipe
             new NamedPipeTransport() { Address = new Address.Single(new Uri($"soex.namedpipe://{subSystem}-{typeof(I)}")) },
             subSystem
             )
-        {}
+        { }
     }
 }

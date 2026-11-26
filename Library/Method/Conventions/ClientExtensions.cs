@@ -17,12 +17,12 @@ namespace SoEx.Method.Conventions
         public static Client ToClient(this Binding service, string subSystem)
         {
             ArgumentNullException.ThrowIfNull(service);
-            return (Client)s_create.MakeGenericMethod(service.Contract).Invoke(null, [service,subSystem])!;
+            return (Client)s_create.MakeGenericMethod(service.Contract).Invoke(null, [service, subSystem])!;
         }
 
         private static Client Create<I>(Binding service, string subsystem) where I : class
         {
-            return new Client<I>() {Service = service, SubSystem =  subsystem};
+            return new Client<I>() { Service = service, SubSystem = subsystem };
         }
     }
 }

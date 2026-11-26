@@ -39,7 +39,7 @@ namespace SoEx.Transport.RabbitMq
             await management.Queue(queueName)
                 .Type(QueueType.QUORUM)
                 .DeadLetterExchange(deadLetterName)
-                .Arguments(new Dictionary<object, object>(){ {"x-delivery-limit", _maxDeliveryAttempts - 1} })
+                .Arguments(new Dictionary<object, object>() { { "x-delivery-limit", _maxDeliveryAttempts - 1 } })
                 .DeclareAsync();
             await management.Binding().SourceExchange(exchangeName).DestinationQueue(queueName).Key("").BindAsync();
             await management.Binding().SourceExchange(deadLetterName).DestinationQueue(deadLetterName).Key("").BindAsync();
@@ -53,7 +53,8 @@ namespace SoEx.Transport.RabbitMq
             {
                 _logger.LogWarning("Connection for {Event} subscriber {Subscriber} lost, reconnecting: {Failure}",
                     typeof(I).FullName, _subscriber, failure);
-            }else if (current == State.Open && previous == State.Reconnecting)
+            }
+            else if (current == State.Open && previous == State.Reconnecting)
             {
                 _logger.LogInformation("Connection for {Event} subscriber {Subscriber} recovered",
                     typeof(I).FullName, _subscriber);
@@ -61,7 +62,7 @@ namespace SoEx.Transport.RabbitMq
             else if (current == State.Closed && failure is not null)
             {
                 _logger.LogError("Connection for {Event} subscriber {Subscriber} failed: {Failure}"
-                    ,typeof(I).FullName, _subscriber, failure);
+                    , typeof(I).FullName, _subscriber, failure);
             }
         }
 
@@ -79,9 +80,10 @@ namespace SoEx.Transport.RabbitMq
                 {
                     _logger.LogWarning(ex, "Handler for {Event} failed attempt {Attempt} of {MaxDeliveryAttempts}",
                         typeof(I).FullName, attempt, _maxDeliveryAttempts);
-                }else
+                }
+                else
                 {
-                  _logger.LogError(ex,"Handler for {Event} failed {MaxDeliveryAttempts} times",typeof(I).FullName, _maxDeliveryAttempts);
+                    _logger.LogError(ex, "Handler for {Event} failed {MaxDeliveryAttempts} times", typeof(I).FullName, _maxDeliveryAttempts);
                 }
                 context.Requeue(new Dictionary<string, object>(), deliveryFailed: true);
             }

@@ -14,7 +14,7 @@ namespace SoEx.Transport.Grpc
         public abstract record ListenAddress(int Port)
         {
             public record Any(int Port) : ListenAddress(Port);
-            public record IP(IPAddress Address, int Port): ListenAddress(Port);
+            public record IP(IPAddress Address, int Port) : ListenAddress(Port);
 
             public static ListenAddress From(GrpcConfig config)
             {
@@ -51,7 +51,7 @@ namespace SoEx.Transport.Grpc
             var listenAddress = ListenAddress.From(config);
             if (_listenEndpoints.TryGetValue(listenAddress, out var protection))
             {
-                if(!protection.Equals(config.Protection))
+                if (!protection.Equals(config.Protection))
                     throw new InvalidOperationException($"Protection {config.Protection} does not match protection {protection} for {listenAddress}");
 
                 return;
@@ -103,12 +103,12 @@ namespace SoEx.Transport.Grpc
             {
                 if (address is ListenAddress.Any any)
                 {
-                    k.ListenAnyIP(any.Port, o=> ConfigureOptions(o, protection));
+                    k.ListenAnyIP(any.Port, o => ConfigureOptions(o, protection));
                 }
 
                 if (address is ListenAddress.IP ip)
                 {
-                    k.Listen( ip.Address, ip.Port, o=> ConfigureOptions(o, protection));
+                    k.Listen(ip.Address, ip.Port, o => ConfigureOptions(o, protection));
                 }
             }
         }

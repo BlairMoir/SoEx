@@ -23,7 +23,7 @@ namespace SoEx.Test
             }
         }
 
-        public async Task<TResult> Proxy<I,TResult>(Func<I, Task<TResult>> callerFunc) where I : notnull
+        public async Task<TResult> Proxy<I, TResult>(Func<I, Task<TResult>> callerFunc) where I : notnull
         {
             using (var scope = _container.BeginLifetimeScopeAsyncLocal())
             {
@@ -51,7 +51,7 @@ namespace SoEx.Test
                         throw new InvalidOperationException(
                             Describe("Event handlers failed.",
                                 chimeraOverview.Subscribers,
-                                s=> s.DeadLettered > 0));
+                                s => s.DeadLettered > 0));
 
                     return;
                 }
@@ -69,7 +69,7 @@ namespace SoEx.Test
 
         private static string Describe(string message, IEnumerable<SubscriberActivity> activities, Func<SubscriberActivity, bool> filter)
         {
-            var failures = activities.Where(filter).Select( a=>
+            var failures = activities.Where(filter).Select(a =>
                 $"{a.Subscriber} on {a.Topic}: behind {a.Behind}, in flight {a.InFlight}, " +
                 $"awaiting retry {a.AwaitingRetry}, dead lettered {a.DeadLettered}");
 

@@ -46,7 +46,7 @@ namespace SoEx.Transport.Azure.Relay
                         Content = new ByteArrayContent(payload)
                     };
                     httpRequest.Headers.Add("ServiceBusAuthorization", token);
-                    var response =await _httpClient.SendAsync(httpRequest).ConfigureAwait(false);
+                    var response = await _httpClient.SendAsync(httpRequest).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
                     var responseBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                     return responseBytes;

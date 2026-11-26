@@ -40,7 +40,7 @@ namespace SoEx.Protection.Jose
             return new ValueTask<byte[]>([]);
         }
 
-        public ValueTask<byte[]> Unprotect(ReadOnlyMemory<byte> payload,  MessageContext context)
+        public ValueTask<byte[]> Unprotect(ReadOnlyMemory<byte> payload, MessageContext context)
         {
             if (context.Role == ProtectionRole.Client)
             {
@@ -96,7 +96,7 @@ namespace SoEx.Protection.Jose
                 throw new MessageProtectionException(ProtectionFailure.DecryptFailed);
             }
 
-            IDictionary<string,object> inner = JoseEnvelope.Headers(signed, 3);
+            IDictionary<string, object> inner = JoseEnvelope.Headers(signed, 3);
             if (JoseEnvelope.String(inner, "alg") != "ES256")
             {
                 throw new MessageProtectionException(ProtectionFailure.UnsupportedSuite);

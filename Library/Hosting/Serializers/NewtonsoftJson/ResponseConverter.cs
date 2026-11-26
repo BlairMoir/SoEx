@@ -14,7 +14,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            if(value is null)
+            if (value is null)
             {
                 writer.WriteNull();
                 return;
@@ -28,7 +28,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
             if (reader.TokenType == JsonToken.Null)
                 return null;
 
-            return JToken.Load(reader).ToObject(_returnType,serializer);
+            return JToken.Load(reader).ToObject(_returnType, serializer);
         }
 
         public override bool CanConvert(Type objectType) => objectType == typeof(object);

@@ -11,11 +11,12 @@ namespace SoEx.Protection
             if (config is CertificateFile file && needsPrivateKey)
             {
                 certificate = X509CertificateLoader.LoadPkcs12FromFile(file.Path, file.Password);
-            }else if (config is CertificateFile publicFile)
+            }
+            else if (config is CertificateFile publicFile)
             {
                 certificate = X509CertificateLoader.LoadCertificateFromFile(publicFile.Path);
             }
-            else if(config is CertificateStore store)
+            else if (config is CertificateStore store)
             {
                 certificate = FromStore(store);
             }
@@ -71,7 +72,7 @@ namespace SoEx.Protection
 
         private static X509Certificate2 FromStore(CertificateStore reference)
         {
-            using(var store = new X509Store(reference.Name, reference.Location))
+            using (var store = new X509Store(reference.Name, reference.Location))
             {
                 store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
                 X509Certificate2Collection found =

@@ -6,7 +6,7 @@ namespace SoEx.Hosting.Default
     {
         public object Protect<T>(T message, string? key = null)
         {
-            if(message is null)
+            if (message is null)
                 return string.Empty;
 
             return message;

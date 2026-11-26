@@ -6,7 +6,9 @@ namespace SoEx.Topology.Pipeline
         {
             var replacementSystem = new Topology.System()
             {
-                Clients = system.Clients, SubSystems = system.SubSystems, Defaults = pipeline
+                Clients = system.Clients,
+                SubSystems = system.SubSystems,
+                Defaults = pipeline
             };
             return replacementSystem;
         }

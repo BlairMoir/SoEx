@@ -13,7 +13,7 @@ namespace SoEx.Hosting.Serializers.DataContract
 
         public ContractLookup(IReadOnlyCollection<Type> knownTypes)
         {
-            Register(typeof(InvocationContext),DtoName(typeof(InvocationContext)));
+            Register(typeof(InvocationContext), DtoName(typeof(InvocationContext)));
             Register(typeof(EntryContext), DtoName(typeof(EntryContext)));
             Register(typeof(PreviousEntryContext), DtoName(typeof(PreviousEntryContext)));
 

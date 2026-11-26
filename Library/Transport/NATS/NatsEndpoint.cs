@@ -35,7 +35,7 @@ namespace SoEx.Transport.NATS
         public Task Listen()
         {
             Debug.Assert(_binding is not null);
-            _natsClient = new NatsClient(new NatsOpts(){ Url = _binding.Config.Url });
+            _natsClient = new NatsClient(new NatsOpts() { Url = _binding.Config.Url });
             _subscription = Task.Run(Subscribe);
             return Task.CompletedTask;
         }
@@ -43,7 +43,7 @@ namespace SoEx.Transport.NATS
         public async Task Close()
         {
             await source.CancelAsync();
-            if(_subscription is not null)
+            if (_subscription is not null)
                 await _subscription.ConfigureAwait(false);
 
             if (_natsClient is not null)

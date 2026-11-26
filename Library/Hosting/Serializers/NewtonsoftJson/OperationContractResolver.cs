@@ -25,7 +25,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
                 property.Converter = new ArgumentsConverter(_declaredTypes);
             }
 
-            if ( _returnType != null && member.DeclaringType == typeof(InvocationResponse) &&
+            if (_returnType != null && member.DeclaringType == typeof(InvocationResponse) &&
                 member.Name == nameof(InvocationResponse.Response))
             {
                 property.Converter = new ResponseConverter(_returnType);

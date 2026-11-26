@@ -10,7 +10,7 @@ namespace SoEx.Transport.RabbitMq
     public class RabbitEventChannel<I> : SoEx.Topology.IChannel
     {
         private RabbitEventBinding<I>? _binding;
-        private static readonly ConcurrentDictionary<string,SharedPublisher> s_shared = new();
+        private static readonly ConcurrentDictionary<string, SharedPublisher> s_shared = new();
         private SharedPublisher? _shared;
         private static readonly TimeSpan s_reconectWait = TimeSpan.FromSeconds(30);
 
@@ -55,9 +55,9 @@ namespace SoEx.Transport.RabbitMq
 
             lock (shared)
             {
-                if(ReferenceEquals(shared.Publisher, lazyPublisher))
+                if (ReferenceEquals(shared.Publisher, lazyPublisher))
                 {
-                    if(lazyPublisher is not null && currentPublisher is not null &&  currentPublisher.IsCompletedSuccessfully)
+                    if (lazyPublisher is not null && currentPublisher is not null && currentPublisher.IsCompletedSuccessfully)
                         _ = currentPublisher.Result.DisposeAsync();
                     shared.Publisher = new Lazy<Task<Publisher>>(Open);
                 }
@@ -93,7 +93,7 @@ namespace SoEx.Transport.RabbitMq
 
         public void Bind(Binding binding)
         {
-            if(binding is RabbitEventBinding<I> rabbitBinding)
+            if (binding is RabbitEventBinding<I> rabbitBinding)
             {
                 _binding = rabbitBinding;
                 _shared = s_shared.GetOrAdd(Key(rabbitBinding), _ => new SharedPublisher());

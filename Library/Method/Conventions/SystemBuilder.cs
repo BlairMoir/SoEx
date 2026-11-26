@@ -12,7 +12,7 @@ namespace SoEx.Method.Conventions
         internal static string ComponentName(Type implementationType, string suffix, string error)
         {
             var typeName = implementationType.Name;
-            if(!typeName.EndsWith(suffix))
+            if (!typeName.EndsWith(suffix))
                 throw new ArgumentException(error);
             return typeName[..^suffix.Length];
         }
@@ -61,12 +61,12 @@ namespace SoEx.Method.Conventions
         public Topology.System Build(IPipeline? defaultPipeline = null)
         {
             ThrowNullEntryPoints();
-            var managers = _methodSubSystems.Values.Where( m => !IsUtility(m)).ToArray();
+            var managers = _methodSubSystems.Values.Where(m => !IsUtility(m)).ToArray();
             var subscriptions = Subscriptions(managers);
             ThrowUnboundEvents(subscriptions);
 
             var eventBindings = EventBindings(managers);
-            Client[] eventClients = [.. eventBindings.Values.Select( c=> c.ToClient())];
+            Client[] eventClients = [.. eventBindings.Values.Select(c => c.ToClient())];
             Client[] sharedUtilities = SharedUtilityClients();
 
             List<Topology.SubSystem> subSystems = new List<Topology.SubSystem>();
@@ -79,14 +79,14 @@ namespace SoEx.Method.Conventions
                 }
                 else
                 {
-                    subSystems.Add(ComposeManager(subsystem, subscriptions[subsystem.Name], eventBindings, eventClients, sharedUtilities ));
+                    subSystems.Add(ComposeManager(subsystem, subscriptions[subsystem.Name], eventBindings, eventClients, sharedUtilities));
                 }
             }
 
             var system = new Topology.System()
             {
                 Clients = [],
-                SubSystems = [ .. subSystems,],
+                SubSystems = [.. subSystems,],
                 Defaults = defaultPipeline,
             };
 
@@ -95,7 +95,7 @@ namespace SoEx.Method.Conventions
 
         private void ThrowNullEntryPoints()
         {
-            var missing = _methodSubSystems.Values.Where(s => s.EntryPoint is null).Select( s=> s.Name).ToArray();
+            var missing = _methodSubSystems.Values.Where(s => s.EntryPoint is null).Select(s => s.Name).ToArray();
             if (missing.Any())
             {
                 var message = $"Subsystems {string.Join(", ", missing)} have no entry point";
@@ -110,13 +110,13 @@ namespace SoEx.Method.Conventions
 
         private static IEnumerable<Type> ImplementedEvents(MethodSubSystem subsystem)
         {
-            return subsystem.EntryPoint!.Implementation.GetInterfaces().Where( w=> w.Name.EndsWith(Keywords.Event));
+            return subsystem.EntryPoint!.Implementation.GetInterfaces().Where(w => w.Name.EndsWith(Keywords.Event));
         }
 
         private static Dictionary<string, Type[]> Subscriptions(MethodSubSystem[] managers)
         {
             return managers.ToDictionary(s => s.Name, s => ImplementedEvents(s)
-                .Where( ev=> !s.EntryPoint!.Endpoints.Any( a=> a.Contract ==ev))
+                .Where(ev => !s.EntryPoint!.Endpoints.Any(a => a.Contract == ev))
                 .ToArray()
             );
         }
@@ -125,7 +125,7 @@ namespace SoEx.Method.Conventions
         {
             if (_eventBinding is not null)
                 return;
-            var unboundEvents = subscriptions.Values.SelectMany(e=> e).Union(_events).ToArray();
+            var unboundEvents = subscriptions.Values.SelectMany(e => e).Union(_events).ToArray();
             if (unboundEvents.Any())
             {
                 var message = $"Events {string.Join(", ", unboundEvents.Select(e => e.Name))} have no binding";
@@ -149,7 +149,7 @@ namespace SoEx.Method.Conventions
 
         private static Client[] ClientsFor(IEnumerable<MethodComponent> components, string subSystemName)
         {
-            return [.. components.SelectMany(c=> ClientsFor(c.Host, subSystemName))];
+            return [.. components.SelectMany(c => ClientsFor(c.Host, subSystemName))];
         }
 
         private static IEnumerable<Client> ClientsFor(Topology.Host host, string subSystemName)
@@ -162,7 +162,7 @@ namespace SoEx.Method.Conventions
         {
             return entryPoint with
             {
-                Endpoints = [..entryPoint.Endpoints, .. subscriptions],
+                Endpoints = [.. entryPoint.Endpoints, .. subscriptions],
                 Proxies =
                 [
                     ..entryPoint.Proxies, .. components,
@@ -174,7 +174,7 @@ namespace SoEx.Method.Conventions
 
         private static Topology.SubSystem ComposeUtility(MethodSubSystem subsystem)
         {
-            var utilitySubsystem = Compose(subsystem, [],[],[]);
+            var utilitySubsystem = Compose(subsystem, [], [], []);
             return utilitySubsystem;
         }
 
@@ -191,12 +191,12 @@ namespace SoEx.Method.Conventions
         {
             Client[] access = ClientsFor(methodSubsystem.Access, methodSubsystem.Name);
             Client[] engines = ClientsFor(methodSubsystem.Engines, methodSubsystem.Name);
-            Client[] utilities = [..ClientsFor(methodSubsystem.Utilities, methodSubsystem.Name),..sharedUtilities];
+            Client[] utilities = [.. ClientsFor(methodSubsystem.Utilities, methodSubsystem.Name), .. sharedUtilities];
 
             var topologySubsystem = new SubSystem()
             {
                 Name = methodSubsystem.Name,
-                EntryPoint = EntryPoint(methodSubsystem.EntryPoint!, subscriptions, [ ..engines, .. access, .. utilities], eventClients),
+                EntryPoint = EntryPoint(methodSubsystem.EntryPoint!, subscriptions, [.. engines, .. access, .. utilities], eventClients),
                 Components = [
                     .. methodSubsystem.Engines.Select(e=> WithProxies(e.Host, [.. access, .. utilities])),
                     .. methodSubsystem.Access.Select(e=> WithProxies(e.Host, [.. utilities])),
@@ -209,7 +209,7 @@ namespace SoEx.Method.Conventions
 
         private static Topology.Host WithProxies(Topology.Host host, Client[] clients)
         {
-            return host with { Proxies = [..host.Proxies, ..clients] };
+            return host with { Proxies = [.. host.Proxies, .. clients] };
         }
     }
 }

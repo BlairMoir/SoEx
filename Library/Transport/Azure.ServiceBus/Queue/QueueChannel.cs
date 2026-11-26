@@ -62,7 +62,7 @@ namespace SoEx.Transport.Azure.ServiceBus
             string entity = config.Queue;
             var sender = await _senders.Get($"{entity}|{config.ClientKey}",
                     () => CreateSender(config, entity),
-                    c => c.IsClosed ).
+                    c => c.IsClosed).
                 ConfigureAwait(false);
             return sender;
         }
@@ -72,7 +72,7 @@ namespace SoEx.Transport.Azure.ServiceBus
             ServiceBusClient client = await _connections.Get(config.ClientKey,
                 () => Task.FromResult(config.Client()),
                 c => c.IsClosed)
-                .ConfigureAwait(false) ;
+                .ConfigureAwait(false);
             var sender = client.CreateSender(entity);
             return sender;
         }

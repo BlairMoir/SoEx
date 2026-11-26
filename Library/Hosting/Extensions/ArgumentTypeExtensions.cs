@@ -18,7 +18,7 @@ namespace SoEx.Hosting.Extensions
 
         private static object? ToTargetType(this object? value, Type targetType)
         {
-            if(value is null)
+            if (value is null)
                 return null;
 
             if (targetType.IsInstanceOfType(value))
@@ -39,7 +39,7 @@ namespace SoEx.Hosting.Extensions
                 return converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
 
             if (converter.CanConvertFromWrappedProperty(targetType))
-                return  converter.ConvertFromWrappedProperty(targetType, value);
+                return converter.ConvertFromWrappedProperty(targetType, value);
 
             return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
         }
@@ -54,7 +54,7 @@ namespace SoEx.Hosting.Extensions
             var wrappedType = property.PropertyType;
             return converter.CanConvertFrom(wrappedType);
         }
-        private static object? ConvertFromWrappedProperty(this TypeConverter converter,Type targetType, object value)
+        private static object? ConvertFromWrappedProperty(this TypeConverter converter, Type targetType, object value)
         {
             var property = targetType.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
 
@@ -72,8 +72,8 @@ namespace SoEx.Hosting.Extensions
 
         private static object? ChangeType(this object value, Type wrappedType)
         {
-            if(value is IConvertible && typeof(IConvertible).IsAssignableFrom(wrappedType))
-                return Convert.ChangeType(value,wrappedType, CultureInfo.InvariantCulture);
+            if (value is IConvertible && typeof(IConvertible).IsAssignableFrom(wrappedType))
+                return Convert.ChangeType(value, wrappedType, CultureInfo.InvariantCulture);
 
             var converter = TypeDescriptor.GetConverter(wrappedType);
             if (converter.CanConvertFrom(value.GetType()))

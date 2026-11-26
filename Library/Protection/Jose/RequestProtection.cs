@@ -59,7 +59,7 @@ namespace SoEx.Protection.Jose
         private byte[] SealReply(ReadOnlyMemory<byte> body)
         {
             OpenedMessage request = _request ?? throw new MessageProtectionException(ProtectionFailure.UnexpectedMessage);
-            Dictionary<string,object> headers = JoseEnvelope.SignedHeaders(_security.SigningKeyId, null, _time);
+            Dictionary<string, object> headers = JoseEnvelope.SignedHeaders(_security.SigningKeyId, null, _time);
             headers[JoseEnvelope.InReplyTo] = request.Nonce;
             return Seal(body, request.Sender, headers);
         }
@@ -121,7 +121,7 @@ namespace SoEx.Protection.Jose
             return JoseEnvelope.Bytes(sealedFrame);
         }
 
-        private OpenedMessage Open(ReadOnlySpan<byte> frame, Func<string,MessageSecurity.Peer?> senderLookup, bool isRequest)
+        private OpenedMessage Open(ReadOnlySpan<byte> frame, Func<string, MessageSecurity.Peer?> senderLookup, bool isRequest)
         {
             string token = JoseEnvelope.Text(frame);
             IDictionary<string, object> outer = JoseEnvelope.Headers(token, 5);
@@ -140,7 +140,8 @@ namespace SoEx.Protection.Jose
             {
                 using ECDiffieHellman own = _security.OwnEncryption();
                 signed = JWT.Decode(token, own, JweAlgorithm.ECDH_ES, JweEncryption.A256GCM);
-            }catch(Exception)
+            }
+            catch (Exception)
             {
                 throw new MessageProtectionException(ProtectionFailure.DecryptFailed);
             }
@@ -168,7 +169,8 @@ namespace SoEx.Protection.Jose
             {
                 using ECDsa verifier = sender.Signing();
                 body = JWT.DecodeBytes(signed, verifier, JwsAlgorithm.ES256);
-            }catch(Exception)
+            }
+            catch (Exception)
             {
                 throw new MessageProtectionException(ProtectionFailure.BadSignature);
             }

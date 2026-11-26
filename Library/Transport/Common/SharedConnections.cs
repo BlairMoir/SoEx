@@ -76,7 +76,7 @@ namespace SoEx.Transport
 
             foreach (var key in _connections.Keys)
             {
-                if(_connections.TryRemove(key, out var entry) && entry.IsValueCreated )
+                if (_connections.TryRemove(key, out var entry) && entry.IsValueCreated)
                     await DisposeWhenOpen(entry.Value).ConfigureAwait(false);
             }
         }

@@ -8,7 +8,7 @@ namespace SoEx.Hosting.Serializers.Common
         {
             foreach (var type in types)
             {
-                if(type.FullName is null)
+                if (type.FullName is null)
                     continue;
 
                 var collectionTypes = For(type);
@@ -24,7 +24,7 @@ namespace SoEx.Hosting.Serializers.Common
             yield return type.MakeArrayType();
             yield return typeof(List<>).MakeGenericType(type);
             yield return typeof(HashSet<>).MakeGenericType(type);
-            foreach(var keyType in KeyTypes)
+            foreach (var keyType in KeyTypes)
             {
                 yield return typeof(Dictionary<,>).MakeGenericType(keyType, type);
             }

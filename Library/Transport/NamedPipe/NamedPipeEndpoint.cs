@@ -41,7 +41,7 @@ namespace SoEx.Transport.NamedPipe
 
         public async Task Close()
         {
-            if(namedPipeServer is not null)
+            if (namedPipeServer is not null)
             {
                 await namedPipeServer.DisposeAsync();
                 namedPipeServer = null;

@@ -9,10 +9,10 @@ namespace SoEx.Hosting
         private readonly ILogger<ErrorInterceptor> _logger;
         private readonly ITelemetryConfidentiality _telemetryConfidentiality;
 
-        public ErrorInterceptor(ILogger<ErrorInterceptor> logger, ITelemetryConfidentiality  telemetryConfidentiality)
+        public ErrorInterceptor(ILogger<ErrorInterceptor> logger, ITelemetryConfidentiality telemetryConfidentiality)
         {
             _logger = logger;
-            _telemetryConfidentiality =  telemetryConfidentiality;
+            _telemetryConfidentiality = telemetryConfidentiality;
         }
 
         public void Intercept(IInvocation invocation)

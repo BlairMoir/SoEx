@@ -56,8 +56,8 @@ namespace SoEx.Protection
 
         internal sealed class RequestPolicy(Peer? recipient, Dictionary<string, Peer> callers, TimeSpan window, bool bindsReplies)
         {
-            public Peer? Recipient { get; } =  recipient;
-            public TimeSpan Window  { get; } = window;
+            public Peer? Recipient { get; } = recipient;
+            public TimeSpan Window { get; } = window;
             public bool BindsReplies { get; } = bindsReplies;
 
             public Peer? CallerBy(string signingKeyId)
@@ -73,7 +73,7 @@ namespace SoEx.Protection
                     recipient = Peer.From(options.Recipient);
                 }
 
-                return new  RequestPolicy(recipient, BySigningKeyId(options.Callers), options.FreshnessWindow, options.BindRepliesToRequests);
+                return new RequestPolicy(recipient, BySigningKeyId(options.Callers), options.FreshnessWindow, options.BindRepliesToRequests);
             }
         }
 
@@ -83,7 +83,7 @@ namespace SoEx.Protection
         {
             public SymmetricKey Current { get; } = current;
             public SymmetricKey? Previous { get; } = previous;
-            public TimeSpan Window  { get; } = window;
+            public TimeSpan Window { get; } = window;
 
             public Peer? PublisherBy(string signingKeyId)
             {
@@ -133,7 +133,7 @@ namespace SoEx.Protection
 
             public ECDsa Signing()
             {
-                ECDsa key  = ECDsa.Create();
+                ECDsa key = ECDsa.Create();
                 key.ImportSubjectPublicKeyInfo(_signingSpki, out _);
                 return key;
             }

@@ -41,7 +41,7 @@ namespace SoEx.Hosting.Serializers.SystemText
         public override void Write(Utf8JsonWriter writer, object?[] value, JsonSerializerOptions options)
         {
             writer.WriteStartArray();
-            for(int argument = 0; argument < value.Length; argument++)
+            for (int argument = 0; argument < value.Length; argument++)
             {
                 JsonSerializer.Serialize(writer, value[argument], TargetOf(argument), options);
             }

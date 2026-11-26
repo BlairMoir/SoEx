@@ -36,7 +36,7 @@ namespace SoEx.Hosting.Serializers.Common
 
         private void RegisterCollection(Type type)
         {
-            if(Register(type))
+            if (Register(type))
             {
                 _collections.Add(type);
             }
@@ -52,8 +52,8 @@ namespace SoEx.Hosting.Serializers.Common
                 var definition = type.GetGenericTypeDefinition();
                 var args = type.GetGenericArguments();
 
-                if (definition == typeof(List<>))       return $"List<{args[0].FullName}>";
-                if (definition == typeof(HashSet<>))    return $"HashSet<{args[0].FullName}>";
+                if (definition == typeof(List<>)) return $"List<{args[0].FullName}>";
+                if (definition == typeof(HashSet<>)) return $"HashSet<{args[0].FullName}>";
                 if (definition == typeof(Dictionary<,>)) return $"Dictionary<{args[0].FullName};{args[1].FullName}>";
 
                 return $"{definition.FullName}<{string.Join(";", args.Select(Discriminate))}>";

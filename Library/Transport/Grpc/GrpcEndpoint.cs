@@ -35,7 +35,7 @@ namespace SoEx.Transport.Grpc
         {
             if (binding is GrpcBinding<I> grpcBinding)
             {
-                _grpcBinding= grpcBinding;
+                _grpcBinding = grpcBinding;
                 _listener.Bind(_grpcBinding.Config);
             }
         }
@@ -52,7 +52,7 @@ namespace SoEx.Transport.Grpc
 
         private async Task<byte[]> DispatchAsync(byte[] serializedRequest)
         {
-            using(var activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(GrpcEndpoint<I>)}", ActivityKind.Server))
+            using (var activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{typeof(GrpcEndpoint<I>)}", ActivityKind.Server))
             {
                 try
                 {

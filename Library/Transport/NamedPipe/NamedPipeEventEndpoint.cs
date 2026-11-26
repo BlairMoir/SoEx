@@ -10,14 +10,14 @@ namespace SoEx.Transport.NamedPipe
     {
 
         readonly ILogger<NamedPipeEventEndpoint<I>> _logger;
-        private Channel<byte[]> _channel = System.Threading.Channels.Channel.CreateBounded<byte[]>(1000) ;
+        private Channel<byte[]> _channel = System.Threading.Channels.Channel.CreateBounded<byte[]>(1000);
         readonly IEndpointPipeline _endpointPipeLine;
         NamedPipeEventBinding<I>? _binding;
         IIpcServer? namedPipeServer;
         private Task? _reader;
 
 
-        public NamedPipeEventEndpoint( ILogger<NamedPipeEventEndpoint<I>> logger ,  IEndpointPipeline endpointPipeLine)
+        public NamedPipeEventEndpoint(ILogger<NamedPipeEventEndpoint<I>> logger, IEndpointPipeline endpointPipeLine)
         {
             _logger = logger;
             _endpointPipeLine = endpointPipeLine;
@@ -61,13 +61,13 @@ namespace SoEx.Transport.NamedPipe
 
         private async Task ReadChannelAsync()
         {
-            await foreach(byte[] request in _channel.Reader.ReadAllAsync())
+            await foreach (byte[] request in _channel.Reader.ReadAllAsync())
             {
                 try
                 {
                     await DispatchAsync(request);
                 }
-                catch(Exception exception)
+                catch (Exception exception)
                 {
                     _logger.LogError(exception, exception.Message);
                 }

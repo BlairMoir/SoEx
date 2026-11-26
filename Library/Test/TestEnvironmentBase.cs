@@ -28,7 +28,7 @@ namespace SoEx.Test
 
         public void SoExTestExceptionMode(ExceptionMode exceptionMode)
         {
-            _testExceptionMode =  new TestExceptionMode(){ Mode = exceptionMode };
+            _testExceptionMode = new TestExceptionMode() { Mode = exceptionMode };
         }
 
         public void DefaultPolicies(Type[] policies)
@@ -67,7 +67,7 @@ namespace SoEx.Test
                 Clients = [new Client<I>() { Service = new InProcBinding<I>(subsystemName), SubSystem = subsystemName }],
                 Defaults = orginalTopo.Defaults
             };
-            await BuildAndInvoke(system => system.Proxy(callerFunc) , newTopo, knownTypes);
+            await BuildAndInvoke(system => system.Proxy(callerFunc), newTopo, knownTypes);
         }
 
         public async Task BuildAndInvoke(Func<SystemHarness, Task> systemFunc, SoEx.Topology.System? system = null,
@@ -164,8 +164,8 @@ namespace SoEx.Test
             Client RedirectClient(Client client) => client with { Service = CheckEventBinding(client.Service, eventDirectory) };
             Host RedirectHost(Host host) => host with
             {
-                Endpoints = [..host.Endpoints.Select(s => CheckEventBinding(s, eventDirectory))],
-                Proxies = [..host.Proxies.Select(RedirectClient)]
+                Endpoints = [.. host.Endpoints.Select(s => CheckEventBinding(s, eventDirectory))],
+                Proxies = [.. host.Proxies.Select(RedirectClient)]
             };
 
             return topology with
@@ -175,7 +175,7 @@ namespace SoEx.Test
                     EntryPoint = RedirectHost(s.EntryPoint),
                     Components = [..s.Components.Select(RedirectHost)]
                 })],
-                Clients = [..topology.Clients.Select(RedirectClient)]
+                Clients = [.. topology.Clients.Select(RedirectClient)]
             };
         }
 

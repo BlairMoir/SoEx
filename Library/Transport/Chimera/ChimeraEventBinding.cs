@@ -21,7 +21,7 @@ namespace SoEx.Transport.Chimera
     {
         public ChimeraEventBinding(string subSystem, ChimeraOptions options, string topic) : base(
             typeof(I),
-                new ChimeraEventTransport(){ Address = new Address.Single(new Uri($"soex.chimera://{topic}"))},
+                new ChimeraEventTransport() { Address = new Address.Single(new Uri($"soex.chimera://{topic}")) },
                     subSystem,
                 options,
                 topic

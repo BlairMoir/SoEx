@@ -11,7 +11,7 @@ namespace SoEx.Hosting.Serializers.SystemText
     {
         private readonly JsonSerializerOptions _options;
         private readonly Type[] _knownTypes;
-        private readonly ConcurrentDictionary<(Type contract, string method),JsonSerializerOptions> _optionCache = new();
+        private readonly ConcurrentDictionary<(Type contract, string method), JsonSerializerOptions> _optionCache = new();
 
         public JsonMessageSerializer(KnownTypes knownTypes)
         {
@@ -25,10 +25,10 @@ namespace SoEx.Hosting.Serializers.SystemText
             var resolver = new DefaultJsonTypeInfoResolver();
             resolver.Modifiers.Add(info => ApplyPolymorphism(knownTypes, info));
 
-            if(declaredTypes.Length > 0)
+            if (declaredTypes.Length > 0)
                 resolver.Modifiers.Add(info => ApplyArgumentBinding(declaredTypes, info));
 
-            if(returnType is not null)
+            if (returnType is not null)
                 resolver.Modifiers.Add(info => ApplyResponseBinding(returnType, info));
 
             options.TypeInfoResolver = resolver;
@@ -68,7 +68,7 @@ namespace SoEx.Hosting.Serializers.SystemText
             if (info.Kind != JsonTypeInfoKind.Object)
                 return;
 
-            var derived = knownTypes.Where( t=> t != info.Type && info.Type.IsAssignableFrom(t)).ToArray();
+            var derived = knownTypes.Where(t => t != info.Type && info.Type.IsAssignableFrom(t)).ToArray();
 
             if (derived.Length == 0)
                 return;
@@ -82,13 +82,13 @@ namespace SoEx.Hosting.Serializers.SystemText
 
             foreach (var type in derived)
             {
-                info.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(type,type.FullName!));
+                info.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(type, type.FullName!));
             }
         }
 
         private JsonSerializerOptions OptionsFor(Type contract, string? methodName)
         {
-            if(methodName is null)
+            if (methodName is null)
                 return _options;
 
             Type[] declared = ContractMethod.ParameterTypes(contract, methodName);
@@ -108,7 +108,7 @@ namespace SoEx.Hosting.Serializers.SystemText
 
         public T? Deserialize<T>(byte[] payload, Type contractType, string? methodName)
         {
-            var resolvedMethodName =  methodName ?? ContractMethod.PeekMethodName(payload);
+            var resolvedMethodName = methodName ?? ContractMethod.PeekMethodName(payload);
             var options = OptionsFor(contractType, resolvedMethodName);
             return JsonSerializer.Deserialize<T>(payload, options);
         }

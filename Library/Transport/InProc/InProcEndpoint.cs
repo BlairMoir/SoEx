@@ -44,7 +44,7 @@ namespace SoEx.Transport.InProc
         {
             if (_binding is not null)
             {
-                _listeners.Deregister(_binding.Transport.Address.Uri,this);
+                _listeners.Deregister(_binding.Transport.Address.Uri, this);
             }
             return Task.CompletedTask;
         }

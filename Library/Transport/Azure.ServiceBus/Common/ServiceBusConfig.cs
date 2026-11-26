@@ -8,9 +8,9 @@ namespace SoEx.Transport.Azure.ServiceBus
         private static readonly ConditionalWeakTable<Func<ServiceBusClient>, string> s_clientKeys = new();
         public required string Namespace { get; init; }
         public required Func<ServiceBusClient> Client { get; init; }
-        public  ServiceBusProcessorOptions Processor { get; init; } = new () { MaxConcurrentCalls = 16 };
+        public ServiceBusProcessorOptions Processor { get; init; } = new() { MaxConcurrentCalls = 16 };
         public Redelivery Redelivery { get; init; } = Redelivery.AfterLockExpiry;
 
-        internal string ClientKey => s_clientKeys.GetValue(Client, _=> Guid.NewGuid().ToString("N"));
+        internal string ClientKey => s_clientKeys.GetValue(Client, _ => Guid.NewGuid().ToString("N"));
     }
 }

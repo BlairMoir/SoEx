@@ -7,7 +7,7 @@ using SoEx.Topology;
 
 namespace SoEx.Transport.Azure.ServiceBus
 {
-    public class TopicEventEndpoint<I> : ServiceBusEndpoint<I> , IEndpoint where I : class
+    public class TopicEventEndpoint<I> : ServiceBusEndpoint<I>, IEndpoint where I : class
     {
         private TopicEventBinding<I>? _binding;
         private string? _subscriber;
@@ -66,7 +66,7 @@ namespace SoEx.Transport.Azure.ServiceBus
             }
             catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
             {
-                _logger.LogDebug("Topic/Subscription already exists topic:{Topic} subscriber:{Subscriber}",topicName, _subscriber);
+                _logger.LogDebug("Topic/Subscription already exists topic:{Topic} subscriber:{Subscriber}", topicName, _subscriber);
             }
             catch (Exception)
             {

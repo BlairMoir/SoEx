@@ -7,7 +7,7 @@ namespace SoEx.Hosting
         private static readonly ProxyGenerator s_proxyGenerator = new ProxyGenerator();
         private readonly Func<Type, ProxyInterceptor> _proxyInterceptor;
 
-        public ProxyFactory(Func<Type,ProxyInterceptor> proxyInterceptor)
+        public ProxyFactory(Func<Type, ProxyInterceptor> proxyInterceptor)
         {
             _proxyInterceptor = proxyInterceptor;
         }

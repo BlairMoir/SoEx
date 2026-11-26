@@ -38,7 +38,7 @@ namespace SoEx.Protection
 
         public bool Seen(string key)
         {
-            return _seen.TryGetValue(key, out DateTimeOffset expires) && expires > _timeProvider.GetUtcNow() ;
+            return _seen.TryGetValue(key, out DateTimeOffset expires) && expires > _timeProvider.GetUtcNow();
         }
 
         private void Sweep(DateTimeOffset now)

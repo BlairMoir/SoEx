@@ -20,7 +20,7 @@ namespace SoEx.Transport.NATS
 
         public Type Contract => typeof(I);
 
-        public NatsEventChannel(IMessageSerializer serializer,  SharedConnections<NatsClient> connections)
+        public NatsEventChannel(IMessageSerializer serializer, SharedConnections<NatsClient> connections)
         {
             _serializer = serializer;
             _connections = connections;
@@ -78,7 +78,7 @@ namespace SoEx.Transport.NATS
 
         private static async Task<NatsClient> Connect(string url)
         {
-            var client = new  NatsClient(new NatsOpts(){ Url = url});
+            var client = new NatsClient(new NatsOpts() { Url = url });
             try
             {
                 await client.ConnectAsync().ConfigureAwait(false);

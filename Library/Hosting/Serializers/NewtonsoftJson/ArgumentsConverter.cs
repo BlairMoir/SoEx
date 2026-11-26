@@ -40,7 +40,7 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
                     writer.WriteNull();
                     continue;
                 }
-                serializer.Serialize(writer, current,TargetOf(argument));
+                serializer.Serialize(writer, current, TargetOf(argument));
             }
 
             writer.WriteEndArray();
@@ -48,14 +48,14 @@ namespace SoEx.Hosting.Serializers.NewtonsoftJson
 
         public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
-            if(reader.TokenType == JsonToken.Null)
-               return null;
+            if (reader.TokenType == JsonToken.Null)
+                return null;
 
             JArray array = JArray.Load(reader);
             var arguments = new object?[array.Count];
             for (int argument = 0; argument < array.Count; argument++)
             {
-                arguments[argument] = array[argument].ToObject(TargetOf(argument),serializer);
+                arguments[argument] = array[argument].ToObject(TargetOf(argument), serializer);
             }
 
             return arguments;

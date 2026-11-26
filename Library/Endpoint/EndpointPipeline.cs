@@ -16,7 +16,7 @@ namespace SoEx.Endpoint
         readonly ExceptionMode _exceptionMode;
         readonly ITelemetryConfidentiality _telemetryConfidentiality;
 
-        public EndpointPipeline(ILogger<EndpointPipeline> logger, ISubSystemScope subsystemlifeTimeScope, ITelemetryConfidentiality  telemetryConfidentiality, TestExceptionMode? testExceptionMode = null)
+        public EndpointPipeline(ILogger<EndpointPipeline> logger, ISubSystemScope subsystemlifeTimeScope, ITelemetryConfidentiality telemetryConfidentiality, TestExceptionMode? testExceptionMode = null)
         {
             _subsystemlifeTimeScope = subsystemlifeTimeScope;
             _logger = logger;
@@ -46,7 +46,7 @@ namespace SoEx.Endpoint
                 {
                     var dispatcher = (IDispatcher)requestScope.Resolve(dispatcherType);
                     var serializer = (IMessageSerializer)requestScope.Resolve(serializerType);
-                    var protector = (IMessageProtection)requestScope.Resolve(protectorType,protectionOptionsParameter);
+                    var protector = (IMessageProtection)requestScope.Resolve(protectorType, protectionOptionsParameter);
 
                     byte[] serializedRequest = await protector.Unprotect(payload, protectionContext);
                     InvocationRequest? request = serializer.Deserialize<InvocationRequest>(serializedRequest, typeof(I));

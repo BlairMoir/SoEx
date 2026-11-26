@@ -4,6 +4,6 @@ namespace SoEx.Transport.Azure.ServiceBus
 {
     public class TopicConfig : ServiceBusConfig
     {
-       public Func<ServiceBusAdministrationClient>? Administration { get; init; }
+        public Func<ServiceBusAdministrationClient>? Administration { get; init; }
     }
 }

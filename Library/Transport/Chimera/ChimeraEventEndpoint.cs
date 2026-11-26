@@ -43,11 +43,11 @@ namespace SoEx.Transport.Chimera
 
         public Task Listen()
         {
-            if(_binding == null || _subscriber == null)
+            if (_binding == null || _subscriber == null)
                 return Task.CompletedTask;
 
             _subscription = SqliteSubscription.Open(_subscriber, _binding.Topic, _binding.Options,
-                new SubscriptionOptions(){ PollInterval =  TimeSpan.FromMilliseconds(20) });
+                new SubscriptionOptions() { PollInterval = TimeSpan.FromMilliseconds(20) });
 
             _listener = Task.Factory.StartNew(Process, TaskCreationOptions.LongRunning).Unwrap();
 
@@ -61,7 +61,7 @@ namespace SoEx.Transport.Chimera
             if (_listener != null)
                 await _listener.ConfigureAwait(false);
 
-            if(_subscription != null)
+            if (_subscription != null)
                 await _subscription.DisposeAsync().ConfigureAwait(false);
         }
 

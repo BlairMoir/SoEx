@@ -20,7 +20,7 @@ namespace SoEx.Hosting
     internal static class TopologyRegistration
     {
         private static readonly ProxyGenerator s_proxyGenerator = new ProxyGenerator();
-        internal static void RegisterBindings(this ContainerBuilder hostApplicationContainer,  Topology.System systemTopology, KnownTypes knownTypes)
+        internal static void RegisterBindings(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, KnownTypes knownTypes)
         {
             var clientBindings = systemTopology.Clients
                 .Select(client => client.Service.Pipeline);
@@ -32,30 +32,30 @@ namespace SoEx.Hosting
             var endpointClientBindings =
                 systemTopology.SubSystems
                     .SelectMany(subsystem =>
-                        subsystem.EntryPoint.Proxies.Select( s=> s.Service.Pipeline));
+                        subsystem.EntryPoint.Proxies.Select(s => s.Service.Pipeline));
             var componentBindings =
                 systemTopology.SubSystems
                     .SelectMany(subsystem =>
                         subsystem.Components
-                            .SelectMany(component => component.Endpoints.Select( s=> s.Pipeline)));
+                            .SelectMany(component => component.Endpoints.Select(s => s.Pipeline)));
             var componentClientBindings =
                 systemTopology.SubSystems
                     .SelectMany(subsystem =>
                         subsystem.Components
-                            .SelectMany(component => component.Proxies.Select( s=> s.Service.Pipeline)));
+                            .SelectMany(component => component.Proxies.Select(s => s.Service.Pipeline)));
 
-            hostApplicationContainer.RegisterBindings(knownTypes, systemTopology.Defaults, [..clientBindings, ..endpointBindings, ..endpointClientBindings, ..componentBindings, ..componentClientBindings]);
+            hostApplicationContainer.RegisterBindings(knownTypes, systemTopology.Defaults, [.. clientBindings, .. endpointBindings, .. endpointClientBindings, .. componentBindings, .. componentClientBindings]);
         }
 
-        internal static void RegisterBindings(this ContainerBuilder hostApplicationContainer,  Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? defaultPipeline)
+        internal static void RegisterBindings(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? defaultPipeline)
         {
-            var clientBindings = hostTopology.Proxies.Select( s=> s.Service.Pipeline);
+            var clientBindings = hostTopology.Proxies.Select(s => s.Service.Pipeline);
             var endpointBindings = hostTopology.Endpoints.Select(s => s.Pipeline);
-            hostApplicationContainer.RegisterBindings(knownTypes, defaultPipeline, [..clientBindings, ..endpointBindings,]);
+            hostApplicationContainer.RegisterBindings(knownTypes, defaultPipeline, [.. clientBindings, .. endpointBindings,]);
 
         }
 
-        private static void RegisterBindings(this ContainerBuilder hostApplicationContainer, KnownTypes? knownTypes, IPipeline? defaultPipeline , params IBindingPipeline?[] bindingPipelines)
+        private static void RegisterBindings(this ContainerBuilder hostApplicationContainer, KnownTypes? knownTypes, IPipeline? defaultPipeline, params IBindingPipeline?[] bindingPipelines)
         {
             var pipeline = defaultPipeline ?? new DefaultPipeline();
             HashSet<Type?> defaults = new HashSet<Type?>(){
@@ -74,7 +74,7 @@ namespace SoEx.Hosting
                     .Where(w => w is not null).Cast<Type>().Distinct();
             foreach (var pipelineType in registerablePipelines)
             {
-                if(defaults.Contains(pipelineType))
+                if (defaults.Contains(pipelineType))
                     continue;
 
                 var registration = hostApplicationContainer.RegisterType(pipelineType).AsSelf();
@@ -89,7 +89,7 @@ namespace SoEx.Hosting
         private static void RegisterPipeline(this ContainerBuilder container, KnownTypes knownTypes, IPipeline pipeline)
         {
             container.RegisterType<EndpointLifetimeService>().As<IHostedService>();
-            container.RegisterTypes(pipeline.ServiceInterceptors.Select( s=> s.ImplementationType).ToArray());
+            container.RegisterTypes(pipeline.ServiceInterceptors.Select(s => s.ImplementationType).ToArray());
             container.RegisterType<EndpointPipeline>().As<IEndpointPipeline>();
             container.RegisterType<ChannelPipeline>().As<IChannelPipeline>();
             container.RegisterType<RegisteredEndpoints>().SingleInstance().AsSelf();
@@ -153,7 +153,7 @@ namespace SoEx.Hosting
 
         private static void RegisterComponentHost(ContainerBuilder hostApplicationContainer, Topology.Host component, IPipeline pipeline)
         {
-            hostApplicationContainer.RegisterBuildCallback( hostApplicationScope =>
+            hostApplicationContainer.RegisterBuildCallback(hostApplicationScope =>
             {
                 ComponentHostFactory(hostApplicationScope, component, pipeline);
             });
@@ -207,7 +207,7 @@ namespace SoEx.Hosting
                 {
                     componentContainer.RegisterType(component.Implementation).Named("Endpoint", cepc)
                         .EnableInterfaceInterceptors()
-                        .InterceptedBy(pipeline.ServiceInterceptors.Select( s=> s.ImplementationType).ToArray());
+                        .InterceptedBy(pipeline.ServiceInterceptors.Select(s => s.ImplementationType).ToArray());
                 }
                 RegisterProxies(componentContainer, component.Proxies);
             }
@@ -248,10 +248,10 @@ namespace SoEx.Hosting
 
         private static void ValidateEndpointContract(Binding endpoint)
         {
-            var groupedByName = endpoint.Contract.Operations().GroupBy( g=> g.Name).ToArray();
+            var groupedByName = endpoint.Contract.Operations().GroupBy(g => g.Name).ToArray();
             if (groupedByName.Any(a => a.Count() != 1))
             {
-                var duplicates =  groupedByName.Where(a => a.Count() > 1);
+                var duplicates = groupedByName.Where(a => a.Count() > 1);
                 string duplicateNames = string.Join(",", duplicates.Select(s => s.Key).ToArray());
                 throw new ArgumentException($"Topology - Endpoint contract is not valid. Contains duplicate operation name: {duplicateNames}");
             }

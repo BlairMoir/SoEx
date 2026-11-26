@@ -6,7 +6,7 @@ namespace SoEx.Hosting.Serializers.InProcReference
 {
     public class InProcReferenceSerializer : IMessageSerializer
     {
-        static readonly ConcurrentDictionary<Guid,(object? Value, long Timestamp)> References = new();
+        static readonly ConcurrentDictionary<Guid, (object? Value, long Timestamp)> References = new();
         private static long _nextSweep;
         private static readonly long s_ttl = Stopwatch.Frequency * 60;
 
@@ -20,7 +20,8 @@ namespace SoEx.Hosting.Serializers.InProcReference
             return Deserialize<T>(payload);
         }
 
-        public byte[] Serialize<T>(T? @object){
+        public byte[] Serialize<T>(T? @object)
+        {
 
             return Put(Freeze(@object));
         }
@@ -39,7 +40,7 @@ namespace SoEx.Hosting.Serializers.InProcReference
                 MethodName = r.MethodName,
                 Arguments = Immutability.Clone(Immutability.Require(r.Arguments)),
                 AmbientContext = (byte[]?)r.AmbientContext?.Clone(),
-                FrameworkContext =  (byte[]?)r.FrameworkContext?.Clone(),
+                FrameworkContext = (byte[]?)r.FrameworkContext?.Clone(),
             },
             InvocationResponse r => new InvocationResponse()
             {
@@ -69,9 +70,9 @@ namespace SoEx.Hosting.Serializers.InProcReference
 
         private static void Sweep(long now)
         {
-            foreach(var (id, entry) in References)
+            foreach (var (id, entry) in References)
             {
-                if(now - entry.Timestamp > s_ttl)
+                if (now - entry.Timestamp > s_ttl)
                 {
                     References.TryRemove(id, out _);
                 }

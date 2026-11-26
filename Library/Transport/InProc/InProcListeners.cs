@@ -14,7 +14,7 @@ namespace SoEx.Transport.InProc
 
         internal void Register<I>(Uri address, InProcEndpoint<I> endpoint) where I : class
         {
-            if(!dictionary.TryAdd(address, endpoint))
+            if (!dictionary.TryAdd(address, endpoint))
             {
                 throw new InvalidOperationException($"Address already registered {address}");
             }
@@ -22,7 +22,7 @@ namespace SoEx.Transport.InProc
 
         internal void Deregister<I>(Uri address, InProcEndpoint<I> endpoint) where I : class
         {
-           dictionary.TryRemove(new KeyValuePair<Uri, object>(address, endpoint));
+            dictionary.TryRemove(new KeyValuePair<Uri, object>(address, endpoint));
         }
 
         public InProcEndpoint<I> ForAddress<I>(Uri address) where I : class

@@ -38,7 +38,7 @@ namespace SoEx.Transport.Grpc
                     // sequential failover if a backend is down
                     long now = Environment.TickCount64;
                     Uri[] uris = _grpcBinding.Transport.Address.Uris
-                        .OrderBy( u => HasFailures(u, now)).ToArray();
+                        .OrderBy(u => HasFailures(u, now)).ToArray();
                     foreach (var uri in uris[..^1])
                     {
                         try
@@ -50,7 +50,7 @@ namespace SoEx.Transport.Grpc
                             // continue if the backend is unreachable
                         }
                     }
-                    return await InvokeAsync(payload, uris[^1],activity).ConfigureAwait(false);
+                    return await InvokeAsync(payload, uris[^1], activity).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -97,7 +97,7 @@ namespace SoEx.Transport.Grpc
 
         private static void ClearFailure(Uri uri)
         {
-            if(s_lastFailure.ContainsKey(uri))
+            if (s_lastFailure.ContainsKey(uri))
                 s_lastFailure.TryRemove(uri, out _);
         }
 
@@ -117,7 +117,7 @@ namespace SoEx.Transport.Grpc
         private static Lazy<GrpcClient> LazyClient(Uri uri) => new Lazy<GrpcClient>(() =>
             GrpcClient.ForAddress(uri, new GrpcChannelOptions()
             {
-                HttpHandler  = new SocketsHttpHandler()
+                HttpHandler = new SocketsHttpHandler()
                 {
                     ConnectTimeout = TimeSpan.FromSeconds(2)
                 }

@@ -15,7 +15,7 @@ namespace SoEx.Transport.RabbitMq
         public static async Task<IConnection> ConnectAsync<I>(this RabbitEventBinding<I> binding, string connectionName)
         {
             var addresses = binding.Transport.Address.Uris;
-            Uri[] uris = [.. addresses.Select( (address,node) => WithCredentials(address, binding.RabbitConfig[node])).ToArray()];
+            Uri[] uris = [.. addresses.Select((address, node) => WithCredentials(address, binding.RabbitConfig[node])).ToArray()];
 
             Exception? lastFailure = null;
             for (int first = 0; first < uris.Length; first++)

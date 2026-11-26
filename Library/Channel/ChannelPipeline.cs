@@ -39,8 +39,8 @@ namespace SoEx.Channel
                 {
                     protectionOptionsParameter = [new TypedParameter(protectionOptions.GetType(), protectionOptions)];
                 }
-                Abstractions.Protection.ClientContext protectionContext = new ClientContext(){ Contract = channel.Contract, MethodName = request.MethodName};
-                var protector =  (IMessageProtection)_scope.Resolve(protectorType, protectionOptionsParameter);
+                Abstractions.Protection.ClientContext protectionContext = new ClientContext() { Contract = channel.Contract, MethodName = request.MethodName };
+                var protector = (IMessageProtection)_scope.Resolve(protectorType, protectionOptionsParameter);
                 var serializer = (IMessageSerializer)_scope.Resolve(serializerType);
                 byte[] serializedRequest = serializer.Serialize(request, channel.Contract, request.MethodName);
                 byte[] protectedRequest = await protector.Protect(serializedRequest, protectionContext).ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace SoEx.Channel
                 if (_exceptionMode == ExceptionMode.Bare)
                     throw;
 
-                if(_exceptionMode == ExceptionMode.Wrapped)
+                if (_exceptionMode == ExceptionMode.Wrapped)
                     throw new ClientException("Error during service invocation", ex);
 
                 // fall through equivalent to

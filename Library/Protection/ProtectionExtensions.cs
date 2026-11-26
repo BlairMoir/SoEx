@@ -9,7 +9,7 @@ namespace SoEx.Protection
         {
             services.AddSingleton(new MessageSecurity(securityConfig));
             services.TryAddSingleton(TimeProvider.System);
-            services.TryAddSingleton<IMessageReplayCache,InMemoryReplayCache>();
+            services.TryAddSingleton<IMessageReplayCache, InMemoryReplayCache>();
             return services;
         }
     }

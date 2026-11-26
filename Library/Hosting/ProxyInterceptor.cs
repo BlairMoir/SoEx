@@ -16,7 +16,7 @@ namespace SoEx.Hosting
         IChannelPipeline _channelPipline;
         Type _contract;
 
-        public ProxyInterceptor(Type contract, TransportFactory transportFactory, IAmbientContext ambientContext, IFrameworkContext frameworkContext , IChannelPipeline channelPipline)
+        public ProxyInterceptor(Type contract, TransportFactory transportFactory, IAmbientContext ambientContext, IFrameworkContext frameworkContext, IChannelPipeline channelPipline)
         {
             _contract = contract;
             _transportFactory = transportFactory;
@@ -45,7 +45,7 @@ namespace SoEx.Hosting
                 try
                 {
                     IChannel channel = _transportFactory.Client(_contract) as IChannel ?? throw new NullReferenceException();
-                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, AmbientContext = _ambientContext.Serialize(), FrameworkContext =  _frameworkContext.Serialize() };
+                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, AmbientContext = _ambientContext.Serialize(), FrameworkContext = _frameworkContext.Serialize() };
                     var invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
                     _ambientContext.Deserialize(invocationResponse.AmbientContext);
                 }
@@ -63,7 +63,7 @@ namespace SoEx.Hosting
                 try
                 {
                     IChannel channel = _transportFactory.Client(_contract) as IChannel ?? throw new NullReferenceException();
-                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, HasResult = true, AmbientContext = _ambientContext.Serialize(), FrameworkContext =  _frameworkContext.Serialize() };
+                    var invocationRequest = new InvocationRequest() { ActivityId = activity?.Id, MethodName = invocation.Method.Name, Arguments = invocation.Arguments, HasResult = true, AmbientContext = _ambientContext.Serialize(), FrameworkContext = _frameworkContext.Serialize() };
                     var invocationResponse = await _channelPipline.ClientPipeLine(invocationRequest, channel, activity).ConfigureAwait(false);
                     _ambientContext.Deserialize(invocationResponse.AmbientContext);
                     return invocationResponse.Response.ToResponseType<TResult>()!;

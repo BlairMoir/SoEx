@@ -43,7 +43,7 @@ namespace SoEx.Transport.Grpc
                 uriList.Add(uri);
             }
 
-            return new Address.Many([..uriList]);
+            return new Address.Many([.. uriList]);
         }
     }
 }

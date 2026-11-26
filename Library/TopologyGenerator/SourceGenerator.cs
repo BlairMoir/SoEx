@@ -8,7 +8,7 @@ namespace SoEx.Test.TopologyGenerator
     public class SourceGenerator
     {
         [Generator]
-        public class TopologyGenerator :IIncrementalGenerator
+        public class TopologyGenerator : IIncrementalGenerator
         {
             public void Initialize(IncrementalGeneratorInitializationContext context)
             {
@@ -19,7 +19,7 @@ namespace SoEx.Test.TopologyGenerator
                 var stuff = context.SyntaxProvider
                     .ForAttributeWithMetadataName(
                         "SoEx.Test.HarnessGenerators.TopologyAttribute",
-                        predicate:  static (_,_) => true,
+                        predicate: static (_, _) => true,
                         transform: (ctx, _) => GetSemanticTargetForGeneration(ctx)
                         );
 
@@ -27,14 +27,14 @@ namespace SoEx.Test.TopologyGenerator
                 {
                     try
                     {
-                        StringBuilder fields = new  StringBuilder();
+                        StringBuilder fields = new StringBuilder();
                         StringBuilder components = new StringBuilder();
                         List<string> proxies = new List<string>();
                         Dictionary<string, string> names = MemberNames(new[] { o.SubsystemContract ?? "" }
                             .Concat(o.Components.Select(c => c.Contract)));
                         fields.AppendLine(
                             $$"""
-                              public Microsoft.Extensions.DependencyInjection.ServiceCollection ServiceCollection_{{names[o.SubsystemContract?? ""]}} = new();
+                              public Microsoft.Extensions.DependencyInjection.ServiceCollection ServiceCollection_{{names[o.SubsystemContract ?? ""]}} = new();
                           """);
 
                         foreach (var component in o.Components)
@@ -79,13 +79,13 @@ namespace SoEx.Test.TopologyGenerator
                             components.AppendLine($"        Proxies = [");
                             foreach (var proxy in proxies)
                             {
-                                if (!proxy.Contains(component.Contract) )
+                                if (!proxy.Contains(component.Contract))
                                 {
-                                    if (component.Contract.EndsWith("Access") && !proxy.Contains("Manager>") && !proxy.Contains("Engine>") && !proxy.Contains("Event>")  )
+                                    if (component.Contract.EndsWith("Access") && !proxy.Contains("Manager>") && !proxy.Contains("Engine>") && !proxy.Contains("Event>"))
                                     {
                                         components.AppendLine(proxy);
                                     }
-                                    else if (component.Contract.EndsWith("Engine") && !proxy.Contains("Manager>") && !proxy.Contains("Event>")  )
+                                    else if (component.Contract.EndsWith("Engine") && !proxy.Contains("Manager>") && !proxy.Contains("Event>"))
                                     {
                                         components.AppendLine(proxy);
                                     }
@@ -116,12 +116,12 @@ namespace SoEx.Test.TopologyGenerator
                         //
                         // </auto-generated>
                         //------------------------------------------------------------------------------
-                        public partial class HarnessFor_{{ o.MethodIdentifier}} : SoEx.Test.TestEnvironmentBase
+                        public partial class HarnessFor_{{o.MethodIdentifier}} : SoEx.Test.TestEnvironmentBase
                         {
-                            {{ fields }}
+                            {{fields}}
 
-                            public Task TestService(Func<{{ o.SubsystemContract }}, Task> callerFunc){
-                                return TestService<{{ o.SubsystemContract }}>(callerFunc, Topology);
+                            public Task TestService(Func<{{o.SubsystemContract}}, Task> callerFunc){
+                                return TestService<{{o.SubsystemContract}}>(callerFunc, Topology);
                             }
 
                             public SoEx.Topology.System Topology =>
@@ -135,7 +135,7 @@ namespace SoEx.Test.TopologyGenerator
                                                 Implementation = typeof({{o.SubsystemImplementation}}),
                                                 Endpoints = [new SoEx.Transport.InProc.InProcBinding<{{o.SubsystemContract}}>("Test")],
                                                 Proxies = [
-                                                    {{String.Join("\r\n",proxies)}}
+                                                    {{String.Join("\r\n", proxies)}}
                                                 ],
                                                 ServiceCollection = ServiceCollection_{{names[o.SubsystemContract ?? ""]}}
                                             },
@@ -156,14 +156,15 @@ namespace SoEx.Test.TopologyGenerator
                         """;
 
                         spc.AddSource($"{o.MethodIdentifier}.g.cs", source);
-                    }catch(Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         spc.ReportDiagnostic(
                             Diagnostic.Create(
                                 new DiagnosticDescriptor("SOEXTG001",
                                     "Topology generation failed",
                                     "Could not generate harness for {0}: {1}",
-                                "SoEx.Test", DiagnosticSeverity.Error,true),
+                                "SoEx.Test", DiagnosticSeverity.Error, true),
                             Location.None, o.MethodIdentifier, ex.Message
                             ));
                     }
@@ -173,7 +174,7 @@ namespace SoEx.Test.TopologyGenerator
             static Dictionary<string, string> MemberNames(IEnumerable<string> contracts)
             {
                 var names = new Dictionary<string, string>();
-                foreach (var group in contracts.Distinct().GroupBy( c => c.Split('.').Last()))
+                foreach (var group in contracts.Distinct().GroupBy(c => c.Split('.').Last()))
                 {
                     var collision = group.ToArray();
                     if (collision.Length == 1)
@@ -183,7 +184,7 @@ namespace SoEx.Test.TopologyGenerator
                     }
 
                     var longest = collision.Max(c => c.Split('.').Length);
-                    for (var take = 2;; take++)
+                    for (var take = 2; ; take++)
                     {
                         var qualified = collision.ToDictionary(c => c, c => Qualify(c, take));
                         if (qualified.Values.Distinct().Count() == collision.Length || take >= longest)
@@ -210,14 +211,14 @@ namespace SoEx.Test.TopologyGenerator
             }
 
             private static bool IsSyntaxTargetForGeneration(SyntaxNode syntaxNode)
-                => syntaxNode is MethodDeclarationSyntax methodSyntax &&  methodSyntax.AttributeLists.Count >0 ;
+                => syntaxNode is MethodDeclarationSyntax methodSyntax && methodSyntax.AttributeLists.Count > 0;
 
             static TopologyToGenerate GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
             {
                 var methodIdentifier = $"{context.TargetSymbol.ContainingSymbol.Name}_{context.TargetSymbol.Name}";
 
                 var methodSymbol = context.TargetSymbol as IMethodSymbol;
-                var attributes = methodSymbol?.GetAttributes().Where( w=> w.AttributeClass?.Name == "TopologyAttribute").ToList();
+                var attributes = methodSymbol?.GetAttributes().Where(w => w.AttributeClass?.Name == "TopologyAttribute").ToList();
 
                 var topologyAttribute = attributes?.FirstOrDefault();
 
@@ -225,7 +226,7 @@ namespace SoEx.Test.TopologyGenerator
                 if (constructorArguments is not null)
                 {
                     var entrypoint = constructorArguments[0].Value as INamedTypeSymbol;
-                    var componentsSymbols =  constructorArguments[1].Values.Select( s=> s.Value as INamedTypeSymbol).ToArray() ;
+                    var componentsSymbols = constructorArguments[1].Values.Select(s => s.Value as INamedTypeSymbol).ToArray();
 
                     var entryPointContract = entrypoint?.TypeArguments[0];
                     var entryPointImplementation = entrypoint?.TypeArguments[1];
@@ -250,7 +251,7 @@ namespace SoEx.Test.TopologyGenerator
                     }
 
                     var topologyToGenerate = new TopologyToGenerate(
-                        methodIdentifier ,
+                        methodIdentifier,
                         $"{entryPointContract?.ContainingNamespace}.{entryPointContract?.Name}",
                         $"{entryPointImplementation?.ContainingNamespace}.{entryPointImplementation?.Name}",
                         components.ToArray()
@@ -260,7 +261,7 @@ namespace SoEx.Test.TopologyGenerator
                 }
 
                 var failedGenerate = new TopologyToGenerate(
-                    methodIdentifier ,
+                    methodIdentifier,
                     null,
                     null,
                     []
@@ -275,7 +276,7 @@ namespace SoEx.Test.TopologyGenerator
                 public readonly string? SubsystemImplementation;
                 public readonly Component[] Components;
 
-                public TopologyToGenerate(string methodIdentifier, string? subsystemContract, string? subsystemImplementation,  Component[] components)
+                public TopologyToGenerate(string methodIdentifier, string? subsystemContract, string? subsystemImplementation, Component[] components)
                 {
                     MethodIdentifier = methodIdentifier;
                     SubsystemContract = subsystemContract;

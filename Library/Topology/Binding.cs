@@ -11,7 +11,7 @@
 
         public Type Contract { get; }
         public Transport Transport { get; }
-        public string SubSystem { get;  }
+        public string SubSystem { get; }
         public IBindingPipeline? Pipeline { get; init; }
     }
 }
