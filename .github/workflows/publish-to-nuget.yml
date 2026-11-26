@@ -20,6 +20,9 @@ jobs:
             10.0.x
             11.0.x
 
+      - name: enforce formatting
+        run: dotnet format Library/SoEx.sln --verify-no-changes
+      
       - name: dotnet pack
         run: | 
           cd ./Library
