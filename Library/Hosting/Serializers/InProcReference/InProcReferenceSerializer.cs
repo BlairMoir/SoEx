@@ -4,15 +4,12 @@ using SoEx.Abstractions;
 
 namespace SoEx.Hosting.Serializers.InProcReference
 {
-    public class InProcReferenceSerializer : IMessageSerializer
+    public class InProcReferenceSerializer<TImmutable> : IMessageSerializer where TImmutable : Attribute
     {
-        static readonly ConcurrentDictionary<Guid, (object? Value, long Timestamp)> References = new();
-        private static long _nextSweep;
-        private static readonly long s_ttl = Stopwatch.Frequency * 60;
 
         public T? Deserialize<T>(byte[] payload)
         {
-            return Take<T>(payload);
+            return InProcReferences.Take<T>(payload);
         }
 
         public T? Deserialize<T>(byte[] payload, Type contractType, string? methodName = null)
@@ -22,68 +19,36 @@ namespace SoEx.Hosting.Serializers.InProcReference
 
         public byte[] Serialize<T>(T? @object)
         {
-
-            return Put(Freeze(@object));
+            object? freeze = Freeze(@object, null);
+            byte[] bytes = InProcReferences.Put(freeze);
+            return bytes;
         }
 
         public byte[] Serialize<T>(T? @object, Type contractType, string methodName)
         {
-            return Serialize(@object);
+            object? freeze = Freeze(@object, $"{contractType.FullName}.{methodName}");
+            byte[] bytes = InProcReferences.Put(freeze);
+            return bytes;
         }
 
-        static object? Freeze(object? @object) => @object switch
+        static object? Freeze(object? @object, string? operation) => @object switch
         {
             InvocationRequest r => new InvocationRequest()
             {
                 ActivityId = r.ActivityId,
                 HasResult = r.HasResult,
                 MethodName = r.MethodName,
-                Arguments = Immutability.Clone(Immutability.Require(r.Arguments)),
+                Arguments = Immutability<TImmutable>.Require(r.Arguments, operation),
                 AmbientContext = (byte[]?)r.AmbientContext?.Clone(),
                 FrameworkContext = (byte[]?)r.FrameworkContext?.Clone(),
             },
             InvocationResponse r => new InvocationResponse()
             {
-                Response = Immutability.Require(r.Response),
+                Response = Immutability<TImmutable>.Require(r.Response, operation),
                 AmbientContext = (byte[]?)r.AmbientContext?.Clone(),
             },
-            _ => Immutability.Require(@object)
+            _ => @object
         };
 
-        public byte[] Put(object? @object)
-        {
-            var id = Guid.NewGuid();
-            References[id] = (@object, Stopwatch.GetTimestamp());
-            CheckTTL();
-            return id.ToByteArray();
-        }
-
-        private static void CheckTTL()
-        {
-            long next = Volatile.Read(ref _nextSweep);
-            long now = Stopwatch.GetTimestamp();
-            if (now >= next && Interlocked.CompareExchange(ref _nextSweep, now + s_ttl, next) == next)
-            {
-                Sweep(now);
-            }
-        }
-
-        private static void Sweep(long now)
-        {
-            foreach ((Guid id, (object? Value, long Timestamp) entry) in References)
-            {
-                if (now - entry.Timestamp > s_ttl)
-                {
-                    References.TryRemove(id, out _);
-                }
-            }
-        }
-
-        public T? Take<T>(byte[] bytes)
-        {
-            if (bytes.Length != 16 || !References.TryRemove(new Guid(@bytes), out (object? Value, long Timestamp) reference))
-                throw new InvalidOperationException("Reference payload not found");
-            return (T?)reference.Value;
-        }
     }
 }
