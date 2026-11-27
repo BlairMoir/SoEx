@@ -4,7 +4,7 @@ using SoEx.Hosting.Extensions;
 
 namespace SoEx.Hosting.Serializers.Common
 {
-    public static class ContractMethod
+    internal static class ContractMethod
     {
         internal static Type[] ParameterTypes(Type contract, string? methodName)
         {
