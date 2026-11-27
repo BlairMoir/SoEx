@@ -59,17 +59,17 @@ namespace SoEx.Transport.NATS
         private async Task<NatsClient> CreateConnection()
         {
             Debug.Assert(_natsBinding is not null);
-            string url = _natsBinding.Config.Url;
-            NatsClient client = await _connections.Get(url,
-                () => Connect(url),
+            NatsConfig config = _natsBinding.Config;
+            NatsClient client = await _connections.Get(config.ClientKey(),
+                () => Connect(config.ClientOptions()),
                 c => c.Connection.ConnectionState == NatsConnectionState.Closed
             ).ConfigureAwait(false);
             return client;
         }
 
-        private static async Task<NatsClient> Connect(string url)
+        private static async Task<NatsClient> Connect(NatsOpts options)
         {
-            var client = new NatsClient(new NatsOpts() { Url = url });
+            var client = new NatsClient(options);
             try
             {
                 await client.ConnectAsync().ConfigureAwait(false);
