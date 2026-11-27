@@ -2,7 +2,7 @@ using SoEx.Context;
 
 namespace SoEx.Hosting.Serializers.Common
 {
-    public sealed class KnownTypeRegistry
+    internal sealed class KnownTypeRegistry
     {
         private readonly Dictionary<Type, string> _typeLookup = new();
         private readonly Dictionary<string, Type> _discriminatorLookup = new(StringComparer.Ordinal);

@@ -5,7 +5,7 @@ using SoEx.Abstractions;
 
 namespace SoEx.Hosting
 {
-    public class SubSystemScope : ISubSystemScope
+    internal class SubSystemScope : ISubSystemScope
     {
         private ILifetimeScope? lifetimeScope;
 

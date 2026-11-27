@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace SoEx.Hosting.Serializers.NewtonsoftJson
 {
-    public class ArgumentsConverter : JsonConverter
+    internal class ArgumentsConverter : JsonConverter
     {
         private Type[] _declaredTypes;
 

@@ -5,7 +5,7 @@ using SoEx.Abstractions;
 
 namespace SoEx.Hosting.Serializers.NewtonsoftJson
 {
-    public class OperationContractResolver : DefaultContractResolver
+    internal class OperationContractResolver : DefaultContractResolver
     {
         Type[] _declaredTypes;
         Type? _returnType;

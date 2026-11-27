@@ -3,7 +3,7 @@ using System.Xml;
 
 namespace SoEx.Hosting.Serializers.DataContract
 {
-    public class ContractResolver : DataContractResolver
+    internal class ContractResolver : DataContractResolver
     {
         readonly ContractLookup _contractLookup;
 

@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 
 namespace SoEx.Transport.NamedPipe
 {
-    public class StreamBytes
+    internal class StreamBytes
     {
         private Stream ioStream;
         private const int MaxBytesPerMessage = 16 * 1024 * 1024;

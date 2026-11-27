@@ -4,7 +4,7 @@ using SoEx.Hosting.Serializers.Common;
 namespace SoEx.Hosting.Serializers.DataContract
 {
 
-    public class ContractLookup
+    internal class ContractLookup
     {
         private readonly Dictionary<Type, NameAndNamespace> _fromType = new();
         private readonly Dictionary<string, Dictionary<string, Type>> _toType = new();

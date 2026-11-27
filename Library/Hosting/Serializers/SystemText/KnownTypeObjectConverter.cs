@@ -4,7 +4,7 @@ using SoEx.Hosting.Serializers.Common;
 
 namespace SoEx.Hosting.Serializers.SystemText
 {
-    public class KnownTypeObjectConverter : JsonConverter<object>
+    internal class KnownTypeObjectConverter : JsonConverter<object>
     {
         KnownTypeRegistry _registry;
 
