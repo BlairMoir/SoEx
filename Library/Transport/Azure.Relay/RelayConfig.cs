@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Azure.Relay;
 
 namespace SoEx.Transport.Azure.Relay
 {
@@ -9,7 +6,8 @@ namespace SoEx.Transport.Azure.Relay
     {
         public required string RelayNamespace { get; init; }
         public required string ConnectionName { get; init; }
-        public required string KeyName { get; init; }
-        public required string Key { get; init; }
+        public string? KeyName { get; init; }
+        public string? Key { get; init; }
+        public TokenProvider? TokenProvider { get; init; }
     }
 }

@@ -13,11 +13,20 @@ namespace SoEx.Transport.Azure.Relay
             subsystem
             )
         {
+            if (config.TokenProvider is null &&
+                (config.KeyName is null || config.Key is null))
+            {
+                throw new ArgumentException("Relay requires TokenProvider or both KeyName and Key", nameof(config));
+            }
             _config = config;
         }
 
         internal TokenProvider CreateTokenProvider()
         {
+            if (_config.TokenProvider is not null)
+            {
+                return _config.TokenProvider;
+            }
             return TokenProvider.CreateSharedAccessSignatureTokenProvider(_config.KeyName, _config.Key);
         }
 
