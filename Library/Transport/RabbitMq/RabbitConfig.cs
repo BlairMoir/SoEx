@@ -7,5 +7,6 @@ namespace SoEx.Transport.RabbitMq
         public string? UserName { get; init; }
         public string? Password { get; init; }
         public string? VirtualHost { get; init; }
+        public bool UseTLS { get; init; }
     }
 }

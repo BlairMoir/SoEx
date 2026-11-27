@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageType>Template</PackageType>
-    <PackageVersion>1.0.0-alpha-4.5</PackageVersion>
+    <PackageVersion>1.0.0-rc.1</PackageVersion>
     <PackageId>SoEx.Method.Templates</PackageId>
     <Title>SoEx Method Templates</Title>
     <Authors>Blair Moir</Authors>
@@ -14,7 +14,6 @@
     <NoDefaultExcludes>true</NoDefaultExcludes>
     <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageIcon>icon.png</PackageIcon>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 
@@ -28,6 +27,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="README.md"/>
-    <None Include="icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>

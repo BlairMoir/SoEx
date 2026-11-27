@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace SoEx.Hosting.Serializers.SystemText
 {
-    public class ArgumentsConverter : JsonConverter<object?[]>
+    internal class ArgumentsConverter : JsonConverter<object?[]>
     {
         private Type[] _declaredTypes;
 

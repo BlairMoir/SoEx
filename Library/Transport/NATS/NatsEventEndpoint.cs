@@ -40,7 +40,7 @@ namespace SoEx.Transport.NATS
         public Task Listen()
         {
             Debug.Assert(_binding is not null);
-            _natsClient = new NatsClient(new NatsOpts() { Url = _binding.Config.Url });
+            _natsClient = new NatsClient(_binding.Config.ClientOptions());
             _subscription = Task.Run(Subscribe);
             return Task.CompletedTask;
         }

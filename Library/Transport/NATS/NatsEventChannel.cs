@@ -1,8 +1,4 @@
 using System.Diagnostics;
-using System.IO.Pipes;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Principal;
-using Autofac;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.JetStream.Models;
@@ -68,17 +64,17 @@ namespace SoEx.Transport.NATS
         private async Task<NatsClient> CreateConnection()
         {
             Debug.Assert(_natsEventBinding is not null);
-            string url = _natsEventBinding.Config.Url;
-            NatsClient client = await _connections.Get(url,
-                () => Connect(url),
+            NatsConfig config = _natsEventBinding.Config;
+            NatsClient client = await _connections.Get(config.ClientKey(),
+                () => Connect(config.ClientOptions()),
                 c => c.Connection.ConnectionState == NatsConnectionState.Closed
             ).ConfigureAwait(false);
             return client;
         }
 
-        private static async Task<NatsClient> Connect(string url)
+        private static async Task<NatsClient> Connect(NatsOpts options)
         {
-            var client = new NatsClient(new NatsOpts() { Url = url });
+            var client = new NatsClient(options);
             try
             {
                 await client.ConnectAsync().ConfigureAwait(false);

@@ -9,6 +9,7 @@
     <PackageProjectUrl>https://github.com/BlairMoir/SoEx/tree/primary/Library</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BlairMoir/SoEx</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -16,4 +17,7 @@
     <PackageOutputPath>$(MSBuildThisFileDirectory)..\nupkgs</PackageOutputPath>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
 </Project>

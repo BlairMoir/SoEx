@@ -1,6 +1,6 @@
 namespace SoEx.Hosting.Serializers.Common
 {
-    public static class KnownCollections
+    internal static class KnownCollections
     {
         private static readonly Type[] KeyTypes = { typeof(string), typeof(int), typeof(long), typeof(Guid) };
 

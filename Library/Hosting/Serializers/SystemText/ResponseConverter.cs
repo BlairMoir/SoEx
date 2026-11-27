@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace SoEx.Hosting.Serializers.SystemText
 {
-    public class ResponseConverter : JsonConverter<object?>
+    internal class ResponseConverter : JsonConverter<object?>
     {
         private readonly Type _returnType;
 

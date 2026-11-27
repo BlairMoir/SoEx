@@ -3,7 +3,7 @@ using SoEx.Abstractions;
 
 namespace SoEx.Hosting
 {
-    public class SubSystemHost<T, I> : ISubSystemHost<I>, ISubSystemHost
+    internal class SubSystemHost<T, I> : ISubSystemHost<I>, ISubSystemHost
     {
         ILifetimeScope _hostLifetimeScope;
         public SubSystemHost(ILifetimeScope scope)

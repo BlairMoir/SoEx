@@ -2,7 +2,7 @@ using Grpc.AspNetCore.Server.Model;
 
 namespace SoEx.Transport.Grpc
 {
-    public sealed class GrpcDispatchProvider<I> : IServiceMethodProvider<GrpcEndpointService>
+    internal sealed class GrpcDispatchProvider<I> : IServiceMethodProvider<GrpcEndpointService>
     {
         private readonly Func<byte[], Task<byte[]>> _dispatchHandler;
 
