@@ -103,7 +103,7 @@ namespace SoEx.Transport.RabbitMq
         private static RabbitPublisherKey Key(RabbitEventBinding<I> binding)
         {
             IEnumerable<string> credentials = binding.RabbitConfig.Select(config => $"{config.UserName}|{config.Password}");
-            string hosts =  $"{string.Join(",", binding.Transport.Address.Uris)}|{string.Join(", ", credentials)}";
+            string hosts = $"{string.Join(",", binding.Transport.Address.Uris)}|{string.Join(", ", credentials)}";
             return new RabbitPublisherKey(hosts, binding.Connection);
         }
 
