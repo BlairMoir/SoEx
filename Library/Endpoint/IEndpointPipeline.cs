@@ -9,6 +9,6 @@ namespace SoEx.Endpoint
 {
     public interface IEndpointPipeline
     {
-        public Task<byte[]> ServicePipeLine<I>(byte[] payload, IPipeline? pipeline, Activity? parentActivity) where I : class;
+        public Task<byte[]> ServicePipeLine<I>(byte[] payload, IBindingPipeline? pipeline, Activity? parentActivity) where I : class;
     }
 }

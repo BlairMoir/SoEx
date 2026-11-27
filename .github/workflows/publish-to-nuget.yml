@@ -13,11 +13,16 @@ jobs:
     runs-on: windows-latest
     environment: nuget
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
+      - name: enforce formatting
+        run: dotnet format Library/SoEx.sln --verify-no-changes
+      
       - name: dotnet pack
         run: | 
           cd ./Library
@@ -39,5 +44,5 @@ jobs:
           Get-ChildItem nupkgs/ -Filter *.nupkg | ForEach-Object {
             dotnet nuget push $_.FullName `
               --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" `
-              --source https://api.nuget.org/v3/index.json
+              --source https://api.nuget.org/v3/index.json --skip-duplicate
           }

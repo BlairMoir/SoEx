@@ -1,37 +1,48 @@
 
-namespace SoEx.Transport.NamedPipe;
-public class StreamBytes
+using System.Buffers.Binary;
+
+namespace SoEx.Transport.NamedPipe
 {
-    private Stream ioStream;
-
-    public StreamBytes(Stream ioStream)
+    public class StreamBytes
     {
-        this.ioStream = ioStream;
-    }
+        private Stream ioStream;
+        private const int MaxBytesPerMessage = 16 * 1024 * 1024;
 
-    public byte[] ReadBytes()
-    {
-        int len;
-        len = ioStream.ReadByte() * 256;
-        len += ioStream.ReadByte();
-        var inBuffer = new byte[len];
-        ioStream.ReadExactly(inBuffer, 0, len);
-
-        return inBuffer;
-    }
-
-    public int WriteBytes(byte[] bytes)
-    {
-        int len = bytes.Length;
-        if (len > UInt16.MaxValue)
+        public StreamBytes(Stream ioStream)
         {
-            len = (int)UInt16.MaxValue;
+            this.ioStream = ioStream;
         }
-        ioStream.WriteByte((byte)(len / 256));
-        ioStream.WriteByte((byte)(len & 255));
-        ioStream.Write(bytes, 0, len);
-        ioStream.Flush();
 
-        return bytes.Length + 2;
+        public byte[] ReadBytes()
+        {
+            Span<byte> header = stackalloc byte[4];
+            ioStream.ReadExactly(header);
+            int length = BinaryPrimitives.ReadInt32BigEndian(header);
+
+            if ((uint)length > MaxBytesPerMessage)
+            {
+                throw new InvalidDataException("Named pipe payload too large");
+            }
+
+            byte[] inBuffer = new byte[length];
+            ioStream.ReadExactly(inBuffer, 0, length);
+
+            return inBuffer;
+        }
+
+        public int WriteBytes(byte[] bytes)
+        {
+            if (bytes.Length > MaxBytesPerMessage)
+            {
+                throw new InvalidDataException("Named pipe payload too large");
+            }
+            Span<byte> header = stackalloc byte[4];
+            BinaryPrimitives.WriteInt32BigEndian(header, bytes.Length);
+            ioStream.Write(header);
+            ioStream.Write(bytes, 0, bytes.Length);
+            ioStream.Flush();
+
+            return bytes.Length + 4;
+        }
     }
 }

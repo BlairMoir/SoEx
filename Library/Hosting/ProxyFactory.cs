@@ -5,16 +5,16 @@ namespace SoEx.Hosting
     public class ProxyFactory
     {
         private static readonly ProxyGenerator s_proxyGenerator = new ProxyGenerator();
-        private readonly ProxyInterceptor _proxyInterceptor;
+        private readonly Func<Type, ProxyInterceptor> _proxyInterceptor;
 
-        public ProxyFactory(ProxyInterceptor proxyInterceptor)
+        public ProxyFactory(Func<Type, ProxyInterceptor> proxyInterceptor)
         {
             _proxyInterceptor = proxyInterceptor;
         }
 
         public object Create(Type serviceInterface)
         {
-            return s_proxyGenerator.CreateInterfaceProxyWithoutTarget(serviceInterface, _proxyInterceptor);
+            return s_proxyGenerator.CreateInterfaceProxyWithoutTarget(serviceInterface, _proxyInterceptor(serviceInterface));
         }
     }
 }

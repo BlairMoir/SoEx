@@ -1,0 +1,26 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Common/">
+    <Project Path="Common/Contract/SoExTemplate.Common.Contract.csproj" />
+    <Project Path="Common/Identifier/SoExTemplate.Common.Identifier.csproj" />
+    <Project Path="Common/Policy/SoExTemplate.Common.Policy.csproj" />
+    <Project Path="Common/Value/SoExTemplate.Common.Value.csproj" />
+  </Folder>
+  <Folder Name="/Host/">
+    <Project Path="Host/InProc/SoExTemplate.Host.InProc.csproj" />
+  </Folder>
+  <Folder Name="/iFx/">
+    <Project Path="iFx/Client/SoExTemplate.iFx.Client.csproj" />
+    <Project Path="iFx/Convention/SoExTemplate.iFx.Convention.csproj" />
+    <Project Path="iFx/Hosting/Component/SoExTemplate.iFx.Hosting.Component.csproj" />
+    <Project Path="iFx/Hosting/InProc/SoExTemplate.iFx.Hosting.InProc.csproj" />
+    <Project Path="iFx/Hosting/SubSystem/SoExTemplate.iFx.Hosting.SubSystem.csproj" />
+    <Project Path="iFx/Observability/SoExTemplate.iFx.Observability.csproj" />
+    <Project Path="iFx/Proxy/SoExTemplate.iFx.Proxy.csproj" />
+    <Project Path="iFx/Service/SoExTemplate.iFx.Service.csproj" />
+  </Folder>
+</Solution>

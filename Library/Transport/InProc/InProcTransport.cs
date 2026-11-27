@@ -1,6 +1,6 @@
 namespace SoEx.Transport.InProc
 {
-    public class InProcTransport : Topology.Transport
+    public record InProcTransport : Topology.Transport
     {
         public InProcTransport()
         {

@@ -2,8 +2,10 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SoEx.Abstractions;
 using SoEx.Context;
 using SoEx.Hosting;
+using SoEx.Method.Conventions;
 using SoEx.Topology;
 using SoEx.Transport.NamedPipe;
 using SoExTemplate.iFx.Convention;
@@ -22,6 +24,7 @@ public static class Host
 
         var services = Scan.ServiceTypes(companyName);
         var interfaces = Scan.ProxyTypes(companyName);
+        var dtoAndContextTypes = Scan.DtoAndContextTypes(companyName);
 
         if (services.Length == 0)
             throw new ArgumentException("You must include a reference to at least one service");
@@ -49,20 +52,12 @@ public static class Host
         List<Client> clients = new List<Client>();
         foreach (var proxy in proxies)
         {
-            var genericType = typeof(Client<>).MakeGenericType(proxy);
-            var client = (Client)Activator.CreateInstance(genericType)!;
-            typeof(Client).GetProperty(nameof(Client.SubSystem))!.SetValue(client, subSystem);
-            typeof(Client).GetProperty(nameof(Client.Service))!.SetValue(client, CreateNamedPipeBinding(subSystem, proxy));
-            clients.Add(client);
+            clients.Add(CreateNamedPipeBinding(subSystem, proxy).ToClient());
         }
         List<Client> eventClients = new List<Client>();
         foreach (var ev in events)
         {
-            var genericType = typeof(Client<>).MakeGenericType(ev);
-            var client = (Client)Activator.CreateInstance(genericType)!;
-            typeof(Client).GetProperty(nameof(Client.SubSystem))!.SetValue(client, subSystem);
-            typeof(Client).GetProperty(nameof(Client.Service))!.SetValue(client, CreateNamedPipeEventBinding(subSystem, ev));
-            eventClients.Add(client);
+            eventClients.Add(CreateNamedPipeEventBinding(subSystem, ev).ToClient());
         }
 
         SoEx.Topology.Host host = new SoEx.Topology.Host()
@@ -75,7 +70,7 @@ public static class Host
 
 
         HostApplicationBuilder serviceHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        serviceHostBuilder.SoEx(host);
+        serviceHostBuilder.SoEx(host, new KnownTypes(dtoAndContextTypes));
         serviceHostBuilder.Services.NamedPipedClient();
         serviceHostBuilder.Services.ConfigureLogging();
         serviceHostBuilder.Services.ConfigureTelemetry();

@@ -1,0 +1,271 @@
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Reflection;
+using Autofac;
+using Autofac.Builder;
+using Autofac.Extensions.DependencyInjection;
+using Autofac.Extras.DynamicProxy;
+using Castle.DynamicProxy;
+using Microsoft.Extensions.Hosting;
+using SoEx.Abstractions;
+using SoEx.Channel;
+using SoEx.Context;
+using SoEx.Endpoint;
+using SoEx.Hosting.Default;
+using SoEx.Hosting.Extensions;
+using SoEx.Topology;
+using SoEx.Topology.Pipeline;
+using SoEx.Transport;
+
+namespace SoEx.Hosting
+{
+    internal static class TopologyRegistration
+    {
+        private static readonly ProxyGenerator s_proxyGenerator = new ProxyGenerator();
+        internal static void RegisterBindings(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, KnownTypes knownTypes)
+        {
+            IEnumerable<IBindingPipeline?> clientBindings = systemTopology.Clients
+                .Select(client => client.Service.Pipeline);
+            IEnumerable<IBindingPipeline?> endpointBindings =
+                systemTopology.SubSystems
+                    .SelectMany(subsystem =>
+                        subsystem.EntryPoint.Endpoints.Select(
+                            (endpoint => endpoint.Pipeline)));
+            IEnumerable<IBindingPipeline?> endpointClientBindings =
+                systemTopology.SubSystems
+                    .SelectMany(subsystem =>
+                        subsystem.EntryPoint.Proxies.Select(s => s.Service.Pipeline));
+            IEnumerable<IBindingPipeline?> componentBindings =
+                systemTopology.SubSystems
+                    .SelectMany(subsystem =>
+                        subsystem.Components
+                            .SelectMany(component => component.Endpoints.Select(s => s.Pipeline)));
+            IEnumerable<IBindingPipeline?> componentClientBindings =
+                systemTopology.SubSystems
+                    .SelectMany(subsystem =>
+                        subsystem.Components
+                            .SelectMany(component => component.Proxies.Select(s => s.Service.Pipeline)));
+
+            hostApplicationContainer.RegisterBindings(knownTypes, systemTopology.Defaults, [.. clientBindings, .. endpointBindings, .. endpointClientBindings, .. componentBindings, .. componentClientBindings]);
+        }
+
+        internal static void RegisterBindings(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline? defaultPipeline)
+        {
+            IEnumerable<IBindingPipeline?> clientBindings = hostTopology.Proxies.Select(s => s.Service.Pipeline);
+            IEnumerable<IBindingPipeline?> endpointBindings = hostTopology.Endpoints.Select(s => s.Pipeline);
+            hostApplicationContainer.RegisterBindings(knownTypes, defaultPipeline, [.. clientBindings, .. endpointBindings,]);
+
+        }
+
+        private static void RegisterBindings(this ContainerBuilder hostApplicationContainer, KnownTypes? knownTypes, IPipeline? defaultPipeline, params IBindingPipeline?[] bindingPipelines)
+        {
+            IPipeline pipeline = defaultPipeline ?? new DefaultPipeline();
+            HashSet<Type?> defaults = new HashSet<Type?>(){
+                pipeline.Dispatcher.ImplementationType,
+                pipeline.MessageProtection.ImplementationType,
+                pipeline.MessageSerializer.ImplementationType
+            };
+
+            IEnumerable<Type> registerablePipelines =
+                bindingPipelines.Where(w => w is not null)
+                    .SelectMany(s => new Type?[]
+                    {
+                        s?.Dispatcher.ImplementationType, s?.MessageProtection.ImplementationType,
+                        s?.MessageSerializer.ImplementationType
+                    })
+                    .Where(w => w is not null).Cast<Type>().Distinct();
+            foreach (Type? pipelineType in registerablePipelines)
+            {
+                if (defaults.Contains(pipelineType))
+                    continue;
+
+                IRegistrationBuilder<object, ConcreteReflectionActivatorData, SingleRegistrationStyle> registration = hostApplicationContainer.RegisterType(pipelineType).AsSelf();
+                if (pipelineType.GetInterfaces().Contains(typeof(IMessageSerializer)))
+                {
+                    registration.WithParameter(new TypedParameter(typeof(KnownTypes), knownTypes))
+                        .SingleInstance();
+                }
+            }
+        }
+
+        private static void RegisterPipeline(this ContainerBuilder container, KnownTypes knownTypes, IPipeline pipeline)
+        {
+            container.RegisterType<EndpointLifetimeService>().As<IHostedService>();
+            container.RegisterTypes(pipeline.ServiceInterceptors.Select(s => s.ImplementationType).ToArray());
+            container.RegisterType<EndpointPipeline>().As<IEndpointPipeline>();
+            container.RegisterType<ChannelPipeline>().As<IChannelPipeline>();
+            container.RegisterType<RegisteredEndpoints>().SingleInstance().AsSelf();
+            container.RegisterType<ProxyFactory>().AsSelf();
+            container.RegisterType<ProxyInterceptor>().AsSelf();
+            container.RegisterType<TransportFactory>().AsSelf();
+            container.RegisterGeneric(typeof(SharedConnections<>)).AsSelf().SingleInstance();
+            container.RegisterType(pipeline.MessageSerializer.ImplementationType).AsSelf().As<IMessageSerializer>()
+                .WithParameter(new TypedParameter(typeof(KnownTypes), knownTypes))
+                .SingleInstance();
+            container.RegisterType(pipeline.Dispatcher.ImplementationType).AsSelf().As<IDispatcher>();
+            container.RegisterType(pipeline.TelemetryConfidentiality.ImplementationType).AsSelf().As<ITelemetryConfidentiality>();
+            container.RegisterType(pipeline.MessageProtection.ImplementationType).AsSelf().As<IMessageProtection>();
+            container.RegisterType<AmbientContext>().As<IAmbientContext>().InstancePerLifetimeScope();
+            container.RegisterType<FrameworkContext>().As<IFrameworkContext>().InstancePerLifetimeScope();
+        }
+
+        internal static void RegisterSystem(this ContainerBuilder hostApplicationContainer, Topology.System systemTopology, KnownTypes knownTypes)
+        {
+            IPipeline pipeline = systemTopology.Defaults ?? new DefaultPipeline();
+            hostApplicationContainer.RegisterPipeline(knownTypes, pipeline);
+            hostApplicationContainer.RegisterProxies(systemTopology.Clients);
+            hostApplicationContainer.RegisterSubSystems(systemTopology.SubSystems, pipeline);
+        }
+
+        internal static void RegisterComponent(this ContainerBuilder hostApplicationContainer, Topology.Host hostTopology, KnownTypes knownTypes, IPipeline pipeline)
+        {
+            hostApplicationContainer.RegisterPipeline(knownTypes, pipeline);
+            RegisterComponentHost(hostApplicationContainer, hostTopology, pipeline);
+        }
+
+        private static void CreateIsolatedScope(this ContainerBuilder parentContainer, Action<ILifetimeScope, ContainerBuilder> callback)
+        {
+            SubSystemScope subSystemScope = new SubSystemScope();
+            parentContainer.RegisterInstance(subSystemScope).As<Abstractions.ISubSystemScope>();
+            parentContainer.RegisterBuildCallback(parentScope =>
+            {
+                ILifetimeScope hostScope = parentScope.BeginLifetimeScope(hostContainer =>
+                {
+                    callback.Invoke(parentScope, hostContainer);
+                });
+                subSystemScope.StoreLifetimeScope(hostScope);
+                parentScope.Disposer.AddInstanceForDisposal(hostScope);
+            });
+        }
+
+        private static void RegisterSubSystems(this ContainerBuilder hostApplicationContainer, ImmutableArray<Topology.SubSystem> subSystems, IPipeline pipeline)
+        {
+            foreach (Topology.SubSystem subSystem in subSystems)
+            {
+                hostApplicationContainer.RegisterBuildCallback(hostApplicationScope =>
+                {
+                    ComponentHostFactory(hostApplicationScope, subSystem.EntryPoint, pipeline, HostRole.EntryPoint);
+                });
+                foreach (Topology.Host component in subSystem.Components)
+                {
+                    RegisterComponentHost(hostApplicationContainer, component, pipeline);
+                }
+            }
+        }
+
+        private static void RegisterComponentHost(ContainerBuilder hostApplicationContainer, Topology.Host component, IPipeline pipeline)
+        {
+            hostApplicationContainer.RegisterBuildCallback(hostApplicationScope =>
+            {
+                ComponentHostFactory(hostApplicationScope, component, pipeline);
+            });
+        }
+
+        private static void ComponentHostFactory(ILifetimeScope hostApplicationScope, Topology.Host host, IPipeline pipeline, HostRole role = HostRole.Component)
+        {
+            ILifetimeScope componentScope = hostApplicationScope.BeginLifetimeScope(componentContainer =>
+            {
+                if (host.ServiceCollection is not null)
+                {
+                    componentContainer.Populate(host.ServiceCollection);
+                }
+                Type[] componentEndpointContracts = host.Endpoints.Select(m => m.Contract).ToArray();
+                RegisterHost(componentContainer, host, componentEndpointContracts, pipeline, role);
+                RegisterEndPoints(host, componentContainer);
+                componentContainer.CreateIsolatedScope((scope, componentHostContainer) =>
+                {
+                    //register inside for InProcEndpoint
+                    RegisterSubSystemHosts(componentHostContainer, host, scope);
+                });
+            });
+            hostApplicationScope.Disposer.AddInstanceForDisposal(componentScope);
+        }
+
+        private static void RegisterHost(ContainerBuilder componentContainer, Topology.Host component, Type[] componentEndpointContracts, IPipeline pipeline, HostRole role)
+        {
+            componentContainer.RegisterInstance(new Role(role)).AsSelf();
+            if (component is HostMock hostMock)
+            {
+                foreach (Type componentContract in componentEndpointContracts)
+                {
+                    componentContainer.Register(c =>
+                    {
+                        List<IInterceptor> interceptors = [];
+                        foreach (IPipelineServiceInterceptor serviceInterceptor in pipeline.ServiceInterceptors)
+                        {
+                            var interceptor = c.Resolve(serviceInterceptor.ImplementationType) as IInterceptor;
+                            if (interceptor is not null)
+                            {
+                                interceptors.Add(interceptor);
+                            }
+                        }
+                        return s_proxyGenerator.CreateInterfaceProxyWithTargetInterface(componentContract, hostMock.Instance, [.. interceptors]);
+                    }).Named("Endpoint", componentContract);
+                }
+            }
+            else
+            {
+                foreach (Type cepc in componentEndpointContracts)
+                {
+                    componentContainer.RegisterType(component.Implementation).Named("Endpoint", cepc)
+                        .EnableInterfaceInterceptors()
+                        .InterceptedBy(pipeline.ServiceInterceptors.Select(s => s.ImplementationType).ToArray());
+                }
+                RegisterProxies(componentContainer, component.Proxies);
+            }
+        }
+
+        private static void RegisterSubSystemHosts(ContainerBuilder hostContainer, Topology.Host host, ILifetimeScope componentScope)
+        {
+            foreach (Binding endpoint in host.Endpoints)
+            {
+                // ISubSystemHost<I>
+                Type genericSubSystemHostType = typeof(SubSystemHost<,>).MakeGenericType(host.Implementation, endpoint.Contract);
+                object? genericSubSystemHost = Activator.CreateInstance(genericSubSystemHostType, componentScope);
+                Debug.Assert(genericSubSystemHost is not null);
+                hostContainer.RegisterInstance(genericSubSystemHost).As(genericSubSystemHostType.GetInterfaces());
+            }
+        }
+
+        private static void RegisterEndPoints(Topology.Host host, ContainerBuilder subsystemScopeBuilder)
+        {
+            foreach (Binding endpoint in host.Endpoints)
+            {
+                Type? hostChannel = endpoint.Transport.HostChannel;
+                Type hostEndpointType = hostChannel?.MakeGenericType(endpoint.Contract) ?? throw new ArgumentException("Endpoint not defined for transport");
+
+                ValidateEndpointContract(endpoint);
+
+                // IEndpoint<I>
+                subsystemScopeBuilder.RegisterType(hostEndpointType).SingleInstance().As([hostEndpointType, typeof(IEndpoint)]);
+                subsystemScopeBuilder.RegisterBuildCallback(c =>
+                {
+                    RegisteredEndpoints endpointRegister = c.Resolve<RegisteredEndpoints>();
+                    var endpointInstance = (IEndpoint)c.Resolve(hostEndpointType);
+                    endpointInstance.Bind(endpoint, host.Implementation.Name);
+                    endpointRegister.AddEndpoint(endpointInstance);
+                });
+            }
+        }
+
+        private static void ValidateEndpointContract(Binding endpoint)
+        {
+            IGrouping<string, MethodInfo>[] groupedByName = endpoint.Contract.Operations().GroupBy(g => g.Name).ToArray();
+            if (groupedByName.Any(a => a.Count() != 1))
+            {
+                IEnumerable<IGrouping<string, MethodInfo>> duplicates = groupedByName.Where(a => a.Count() > 1);
+                string duplicateNames = string.Join(",", duplicates.Select(s => s.Key).ToArray());
+                throw new ArgumentException($"Topology - Endpoint contract is not valid. Contains duplicate operation name: {duplicateNames}");
+            }
+        }
+
+        private static void RegisterProxies(this ContainerBuilder builder, ImmutableArray<Topology.Client> clients)
+        {
+            foreach (Client client in clients)
+            {
+                builder.RegisterInstance(client);
+                builder.Register(c => c.Resolve<ProxyFactory>().Create(client.Service.Contract)).As(client.Service.Contract);
+            }
+        }
+    }
+}

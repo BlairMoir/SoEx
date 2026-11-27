@@ -1,7 +1,9 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SoEx.Abstractions;
 using SoEx.Context;
+using SoEx.Hosting;
 using SoEx.Method.Conventions;
 using SoEx.Topology;
 using SoEx.Transport.InProc;
@@ -19,10 +21,12 @@ public static class Host
         var namespaceParts = assemblyName!.Split(".");
         string subSystem = namespaceParts[0];
         string companyName = namespaceParts[1];
+        var dtoAndContextTypes = Scan.DtoAndContextTypes(companyName);
 
         var topology = BuildSystem(subSystem, companyName, scd);
 
         HostApplicationBuilder serviceHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
+        serviceHostBuilder.SoEx(topology, new KnownTypes(dtoAndContextTypes));
         serviceHostBuilder.Services.InProcClient();
         serviceHostBuilder.Services.NamedPipedClient();
         serviceHostBuilder.Services.ConfigureLogging();
@@ -106,11 +110,7 @@ public static class Host
         List<Client> eventClients = new List<Client>();
         foreach (var ev in eventTypes)
         {
-            var genericType = typeof(Client<>).MakeGenericType(ev);
-            var client = (Client)Activator.CreateInstance(genericType)!;
-            typeof(Client).GetProperty(nameof(Client.SubSystem))?.SetValue(client, "");
-            typeof(Client).GetProperty(nameof(Client.Service))?.SetValue(client, CreateNamedPipeEventBinding("", ev));
-            eventClients.Add(client);
+           eventClients.Add(CreateNamedPipeEventBinding("",ev).ToClient());
         }
         return eventClients.ToArray();
     }

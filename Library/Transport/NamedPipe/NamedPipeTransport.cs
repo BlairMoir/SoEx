@@ -1,6 +1,6 @@
 namespace SoEx.Transport.NamedPipe
 {
-    public class NamedPipeTransport : Topology.Transport
+    public record NamedPipeTransport : Topology.Transport
     {
         public NamedPipeTransport()
         {

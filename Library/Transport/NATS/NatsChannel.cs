@@ -1,13 +1,8 @@
 using System.Diagnostics;
-using System.IO.Pipes;
-using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Principal;
-using Autofac;
 using NATS.Client.Core;
 using NATS.Net;
 using SoEx.Abstractions;
+using SoEx.Exceptions;
 using SoEx.Topology;
 
 namespace SoEx.Transport.NATS
@@ -16,10 +11,14 @@ namespace SoEx.Transport.NATS
     {
         readonly IMessageSerializer _serializer;
         NatsBinding<I>? _natsBinding;
+        private readonly SharedConnections<NatsClient> _connections;
 
-        public NatsChannel(IMessageSerializer serializer)
+        public Type Contract => typeof(I);
+
+        public NatsChannel(IMessageSerializer serializer, SharedConnections<NatsClient> connections)
         {
             _serializer = serializer;
+            _connections = connections;
         }
 
         public void Bind(Binding binding)
@@ -30,7 +29,7 @@ namespace SoEx.Transport.NATS
             }
         }
 
-        public IPipeline? Pipeline => _natsBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _natsBinding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {
@@ -38,13 +37,16 @@ namespace SoEx.Transport.NATS
             {
                 try
                 {
-                    Debug.Assert(_natsBinding is not null);
-                    await using (NatsClient nc = new NatsClient())
+                    Debug.Assert(_natsBinding != null);
+                    NatsClient nc = await CreateConnection().ConfigureAwait(false);
+                    string natsSubject = $"{_natsBinding.SubSystem}-{typeof(I)}";
+                    NatsMsg<byte[]> reply = await nc.RequestAsync<byte[], byte[]>(natsSubject, payload).ConfigureAwait(false);
+                    if (NatsServiceError.IsIn(reply))
                     {
-                        string natsSubject = $"{_natsBinding.SubSystem}-{typeof(I)}";
-                        NatsMsg<byte[]> reply = await nc.RequestAsync<byte[], byte[]>(natsSubject, payload);
-                        return reply.Data ?? [];
+                        throw new ServiceException("Error executing service pipeline",
+                            new InvalidOperationException("The service reported an error"));
                     }
+                    return reply.Data ?? [];
                 }
                 catch (Exception)
                 {
@@ -54,5 +56,30 @@ namespace SoEx.Transport.NATS
             }
         }
 
+        private async Task<NatsClient> CreateConnection()
+        {
+            Debug.Assert(_natsBinding is not null);
+            string url = _natsBinding.Config.Url;
+            NatsClient client = await _connections.Get(url,
+                () => Connect(url),
+                c => c.Connection.ConnectionState == NatsConnectionState.Closed
+            ).ConfigureAwait(false);
+            return client;
+        }
+
+        private static async Task<NatsClient> Connect(string url)
+        {
+            var client = new NatsClient(new NatsOpts() { Url = url });
+            try
+            {
+                await client.ConnectAsync().ConfigureAwait(false);
+                return client;
+            }
+            catch
+            {
+                await client.DisposeAsync().ConfigureAwait(false);
+                throw;
+            }
+        }
     }
 }

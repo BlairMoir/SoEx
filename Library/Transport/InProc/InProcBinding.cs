@@ -1,15 +1,16 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using SoEx.Topology;
 
 namespace SoEx.Transport.InProc
 {
-    public class InProcBinding<I> : Topology.Binding
+    public record InProcBinding<I> : Topology.Binding
     {
-        [SetsRequiredMembers]
-        public InProcBinding(string subSystem)
+        public InProcBinding(string subSystem) : base(
+            typeof(I),
+            new InProcTransport() { Address = new Address.Single(new Uri($"soex.inproc://{subSystem}-{typeof(I)}")) },
+            subSystem
+            )
         {
-            Contract = typeof(I);
-            SubSystem = subSystem;
-            Transport = new InProcTransport() { Address = new Uri($"soex.inproc://{SubSystem}-{typeof(I)}") };
         }
     }
 }

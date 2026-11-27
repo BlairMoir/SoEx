@@ -3,7 +3,7 @@ using SoEx.Abstractions;
 
 namespace SoEx.Hosting
 {
-    public class SubSystemHost<T, I> : ISubSystemHost<I>, ISubSystemHost, ISubSystemHostChannel
+    public class SubSystemHost<T, I> : ISubSystemHost<I>, ISubSystemHost
     {
         ILifetimeScope _hostLifetimeScope;
         public SubSystemHost(ILifetimeScope scope)
@@ -14,11 +14,6 @@ namespace SoEx.Hosting
         public ILifetimeScope BeginRequestLifetimeScope()
         {
             return _hostLifetimeScope.BeginLifetimeScopeAsyncLocal();
-        }
-
-        public C Resolve<C>() where C : class
-        {
-            return _hostLifetimeScope.Resolve<C>();
         }
     }
 }

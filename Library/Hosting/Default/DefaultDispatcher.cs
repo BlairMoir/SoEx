@@ -1,0 +1,179 @@
+using System.Diagnostics;
+using System.Reflection;
+using Autofac;
+using Microsoft.Extensions.Logging;
+using SoEx.Abstractions;
+using SoEx.Context;
+using SoEx.Hosting.Extensions;
+using SoEx.Topology;
+
+namespace SoEx.Hosting.Default
+{
+    public class DefaultDispatcher : IDispatcher
+    {
+        readonly ILogger<DefaultDispatcher> _logger;
+        readonly ISubSystemScope _subsystemlifeTimeScope;
+        readonly IAmbientContext _callerAmbientContext;
+        readonly IFrameworkContext _callerFrameworkContext;
+        readonly IEnumerable<IContextFlowPolicy> _policies;
+        readonly ITelemetryConfidentiality _telemetryConfidentiality;
+        private readonly Topology.Role _role;
+
+        public DefaultDispatcher(ILogger<DefaultDispatcher> logger, ISubSystemScope subsystemlifeTimeScope, IAmbientContext callerAmbientContext, IFrameworkContext callerFrameworkContext, ITelemetryConfidentiality telemetryConfidentiality, IEnumerable<IContextFlowPolicy> policies, Topology.Role role)
+        {
+            _subsystemlifeTimeScope = subsystemlifeTimeScope;
+            _callerAmbientContext = callerAmbientContext;
+            _callerFrameworkContext = callerFrameworkContext;
+            _policies = policies;
+            _logger = logger;
+            _telemetryConfidentiality = telemetryConfidentiality;
+            _role = role;
+        }
+
+        public async Task<InvocationResponse> Dispatch<I>(InvocationRequest invocationRequest) where I : class
+        {
+            ((AmbientContext)_callerAmbientContext).Deserialize(invocationRequest.AmbientContext);
+
+            using (Activity? activity = SoEx.Diagnostics.ActivitySources.Host.StartActivity($"{nameof(DefaultDispatcher)} {typeof(I)} {invocationRequest.MethodName}"))
+            {
+                try
+                {
+
+                    ISubSystemHost subSystemHost = _subsystemlifeTimeScope.For<ISubSystemHost<I>>();
+                    using (ILifetimeScope requestLifetime = subSystemHost.BeginRequestLifetimeScope())
+                    {
+                        IncomingFrameworkContext<I>(invocationRequest, requestLifetime);
+                        IAmbientContext operationAmbientContext = requestLifetime.Resolve<IAmbientContext>();
+                        FlowIncoming(_callerAmbientContext, operationAmbientContext);
+
+                        Dictionary<string, object> scopeProperties = ScopeProperties(operationAmbientContext);
+                        using (_logger.BeginScope(scopeProperties))
+                        {
+                            AddScopePropertiesToActivity(activity, scopeProperties);
+                            I host = requestLifetime.ResolveNamed<I>("Endpoint");
+
+                            MethodInfo? method = typeof(I).Find(invocationRequest.MethodName);
+                            if (method is null)
+                            {
+                                throw new MissingMethodException(typeof(I).FullName, invocationRequest.MethodName);
+                            }
+
+                            ParameterInfo[] parameters = method.GetParameters();
+                            object?[] arguments = ArgumentTypes(parameters, invocationRequest.Arguments);
+                            object? returnValue = method.Invoke(host, arguments);
+                            Debug.Assert(returnValue is not null);
+
+                            if (returnValue is not Task)
+                            {
+                                throw new NotSupportedException("SoEx contracts must be async");
+                            }
+
+                            object? response = null;
+                            if (!invocationRequest.HasResult)
+                            {
+                                await (Task)returnValue;
+                            }
+                            else
+                            {
+                                object? responseObject = await returnValue.TaskResult();
+                                response = responseObject;
+                            }
+
+                            FlowContextToCaller(_callerAmbientContext, operationAmbientContext);
+                            InvocationResponse invocationResponse = new InvocationResponse()
+                            {
+                                Response = response,
+                                AmbientContext = ((AmbientContext)_callerAmbientContext).Serialize()
+                            };
+                            return invocationResponse;
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    activity?.SetStatus(ActivityStatusCode.Error);
+                    throw;
+                }
+            }
+        }
+
+        private object?[] ArgumentTypes(ParameterInfo[] parameters, object?[] invocationRequestArguments)
+        {
+            for (int arg = 0; arg < invocationRequestArguments.Length; arg++)
+            {
+                object? value = invocationRequestArguments[arg];
+                if (value is null)
+                    continue;
+
+                Type paramType = parameters[arg].ParameterType;
+                invocationRequestArguments[arg] = value.ToArgumentType(paramType);
+            }
+
+            return invocationRequestArguments;
+        }
+
+        private void IncomingFrameworkContext<I>(InvocationRequest invocationRequest, ILifetimeScope requestLifetime)
+            where I : class
+        {
+            FrameworkContext callerFrameworkContext = (FrameworkContext)_callerFrameworkContext;
+            callerFrameworkContext.Deserialize(invocationRequest.FrameworkContext);
+            InvocationContext invocationContext = new InvocationContext(typeof(I).FullName ?? typeof(I).Name, invocationRequest.MethodName);
+            FrameworkContext operationFrameworkContext = (FrameworkContext)requestLifetime.Resolve<IFrameworkContext>();
+            operationFrameworkContext.SetOrReplace(invocationContext);
+
+            if (callerFrameworkContext.Contains<EntryContext>() && _role.HostRole == HostRole.Component)
+            {
+                operationFrameworkContext.SetOrReplace(callerFrameworkContext.Get<EntryContext>());
+            }
+            if (_role.HostRole == HostRole.EntryPoint)
+            {
+                if (callerFrameworkContext.Contains<EntryContext>())
+                {
+                    InvocationContext previousEntryInvocationContext = callerFrameworkContext.Get<EntryContext>().Entry;
+                    operationFrameworkContext.SetOrReplace(new PreviousEntryContext(previousEntryInvocationContext));
+                }
+                operationFrameworkContext.SetOrReplace(new EntryContext(invocationContext));
+            }
+        }
+
+        private static async Task<object> Convert(Task task)
+        {
+            await task;
+            PropertyInfo? property = task.GetType().GetProperty("Result", BindingFlags.Public | BindingFlags.Instance);
+            if (property == null)
+                throw new InvalidOperationException("Task does not have a return value (" + task.GetType().ToString() + ")");
+            return property.GetValue(task) ?? throw new InvalidOperationException("Result property is null");
+        }
+
+        private static void AddScopePropertiesToActivity(Activity? activity, Dictionary<string, object> scopeProperties)
+        {
+            foreach (KeyValuePair<string, object> property in scopeProperties)
+            {
+                activity?.AddTag(property.Key, property.Value);
+            }
+        }
+
+        private void FlowIncoming(IAmbientContext caller, IAmbientContext invoked)
+        {
+            foreach (IContextFlowPolicy policy in _policies)
+            {
+                policy.Incoming(caller, invoked);
+            }
+        }
+
+        private void FlowContextToCaller(IAmbientContext caller, IAmbientContext invoked)
+        {
+            foreach (IContextFlowPolicy policy in _policies)
+            {
+                policy.Outgoing(invoked, caller);
+            }
+        }
+
+        private Dictionary<string, object> ScopeProperties(IAmbientContext invokedContext)
+        {
+            IEnumerable<KeyValuePair<string, object>> flattenedProperties = _policies.SelectMany(s => s.ScopeProperties(invokedContext));
+            Dictionary<string, object> protectedProperties = flattenedProperties.ToDictionary(kvp => kvp.Key, kvp => _telemetryConfidentiality.Protect(kvp.Value, kvp.Key));
+            return protectedProperties;
+        }
+    }
+}

@@ -2,10 +2,13 @@
 using Microsoft.Extensions.Logging;
 using SoEx.Abstractions;
 using SoEx.Context;
+using SoEx.Exceptions;
 using SoEx.Hosting;
+using SoEx.Hosting.Extensions;
+using SoEx.Messaging.Chimera;
 using SoEx.Topology;
+using SoEx.Transport.Chimera;
 using SoEx.Transport.InProc;
-using SoEx.Transport.ThreadChannel;
 
 namespace SoEx.Test
 {
@@ -15,10 +18,17 @@ namespace SoEx.Test
 
         Type[]? _policies;
         Type[]? _generics;
+        KnownTypes _knownTypes = new KnownTypes();
+        TestExceptionMode _testExceptionMode = new TestExceptionMode();
 
         public void DefaultConfiguration(SoEx.Topology.System topology)
         {
             _topology = topology;
+        }
+
+        public void SoExTestExceptionMode(ExceptionMode exceptionMode)
+        {
+            _testExceptionMode = new TestExceptionMode() { Mode = exceptionMode };
         }
 
         public void DefaultPolicies(Type[] policies)
@@ -26,43 +36,100 @@ namespace SoEx.Test
             _policies = policies;
         }
 
+        public void DefaultKnownTypes(Type[] knownTypes)
+        {
+            _knownTypes = new KnownTypes(knownTypes);
+        }
+
         public void GenericRegistrations(Type[] generics)
         {
             _generics = generics;
         }
 
-        public async Task TestService<S>(Func<S, Task> callerFunc, SoEx.Topology.System? system = null) where S : notnull
+        public async Task TestSystem(Func<SystemHarness, Task> systemFunc, SoEx.Topology.System? system = null,
+            KnownTypes? knownTypes = null)
         {
-            var container = BuildContainer(system);
-            using (var requestScope = container.BeginLifetimeScopeAsyncLocal())
-            {
-                var proxy = requestScope.Resolve<S>();
-                await callerFunc.Invoke(proxy);
-            }
+            await BuildAndInvoke(systemFunc, system, knownTypes);
         }
 
-        public async Task TestComponent<I>(Func<I, Task> callerFunc, SoEx.Topology.System? system = null) where I : class
+        public async Task TestService<S>(Func<S, Task> callerFunc, SoEx.Topology.System? system = null, KnownTypes? knownTypes = null) where S : notnull
         {
-            var orginalTopo = system ?? _topology;
-            var subsystemName = orginalTopo.SubSystems.First().Name;
+            await BuildAndInvoke(system => system.Proxy(callerFunc), system, knownTypes);
+        }
+
+        public async Task TestComponent<I>(Func<I, Task> callerFunc, SoEx.Topology.System? system = null, KnownTypes? knownTypes = null) where I : class
+        {
+            Topology.System orginalTopo = system ?? _topology;
+            string subsystemName = orginalTopo.SubSystems.First().Name;
             var newTopo = new SoEx.Topology.System()
             {
                 SubSystems = orginalTopo.SubSystems,
                 Clients = [new Client<I>() { Service = new InProcBinding<I>(subsystemName), SubSystem = subsystemName }],
                 Defaults = orginalTopo.Defaults
             };
-            var container = BuildContainer(newTopo);
-            using (var requestScope = container.BeginLifetimeScopeAsyncLocal())
+            await BuildAndInvoke(system => system.Proxy(callerFunc), newTopo, knownTypes);
+        }
+
+        public async Task BuildAndInvoke(Func<SystemHarness, Task> systemFunc, SoEx.Topology.System? system = null,
+            KnownTypes? knownTypes = null)
+        {
+            string eventDirectory =
+                Path.Combine(Path.GetTempPath(), "soex-test-events", Guid.NewGuid().ToString("N"));
+            try
             {
-                var proxy = requestScope.Resolve<I>();
-                await callerFunc.Invoke(proxy);
+                Topology.System topology = UniqueEventsDirectory(system ?? _topology, eventDirectory);
+                using (ILifetimeScope container = BuildContainer(topology, knownTypes))
+                {
+                    await Invoke(systemFunc, container);
+                }
+            }
+            finally
+            {
+                if (Directory.Exists(eventDirectory))
+                {
+                    Directory.Delete(eventDirectory, true);
+                }
             }
         }
 
-        private ILifetimeScope BuildContainer(SoEx.Topology.System? system)
+        private async Task Invoke(Func<SystemHarness, Task> systemFunc, ILifetimeScope container)
+        {
+            RegisteredEndpoints endpointRegister = container.Resolve<RegisteredEndpoints>();
+            ChimeraTopic topics = container.Resolve<ChimeraTopic>();
+            ChimeraOptions? options = null;
+            foreach (IEndpoint endpoint in endpointRegister.Endpoints)
+            {
+                if (endpoint is ChimeraEventEndpoint chimeraEventEndpoint
+                    && chimeraEventEndpoint.ChimeraOptions is not null
+                    && chimeraEventEndpoint.Topic is not null
+                    )
+                {
+                    if (options is null)
+                    {
+                        options = chimeraEventEndpoint.ChimeraOptions;
+                    }
+                    topics.For(chimeraEventEndpoint.ChimeraOptions, chimeraEventEndpoint.Topic);
+                }
+                await endpoint.Listen();
+            }
+
+            try
+            {
+                await systemFunc.Invoke(new SystemHarness(container, options));
+            }
+            finally
+            {
+                foreach (IEndpoint endpoint in endpointRegister.Endpoints)
+                {
+                    await endpoint.Close();
+                }
+            }
+        }
+
+        private ILifetimeScope BuildContainer(SoEx.Topology.System system, KnownTypes? knownTypes)
         {
             ContainerBuilder builder = new ContainerBuilder();
-            builder.RegisterSoEx(system ?? _topology);
+            builder.RegisterSoEx(system, knownTypes ?? _knownTypes);
             builder.RegisterType<LoggerFactory>()
                             .As<ILoggerFactory>()
                             .SingleInstance();
@@ -70,9 +137,10 @@ namespace SoEx.Test
                 .As(typeof(ILogger<>))
                 .SingleInstance();
             builder.RegisterGeneric(typeof(InProcChannel<>)).As(typeof(InProcChannel<>));
-            builder.RegisterGeneric(typeof(UnsafeThreadChannelChannel<>)).As(typeof(UnsafeThreadChannelChannel<>));
-            builder.RegisterGeneric(typeof(UnsafeThreadEventChannel<>)).As(typeof(UnsafeThreadEventChannel<>)).SingleInstance();
+            builder.RegisterGeneric(typeof(ChimeraEventChannel<>)).As(typeof(ChimeraEventChannel<>));
             builder.RegisterType<InProcListeners>().SingleInstance().AsSelf();
+            builder.RegisterType<ChimeraTopic>().SingleInstance();
+            builder.RegisterInstance(_testExceptionMode).AsSelf();
 
             if (_policies is not null)
             {
@@ -81,20 +149,46 @@ namespace SoEx.Test
 
             if (_generics is not null)
             {
-                foreach (var type in _generics)
+                foreach (Type type in _generics)
                 {
                     builder.RegisterGeneric(type).As(type);
                 }
             }
 
-            var scope = builder.Build();
-            var endpointRegister = scope.Resolve<RegisteredEndpoints>();
-            foreach (var endpoint in endpointRegister.Endpoints)
-            {
-                endpoint.Listen();
-            }
-
+            IContainer scope = builder.Build();
             return scope;
+        }
+
+        private Topology.System UniqueEventsDirectory(Topology.System topology, string eventDirectory)
+        {
+            Client RedirectClient(Client client) => client with { Service = CheckEventBinding(client.Service, eventDirectory) };
+            Host RedirectHost(Host host) => host with
+            {
+                Endpoints = [.. host.Endpoints.Select(s => CheckEventBinding(s, eventDirectory))],
+                Proxies = [.. host.Proxies.Select(RedirectClient)]
+            };
+
+            return topology with
+            {
+                SubSystems = [..topology.SubSystems.Select( s=> s with
+                {
+                    EntryPoint = RedirectHost(s.EntryPoint),
+                    Components = [..s.Components.Select(RedirectHost)]
+                })],
+                Clients = [.. topology.Clients.Select(RedirectClient)]
+            };
+        }
+
+        private Binding CheckEventBinding(Binding binding, string eventDirectory)
+        {
+            if (binding is ChimeraEventBinding chimeraEventBinding)
+            {
+                return chimeraEventBinding with
+                {
+                    Options = chimeraEventBinding.Options with { RootDirectory = eventDirectory }
+                };
+            }
+            return binding;
         }
     }
 }

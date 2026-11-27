@@ -1,16 +1,19 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <DebugType>embedded</DebugType>
     <LangVersion>13.0</LangVersion>
-    <Version>0.0.0-alpha-2.2</Version>
+    <Version>1.0.0-rc.1</Version>
     <Authors>Blair Moir</Authors>
-    <Copyright>Copyright (c) Blair Moir 2024</Copyright>
+    <Copyright>Copyright (c) Blair Moir 2024-2026</Copyright>
     <PackageProjectUrl>https://github.com/BlairMoir/SoEx/tree/primary/Library</PackageProjectUrl>
     <RepositoryUrl>https://github.com/BlairMoir/SoEx</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)..\nupkgs</PackageOutputPath>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 </Project>

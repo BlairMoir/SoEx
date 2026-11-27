@@ -13,6 +13,8 @@ namespace SoEx.Transport.NamedPipe
         readonly IMessageSerializer _serializer;
         NamedPipeEventBinding<I>? _namedPipeBinding;
 
+        public Type Contract => typeof(I);
+
         public NamedPipeEventChannel(IMessageSerializer serializer)
         {
             _serializer = serializer;
@@ -26,7 +28,7 @@ namespace SoEx.Transport.NamedPipe
             }
         }
 
-        public IPipeline? Pipeline => _namedPipeBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _namedPipeBinding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {
@@ -35,11 +37,11 @@ namespace SoEx.Transport.NamedPipe
                 try
                 {
                     Debug.Assert(_namedPipeBinding is not null);
-                    using (var pipeClient = new NamedPipeClientStream(".", _namedPipeBinding.Transport.Address.Host,
-                                                PipeDirection.InOut, PipeOptions.None,
+                    using (var pipeClient = new NamedPipeClientStream(".", _namedPipeBinding.Transport.Address.Uri.Host,
+                                                PipeDirection.InOut, PipeOptions.CurrentUserOnly,
                                                 TokenImpersonationLevel.None))
                     {
-                        await pipeClient.ConnectAsync(3000);
+                        await pipeClient.ConnectAsync(3000).ConfigureAwait(false);
                         var ss = new StreamBytes(pipeClient);
                         ss.WriteBytes(payload);
                         return [];

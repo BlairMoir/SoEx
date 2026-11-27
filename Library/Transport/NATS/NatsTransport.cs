@@ -1,6 +1,6 @@
 namespace SoEx.Transport.NATS
 {
-    public class NatsTransport : Topology.Transport
+    public record NatsTransport : Topology.Transport
     {
         public NatsTransport()
         {

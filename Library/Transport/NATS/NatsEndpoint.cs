@@ -1,11 +1,7 @@
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Autofac;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Net;
-using SoEx.Abstractions;
 using SoEx.Endpoint;
 using SoEx.Topology;
 
@@ -17,6 +13,8 @@ namespace SoEx.Transport.NATS
         NatsBinding<I>? _binding;
         IEndpointPipeline _endpointPipeLine;
         private INatsClient? _natsClient;
+        private Task? _subscription;
+        private readonly TimeSpan _retryDelay = TimeSpan.FromSeconds(5);
         CancellationTokenSource source = new CancellationTokenSource();
 
 
@@ -36,35 +34,107 @@ namespace SoEx.Transport.NATS
 
         public Task Listen()
         {
-            _natsClient = new NatsClient();
-            Task.Factory.StartNew(Subscribe, TaskCreationOptions.LongRunning);
+            Debug.Assert(_binding is not null);
+            _natsClient = new NatsClient(new NatsOpts() { Url = _binding.Config.Url });
+            _subscription = Task.Run(Subscribe);
             return Task.CompletedTask;
         }
 
-        public Task Close()
+        public async Task Close()
         {
-            source.Cancel();
-            // create a mechanism to wait for the subscribe loop to be finished
-            return Task.CompletedTask;
+            await source.CancelAsync();
+            if (_subscription is not null)
+                await _subscription.ConfigureAwait(false);
+
+            if (_natsClient is not null)
+            {
+                await _natsClient.DisposeAsync().ConfigureAwait(false);
+                _natsClient = null;
+            }
         }
 
         private async Task Subscribe()
         {
-            Debug.Assert(_natsClient is not null);
-            Debug.Assert(_binding is not null);
-            string subject = $"{_binding.SubSystem}-{typeof(I)}";
-            await foreach (NatsMsg<byte[]> msg in _natsClient.SubscribeAsync<byte[]>(subject, cancellationToken: source.Token))
+            while (!source.IsCancellationRequested)
             {
                 try
                 {
-                    Debug.Assert(msg.Data is not null);
-                    var dispatchResult = await Dispatch(msg.Data);
-                    await msg.ReplyAsync(dispatchResult, cancellationToken: source.Token);
+                    await MessageLoop();
+                }
+                catch (OperationCanceledException) when (source.IsCancellationRequested)
+                {
+                    return;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, ex.Message);
+                    _logger.LogError(ex, "NATS subscription for {Contract} failed", typeof(I));
                 }
+
+                try
+                {
+                    await Task.Delay(_retryDelay, source.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+            }
+        }
+
+        private async Task MessageLoop()
+        {
+            Debug.Assert(_natsClient is not null);
+            Debug.Assert(_binding is not null);
+            string subject = $"{_binding.SubSystem}-{typeof(I)}";
+            int maxConcurrent = _binding.Config.MaxConcurrentMessages;
+            using var slots = new SemaphoreSlim(maxConcurrent);
+
+            try
+            {
+                await foreach (NatsMsg<byte[]> msg in _natsClient.SubscribeAsync<byte[]>(subject,
+                                   queueGroup: subject, cancellationToken: source.Token))
+                {
+                    await slots.WaitAsync(source.Token);
+                    _ = HandleMessage(msg, slots);
+                }
+            }
+            finally
+            {
+                for (int i = 0; i < maxConcurrent; i++)
+                {
+                    await slots.WaitAsync();
+                }
+            }
+        }
+
+        private async Task HandleMessage(NatsMsg<byte[]> msg, SemaphoreSlim slots)
+        {
+            await Task.Yield();
+            try
+            {
+                Debug.Assert(msg.Data is not null);
+                byte[] dispatchResult;
+                try
+                {
+                    dispatchResult = await Dispatch(msg.Data);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "NATS request for {Contract} failed", typeof(I));
+                    await msg.ReplyAsync<byte[]>([], headers: NatsServiceError.Headers());
+                    return;
+                }
+
+
+                await msg.ReplyAsync(dispatchResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "NATS reply for {Contract} failed", typeof(I));
+            }
+            finally
+            {
+                slots.Release();
             }
         }
 

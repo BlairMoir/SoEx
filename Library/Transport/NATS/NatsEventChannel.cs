@@ -16,10 +16,14 @@ namespace SoEx.Transport.NATS
     {
         readonly IMessageSerializer _serializer;
         NatsEventBinding<I>? _natsEventBinding;
+        private readonly SharedConnections<NatsClient> _connections;
 
-        public NatsEventChannel(IMessageSerializer serializer)
+        public Type Contract => typeof(I);
+
+        public NatsEventChannel(IMessageSerializer serializer, SharedConnections<NatsClient> connections)
         {
             _serializer = serializer;
+            _connections = connections;
         }
 
         public void Bind(Binding binding)
@@ -30,7 +34,7 @@ namespace SoEx.Transport.NATS
             }
         }
 
-        public IPipeline? Pipeline => _natsEventBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _natsEventBinding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {
@@ -38,20 +42,52 @@ namespace SoEx.Transport.NATS
             {
                 try
                 {
-                    await using (NatsClient nc = new NatsClient())
+                    NatsClient nc = await CreateConnection().ConfigureAwait(false);
+                    INatsJSContext js = nc.CreateJetStreamContext();
+                    PubAckResponse ack;
+                    try
                     {
-                        INatsJSContext js = nc.CreateJetStreamContext();
-                        await js.CreateStreamAsync(new StreamConfig(name: NatsSubject.For<I>(), subjects: [NatsSubject.For<I>()]));
-                        var ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload);
-                        ack.EnsureSuccess();
-                        return [];
+                        ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload).ConfigureAwait(false);
                     }
+                    catch (NatsJSPublishNoResponseException)
+                    {
+                        await js.CreateEventStream<I>().ConfigureAwait(false);
+                        ack = await js.PublishAsync<byte[]>(NatsSubject.For<I>(), payload).ConfigureAwait(false);
+                    }
+                    ack.EnsureSuccess();
+                    return [];
                 }
                 catch
                 {
                     activity?.SetStatus(ActivityStatusCode.Error);
                     throw;
                 }
+            }
+        }
+
+        private async Task<NatsClient> CreateConnection()
+        {
+            Debug.Assert(_natsEventBinding is not null);
+            string url = _natsEventBinding.Config.Url;
+            NatsClient client = await _connections.Get(url,
+                () => Connect(url),
+                c => c.Connection.ConnectionState == NatsConnectionState.Closed
+            ).ConfigureAwait(false);
+            return client;
+        }
+
+        private static async Task<NatsClient> Connect(string url)
+        {
+            var client = new NatsClient(new NatsOpts() { Url = url });
+            try
+            {
+                await client.ConnectAsync().ConfigureAwait(false);
+                return client;
+            }
+            catch
+            {
+                await client.DisposeAsync().ConfigureAwait(false);
+                throw;
             }
         }
 

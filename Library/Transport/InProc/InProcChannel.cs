@@ -12,6 +12,8 @@ namespace SoEx.Transport.InProc
         InProcBinding<I>? _inProcBinding;
         readonly InProcListeners _listeners;
 
+        public Type Contract => typeof(I);
+
         public InProcChannel(ILifetimeScope scope, InProcListeners listeners)
         {
             _scope = scope;
@@ -26,7 +28,7 @@ namespace SoEx.Transport.InProc
             }
         }
 
-        public IPipeline? Pipeline => _inProcBinding?.Pipeline;
+        public IBindingPipeline? Pipeline => _inProcBinding?.Pipeline;
 
         public async Task<byte[]> InvokeResult(byte[] payload)
         {
@@ -35,8 +37,8 @@ namespace SoEx.Transport.InProc
                 try
                 {
 
-                    InProcEndpoint<I> host = _listeners.ForAddress<I>(_inProcBinding?.Transport.Address ?? throw new InvalidOperationException("Binding must be set before a channle is used"));
-                    byte[] response = await host.Send(payload);
+                    InProcEndpoint<I> host = _listeners.ForAddress<I>(_inProcBinding?.Transport.Address.Uri ?? throw new InvalidOperationException("Binding must be set before a channle is used"));
+                    byte[] response = await host.Send(payload).ConfigureAwait(false);
                     return response;
                 }
                 catch

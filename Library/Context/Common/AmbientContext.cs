@@ -13,9 +13,14 @@ namespace SoEx.Context
             _messageSerializer = messageSerializer;
         }
 
+        private string ContextName<T>()
+        {
+            return typeof(T).FullName ?? typeof(T).Name;
+        }
+
         public void SetIfNotExists<T>(Func<T> contextFactory) where T : notnull
         {
-            string contextName = typeof(T).Name;
+            string contextName = ContextName<T>();
             if (_contexts.ContainsKey(contextName))
             {
                 return;
@@ -25,17 +30,17 @@ namespace SoEx.Context
 
         public T Get<T>() where T : notnull
         {
-            return (T)_contexts[typeof(T).Name];
+            return (T)_contexts[ContextName<T>()];
         }
 
         public bool Contains<T>() where T : notnull
         {
-            return _contexts.ContainsKey(typeof(T).Name);
+            return _contexts.ContainsKey(ContextName<T>());
         }
 
         public void SetOrReplace<T>(T context) where T : notnull
         {
-            string contextName = typeof(T).Name;
+            string contextName = ContextName<T>();
             if (_contexts.ContainsKey(contextName))
             {
                 _contexts[contextName] = context;
@@ -48,24 +53,42 @@ namespace SoEx.Context
 
         public byte[] Serialize()
         {
-            return _messageSerializer.Serialize(_contexts);
+            var outgoingBytes = new ConcurrentDictionary<string, byte[]>();
+            foreach (KeyValuePair<string, object> pair in _contexts)
+            {
+                outgoingBytes[pair.Key] = _messageSerializer.Serialize(pair.Value);
+            }
+            return _messageSerializer.Serialize(outgoingBytes);
         }
 
-        public void Deserialize(byte[]? serlializedContexts)
+        public void Deserialize(byte[]? serializedContexts)
         {
-            if (serlializedContexts is null)
+            if (serializedContexts is null)
                 return;
 
+            ConcurrentDictionary<string, byte[]>? incomingBytes =
+                _messageSerializer.Deserialize<ConcurrentDictionary<string, byte[]>>(serializedContexts);
 
-            ConcurrentDictionary<string, object>? replacmentContexts = _messageSerializer.Deserialize<ConcurrentDictionary<string, object>>(serlializedContexts);
-
-            if (replacmentContexts is null)
+            if (incomingBytes is null)
                 return;
 
-
-            foreach (var replacement in replacmentContexts)
+            foreach (KeyValuePair<string, byte[]> pair in incomingBytes)
             {
-                _contexts.AddOrUpdate(replacement.Key, replacement.Value, (k, v) => replacement.Value);
+                object? value;
+                try
+                {
+                    value = _messageSerializer.Deserialize<object>(pair.Value);
+                }
+                catch
+                {
+                    // silently drop any contexts that are not in our known types
+                    continue;
+                }
+
+                if (value is null)
+                    continue;
+
+                _contexts[pair.Key] = value;
             }
         }
     }

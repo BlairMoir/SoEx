@@ -1,10 +1,17 @@
 ﻿namespace SoEx.Topology
 {
-    public abstract class Binding
+    public abstract record Binding
     {
-        public required Type Contract { get; init; }
-        public required Transport Transport { get; init; }
-        public required string SubSystem { get; init; }
-        public IPipeline? Pipeline { get; set; }
+        protected Binding(Type contract, Transport transport, string subSystem)
+        {
+            Contract = contract;
+            Transport = transport;
+            SubSystem = subSystem;
+        }
+
+        public Type Contract { get; }
+        public Transport Transport { get; }
+        public string SubSystem { get; }
+        public IBindingPipeline? Pipeline { get; init; }
     }
 }

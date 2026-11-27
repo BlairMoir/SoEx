@@ -1,76 +1,96 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
+using System.Xml;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SoEx.Topology;
 
-namespace SoEx.Hosting;
-
-public class EndpointLifetimeService : IHostedLifecycleService
+namespace SoEx.Hosting
 {
-    readonly ILogger<EndpointLifetimeService> _logger;
-    readonly RegisteredEndpoints _registeredEndpoints;
-
-    public EndpointLifetimeService(ILogger<EndpointLifetimeService> logger, RegisteredEndpoints registeredEndpoints)
+    public class EndpointLifetimeService : IHostedLifecycleService
     {
-        _logger = logger;
-        _registeredEndpoints = registeredEndpoints;
-    }
+        readonly ILogger<EndpointLifetimeService> _logger;
+        readonly RegisteredEndpoints _registeredEndpoints;
 
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
+        public EndpointLifetimeService(ILogger<EndpointLifetimeService> logger, RegisteredEndpoints registeredEndpoints)
+        {
+            _logger = logger;
+            _registeredEndpoints = registeredEndpoints;
+        }
 
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
 
 
-    public Task StartingAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
+        public Task StartingAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
 
-    public async Task StartedAsync(CancellationToken cancellationToken)
-    {
-        List<Task> startupTasks = new List<Task>();
-        _logger.LogDebug("The host has started, attempting to start listeners");
-        foreach (var endpoint in _registeredEndpoints.Endpoints)
+        public async Task StartedAsync(CancellationToken cancellationToken)
+        {
+            List<Task> startupTasks = new List<Task>();
+            _logger.LogDebug("The host has started, attempting to start listeners");
+            foreach (IEndpoint endpoint in _registeredEndpoints.Endpoints)
+            {
+                startupTasks.Add(Listen(endpoint));
+            }
+            await Task.WhenAll(startupTasks);
+            _logger.LogDebug("Listeners started");
+        }
+
+        public async Task StoppingAsync(CancellationToken cancellationToken)
+        {
+            List<Task> shutdownTasks = new List<Task>();
+            _logger.LogDebug("The host has requested shutdown, attempting to close listeners");
+            foreach (IEndpoint endpoint in _registeredEndpoints.Endpoints)
+            {
+                try
+                {
+                    shutdownTasks.Add(Close(endpoint));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Endpoint listen error: {ErrorMessage}", ex.Message);
+                }
+            }
+
+            await Task.WhenAll(shutdownTasks);
+            _logger.LogDebug("Listeners closed");
+        }
+
+        public Task StoppedAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        private async Task Listen(IEndpoint endpoint)
         {
             try
             {
-                startupTasks.Add(endpoint.Listen());
+                await endpoint.Listen();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Endpoint listen error: {ErrorMessage}", ex.Message);
+                _logger.LogError(ex, "Endpoint {Endpoint} did not start listening", endpoint.GetType());
             }
         }
-        await Task.WhenAll(startupTasks).ContinueWith(_ => _logger.LogDebug("Listeners started"));
-    }
 
-    public async Task StoppingAsync(CancellationToken cancellationToken)
-    {
-        List<Task> shutdownTasks = new List<Task>();
-        _logger.LogDebug("The host has requested shutdown, attempting to close listeners");
-        foreach (var endpoint in _registeredEndpoints.Endpoints)
+        private async Task Close(IEndpoint endpoint)
         {
             try
             {
-                shutdownTasks.Add(endpoint.Close());
+                await endpoint.Close();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Endpoint listen error: {ErrorMessage}", ex.Message);
+                _logger.LogError(ex, "Endpoint {Endpoint} did not close cleanly", endpoint.GetType());
             }
         }
-        await Task.WhenAll(shutdownTasks).ContinueWith(_ => _logger.LogDebug("Listeners closed"));
-    }
-
-    public Task StoppedAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
     }
 }

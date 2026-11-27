@@ -1,12 +1,17 @@
+using System.Diagnostics.Tracing;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SoEx.Abstractions;
 using SoEx.Context;
 using SoEx.Hosting;
+using SoEx.Method.Conventions;
 using SoEx.Topology;
 using SoEx.Transport.InProc;
+using SoEx.Transport.Chimera;
 using SoExTemplate.iFx.Convention;
 using SoExTemplate.iFx.Observability;
+
 
 namespace SoExTemplate.iFx.Hosting;
 public static class Host
@@ -17,17 +22,19 @@ public static class Host
         var namespaceParts = assemblyName!.Split(".");
         string companyName = namespaceParts[0];
         var hostTopology = TopologyBuilder.BuildSystem(companyName, scd);
+        var dtoAndContextTypes = Scan.DtoAndContextTypes(companyName);
         var clientTopology = BuildClients(hostTopology);
         var contextPolicies = Scan.ContextPolicyTypes(companyName);
 
         HostApplicationBuilder serviceHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        serviceHostBuilder.SoEx(hostTopology);
+        serviceHostBuilder.SoEx(hostTopology, new KnownTypes(dtoAndContextTypes));
         HostApplicationBuilder clientHostBuilder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        clientHostBuilder.SoEx(clientTopology);
+        clientHostBuilder.SoEx(clientTopology, new KnownTypes(dtoAndContextTypes));
 
         CommonServices(contextPolicies, serviceHostBuilder.Services, clientHostBuilder.Services);
         serviceHostBuilder.Services.ConfigureTelemetry();
         serviceHostBuilder.Services.InProcClientWithSpan(clientHostBuilder.Services);
+        serviceHostBuilder.Services.ChimeraClient();
 
         return new InProcHostApplications()
         {
@@ -57,23 +64,12 @@ public static class Host
             var endpoints = subSystem.EntryPoint.Endpoints;
             foreach (var endpoint in endpoints)
             {
-                clients.Add(ToClient(endpoint, subSystem.Name));
+                if (endpoint.Contract.Name.EndsWith(Keywords.Event))
+                    continue;
+
+                clients.Add(endpoint.ToClient(subSystem.Name));
             }
         }
-        return new SoEx.Topology.System() { SubSystems = [], Clients = clients.ToArray() };
+        return new SoEx.Topology.System() { SubSystems = [], Clients = [..clients], Defaults = system.Defaults };
     }
-
-    private static SoEx.Topology.Client ToClient(Binding s, string subsystemName)
-    {
-        var clientContractType = typeof(SoEx.Topology.Client<>).MakeGenericType(s.Contract);
-        if (Activator.CreateInstance(clientContractType) is SoEx.Topology.Client instance)
-        {
-            clientContractType.GetProperty(nameof(SoEx.Topology.Client.Service))!.SetValue(instance, s);
-            clientContractType.GetProperty(nameof(SoEx.Topology.Client.SubSystem))!.SetValue(instance, subsystemName);
-            return instance;
-        }
-        throw new ArgumentOutOfRangeException(nameof(instance));
-    }
-
-
 }

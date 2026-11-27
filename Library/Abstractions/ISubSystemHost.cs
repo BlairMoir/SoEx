@@ -7,9 +7,5 @@ namespace SoEx.Abstractions
         public ILifetimeScope BeginRequestLifetimeScope();
     }
 
-    public interface ISubSystemHostChannel
-    {
-        public C Resolve<C>() where C : class;
-    }
     public interface ISubSystemHost<I> { }
 }

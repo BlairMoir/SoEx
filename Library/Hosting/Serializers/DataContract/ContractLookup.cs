@@ -1,63 +1,71 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+using SoEx.Context;
+using SoEx.Hosting.Serializers.Common;
 
-namespace SoEx.Hosting.Serializers.DataContract;
-
-
-public class ContractLookup
+namespace SoEx.Hosting.Serializers.DataContract
 {
-    private Dictionary<Type, NameAndNamespace> fromType = [];
-    private Dictionary<string, Dictionary<string, Type>> toType = [];
 
-    public ContractLookup() { }
-    public ContractLookup(params Type[] types)
+    public class ContractLookup
     {
-        RegisterTypes(types);
-    }
+        private readonly Dictionary<Type, NameAndNamespace> _fromType = new();
+        private readonly Dictionary<string, Dictionary<string, Type>> _toType = new();
 
-    public void RegisterTypes(params Type[] types)
-    {
-        foreach (var type in types)
+        private const string CollectionNamespace = "urn:soex:knowntypes";
+
+        public ContractLookup(IReadOnlyCollection<Type> knownTypes)
         {
-            if (type.Namespace is null)
-                continue;
+            Register(typeof(InvocationContext), DtoName(typeof(InvocationContext)));
+            Register(typeof(EntryContext), DtoName(typeof(EntryContext)));
+            Register(typeof(PreviousEntryContext), DtoName(typeof(PreviousEntryContext)));
 
-            if (!fromType.ContainsKey(type))
-            {
-                fromType.Add(type, new NameAndNamespace() { Name = type.Name, Namespace = type.Namespace });
-            }
+            foreach (Type type in knownTypes)
+                Register(type, DtoName(type));
 
-            if (!toType.ContainsKey(type.Namespace))
-            {
-                toType.Add(type.Namespace, new Dictionary<string, Type>());
-            }
-
-            if (!toType[type.Namespace].ContainsKey(type.Name))
-            {
-                toType[type.Namespace].Add(type.Name, type);
-            }
+            foreach (Type type in KnownCollections.For(knownTypes))
+                Register(type, CollectionName(type));
         }
+
+        private void Register(Type type, NameAndNamespace? name)
+        {
+            if (name is null || !_fromType.TryAdd(type, name))
+                return;
+
+            if (!_toType.TryGetValue(name.Namespace, out Dictionary<string, Type>? inner))
+                _toType[name.Namespace] = inner = new();
+
+            inner.TryAdd(name.Name, type);
+        }
+
+
+        private static NameAndNamespace? DtoName(Type type) =>
+            type.FullName is null ? null : new NameAndNamespace { Name = XmlName(type), Namespace = type.Namespace! };
+
+
+        private static string XmlName(Type type)
+        {
+            if (!type.IsGenericType)
+                return type.Name;
+
+            string definition = type.Name[..type.Name.IndexOf('`')];
+            return definition + "Of" + string.Concat(type.GetGenericArguments().Select(XmlName));
+        }
+
+        private static NameAndNamespace CollectionName(Type type)
+        {
+            Type[] args = type.IsArray ? new[] { type.GetElementType()! } : type.GetGenericArguments();
+            string element = string.Join("__", args.Select(a => a.FullName));
+
+            string prefix = type.IsArray ? "Array"
+                       : type.GetGenericTypeDefinition() == typeof(List<>) ? "List"
+                       : type.GetGenericTypeDefinition() == typeof(HashSet<>) ? "HashSet"
+                       : "Dictionary";
+
+            return new NameAndNamespace { Name = $"{prefix}__{element}", Namespace = CollectionNamespace };
+        }
+
+        public bool Contains(string name, string ns) => _toType.TryGetValue(ns, out Dictionary<string, Type>? inner) && inner.ContainsKey(name);
+        public bool Contains(Type type) => _fromType.ContainsKey(type);
+        public Type Convert(string name, string ns) => _toType[ns][name];
+        public NameAndNamespace Convert(Type type) => _fromType[type];
     }
 
-    public bool Contains(string typeName, string typeNamespace)
-    {
-        return toType.ContainsKey(typeNamespace) && toType[typeNamespace].ContainsKey(typeName);
-    }
-
-    public bool Contains(Type type)
-    {
-        return fromType.ContainsKey(type);
-    }
-
-    public Type Convert(string typeName, string typeNamespace)
-    {
-        return toType[typeNamespace][typeName];
-    }
-
-    public NameAndNamespace Convert(Type type)
-    {
-        var t = fromType[type];
-        return t;
-    }
 }
-
