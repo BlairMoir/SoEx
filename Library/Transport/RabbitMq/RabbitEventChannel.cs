@@ -10,7 +10,7 @@ namespace SoEx.Transport.RabbitMq
     public class RabbitEventChannel<I> : SoEx.Topology.IChannel
     {
         private RabbitEventBinding<I>? _binding;
-        private static readonly ConcurrentDictionary<string, SharedPublisher> s_shared = new();
+        private static readonly ConcurrentDictionary<RabbitPublisherKey, SharedPublisher> s_shared = new();
         private SharedPublisher? _shared;
         private static readonly TimeSpan s_reconectWait = TimeSpan.FromSeconds(30);
 
@@ -100,10 +100,11 @@ namespace SoEx.Transport.RabbitMq
             }
         }
 
-        private static string Key(RabbitEventBinding<I> binding)
+        private static RabbitPublisherKey Key(RabbitEventBinding<I> binding)
         {
             IEnumerable<string> credentials = binding.RabbitConfig.Select(config => $"{config.UserName}|{config.Password}");
-            return $"{string.Join(",", binding.Transport.Address.Uris)}|{string.Join(", ", credentials)}";
+            string hosts =  $"{string.Join(",", binding.Transport.Address.Uris)}|{string.Join(", ", credentials)}";
+            return new RabbitPublisherKey(hosts, binding.Connection);
         }
 
         public IBindingPipeline? Pipeline => _binding?.Pipeline;

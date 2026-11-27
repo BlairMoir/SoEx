@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using RabbitMQ.AMQP.Client;
 using SoEx.Topology;
 
 namespace SoEx.Transport.RabbitMq
@@ -15,6 +16,7 @@ namespace SoEx.Transport.RabbitMq
         }
 
         public ImmutableArray<RabbitConfig> RabbitConfig { get; }
+        public Func<ConnectionSettingsBuilder, ConnectionSettingsBuilder>? Connection { get; init; }
 
         private static Address TransportAddress(ImmutableArray<RabbitConfig> config)
         {
@@ -27,7 +29,12 @@ namespace SoEx.Transport.RabbitMq
             foreach (RabbitConfig host in config)
             {
                 string virtualHost = Uri.EscapeDataString(host.VirtualHost ?? "/");
-                var uri = new Uri($"amqp://{host.Host}:{host.Port}/{virtualHost}");
+                string scheme = "amqp";
+                if (host.UseTLS)
+                {
+                    scheme = "amqps";
+                }
+                var uri = new Uri($"{scheme}://{host.Host}:{host.Port}/{virtualHost}");
                 uriList.Add(uri);
             }
 

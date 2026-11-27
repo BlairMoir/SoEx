@@ -24,7 +24,14 @@ namespace SoEx.Transport.RabbitMq
                 IRecoveryConfiguration recovery = new RecoveryConfiguration().BackOffDelayPolicy(new BackOffDelayPolicy(int.MaxValue));
                 ConnectionSettingsBuilder settingsBuilder = ConnectionSettingsBuilder.Create().ContainerId(connectionName)
                     .Uris(uris).UriSelector(new RotatingUriSlector(first)).RecoveryConfiguration(recovery);
+
+                if (binding.Connection is not null)
+                {
+                    settingsBuilder = binding.Connection(settingsBuilder);
+                }
+
                 ConnectionSettings settings = settingsBuilder.Build();
+
                 try
                 {
                     return await AmqpConnection.CreateAsync(settings);
